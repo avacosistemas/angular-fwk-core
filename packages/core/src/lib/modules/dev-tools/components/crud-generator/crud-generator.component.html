@@ -1,0 +1,830 @@
+<mat-stepper [linear]="true" #stepper class="h-full"
+    [orientation]="(isScreenSmall$ | async) ? 'horizontal' : 'vertical'">
+
+    <!-- ====================================================================================================== -->
+    <!-- PASO 1: ENDPOINT                                                                                       -->
+    <!-- ====================================================================================================== -->
+    <mat-step [stepControl]="step1Form">
+        <ng-template matStepLabel>{{ 'dev_tools_crud_gen_step1_label' | translate }}</ng-template>
+        <ng-template matStepContent>
+            <div class="p-6 border rounded-lg bg-card">
+                <div class="flex items-center gap-3">
+                    <mat-icon svgIcon="heroicons_outline:cloud-arrow-down" class="text-accent"></mat-icon>
+                    <h2 class="text-2xl font-semibold">{{ 'dev_tools_crud_gen_step1_title' | translate }}</h2>
+                </div>
+                <p class="text-secondary mt-1 mb-6">{{ 'dev_tools_crud_gen_step1_subtitle' | translate }}</p>
+                <form [formGroup]="step1Form">
+                    <mat-form-field class="w-full" appearance="outline">
+                        <mat-label>{{ 'dev_tools_crud_gen_step1_endpoint_label' | translate }}</mat-label>
+                        <input matInput placeholder="Ej: /api/Role" formControlName="endpoint" [matAutocomplete]="auto">
+                        <mat-autocomplete #auto="matAutocomplete">
+                            <mat-option *ngFor="let option of filteredEndpoints$ | async" [value]="option.path">
+                                <span class="font-mono text-sm">{{ option.path }}</span>
+                                <span class="text-xs text-secondary ml-2 truncate">{{ option.summary }}</span>
+                            </mat-option>
+                        </mat-autocomplete>
+                    </mat-form-field>
+                    <div *ngIf="scanError"
+                        class="mt-4 p-4 rounded-md bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400">
+                        <p class="font-medium">{{ 'dev_tools_crud_gen_scan_error_title' | translate }}</p>
+                        <p class="text-sm">{{ scanError }}</p>
+                    </div>
+                    <div class="flex items-center justify-end mt-6">
+                        <button mat-flat-button color="accent" class="flex gap-2"
+                            [disabled]="step1Form.invalid || isScanning" (click)="scanEndpoint()">
+                            <span class="flex gap-2 items-center">
+                                <mat-progress-spinner *ngIf="isScanning" [diameter]="20"
+                                    mode="indeterminate"></mat-progress-spinner>
+                                <mat-icon *ngIf="!isScanning" svgIcon="heroicons_outline:magnifying-glass"></mat-icon>
+                                <span>{{ 'dev_tools_scan_button' | translate }}</span>
+                            </span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </ng-template>
+    </mat-step>
+
+    <!-- ====================================================================================================== -->
+    <!-- PASO 2: INFORMACIÓN GENERAL                                                                            -->
+    <!-- ====================================================================================================== -->
+    <mat-step [stepControl]="step2Form">
+        <ng-template matStepLabel>{{ 'dev_tools_crud_gen_step2_label' | translate }}</ng-template>
+        <ng-template matStepContent>
+            <div class="p-6 border rounded-lg bg-card">
+                <div class="flex items-center gap-3">
+                    <mat-icon svgIcon="heroicons_outline:identification" class="text-accent"></mat-icon>
+                    <h2 class="text-2xl font-semibold">{{ 'dev_tools_crud_gen_step2_title' | translate }}</h2>
+                </div>
+                <p class="text-secondary mt-1 mb-6">{{ 'dev_tools_crud_gen_step2_subtitle' | translate }}</p>
+                <form [formGroup]="step2Form">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 animate-fade-in">
+                        <mat-form-field appearance="outline">
+                            <mat-label>{{ 'dev_tools_crud_gen_step2_name_label' | translate }}</mat-label>
+                            <input matInput formControlName="name" placeholder="Ej: VentaPrueba" required>
+                            <mat-error *ngIf="step2Form.get('name')?.hasError('required')">{{ 'dev_tools_error_required'
+                                | translate }}</mat-error>
+                            <mat-error *ngIf="step2Form.get('name')?.hasError('pattern')">{{
+                                'dev_tools_crud_gen_step2_name_error' | translate }}</mat-error>
+                        </mat-form-field>
+                        <mat-form-field appearance="outline">
+                            <mat-label>{{ 'dev_tools_crud_gen_step2_plural_label' | translate }}</mat-label>
+                            <input matInput formControlName="pluralName" placeholder="Ej: Ventas de Prueba" required>
+                            <mat-error>{{ 'dev_tools_error_required' | translate }}</mat-error>
+                        </mat-form-field>
+                        <mat-form-field appearance="outline">
+                            <mat-label>{{ 'dev_tools_crud_gen_step2_navgroup_label' | translate }}</mat-label>
+                            <mat-select formControlName="navGroup">
+                                <mat-option *ngFor="let group of navigationGroups" [value]="group.id">{{ group.title
+                                    }}</mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                        <fwk-icon-picker formControlName="navIcon"
+                            [label]="'dev_tools_crud_gen_step2_icon_label' | translate"
+                            namespace="heroicons_outline"></fwk-icon-picker>
+
+                        <div class="sm:col-span-2 pt-4 border-t mt-2">
+                            <div class="flex items-start gap-4">
+                                <mat-slide-toggle formControlName="showInMenu" color="accent"
+                                    class="mt-1"></mat-slide-toggle>
+                                <div>
+                                    <p class="font-medium">{{ 'dev_tools_crud_gen_step2_showinmenu_check' | translate }}
+                                    </p>
+                                    <p class="text-sm text-secondary">{{ 'dev_tools_crud_gen_step2_showinmenu_subtitle' | translate }}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="sm:col-span-2 pt-4 border-t mt-2">
+                            <p class="font-medium text-secondary mb-2">{{ 'dev_tools_crud_gen_step2_forms_title' |
+                                translate }}</p>
+                            <div class="flex flex-col sm:flex-row sm:space-x-6 space-y-2 sm:space-y-0">
+                                <mat-checkbox formControlName="useCreate">{{ 'dev_tools_form_create' | translate
+                                    }}</mat-checkbox>
+                                <mat-checkbox formControlName="useUpdate">{{ 'dev_tools_form_update' | translate
+                                    }}</mat-checkbox>
+                                <mat-checkbox formControlName="useRead">{{ 'dev_tools_form_read' | translate
+                                    }}</mat-checkbox>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="flex justify-between mt-6">
+                <button mat-stroked-button matStepperPrevious>{{ 'dev_tools_back_button' | translate }}</button>
+                <button mat-flat-button color="accent" matStepperNext>
+                    <span class="flex gap-2 items-center">
+                        <mat-icon svgIcon="heroicons_outline:arrow-right"></mat-icon>
+                        <span>{{ 'dev_tools_next_button' | translate }}</span>
+                    </span>
+                </button>
+            </div>
+        </ng-template>
+    </mat-step>
+
+    <!-- ====================================================================================================== -->
+    <!-- PASO 3: SEGURIDAD                                                                                      -->
+    <!-- ====================================================================================================== -->
+    <mat-step [stepControl]="step3Form">
+        <ng-template matStepLabel>{{ 'dev_tools_crud_gen_step3_label' | translate }}</ng-template>
+        <ng-template matStepContent>
+            <div class="p-6 border rounded-lg bg-card">
+                <div class="flex items-center gap-3">
+                    <mat-icon svgIcon="heroicons_outline:shield-check" class="text-accent"></mat-icon>
+                    <h2 class="text-2xl font-semibold">{{ 'dev_tools_crud_gen_step3_title' | translate }}</h2>
+                </div>
+                <p class="text-secondary mt-1 mb-6">{{ 'dev_tools_crud_gen_step3_subtitle' | translate }}</p>
+
+                <form [formGroup]="step3Form">
+                    <div class="flex items-start gap-4 mb-6">
+                        <mat-slide-toggle formControlName="customize" color="accent" class="mt-1"></mat-slide-toggle>
+                        <div>
+                            <p class="font-medium">{{ 'dev_tools_crud_gen_step3_customize_toggle' | translate }}</p>
+                            <p class="text-sm text-secondary">{{ 'dev_tools_crud_gen_step3_customize_subtitle' | translate }}</p>
+                        </div>
+                    </div>
+
+                    <div *ngIf="step3Form.get('customize')?.value" div
+                        class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 animate-fade-in">
+                        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                            <mat-icon matPrefix svgIcon="heroicons_outline:eye"></mat-icon>
+                            <mat-label>{{ 'dev_tools_perm_read' | translate }}</mat-label>
+                            <input matInput formControlName="readAccess">
+                        </mat-form-field>
+                        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                            <mat-icon matPrefix svgIcon="heroicons_outline:plus-circle"></mat-icon>
+                            <mat-label>{{ 'dev_tools_perm_create' | translate }}</mat-label>
+                            <input matInput formControlName="createAccess">
+                        </mat-form-field>
+                        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                            <mat-icon matPrefix svgIcon="heroicons_outline:pencil-square"></mat-icon>
+                            <mat-label>{{ 'dev_tools_perm_update' | translate }}</mat-label>
+                            <input matInput formControlName="updateAccess">
+                        </mat-form-field>
+                        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                            <mat-icon matPrefix svgIcon="heroicons_outline:trash"></mat-icon>
+                            <mat-label>{{ 'dev_tools_perm_delete' | translate }}</mat-label>
+                            <input matInput formControlName="deleteAccess">
+                        </mat-form-field>
+                    </div>
+                    <div
+                        class="p-4 mt-6 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-blue-800 dark:text-blue-300 animate-fade-in flex items-center gap-3">
+                        <mat-icon svgIcon="heroicons_outline:information-circle"
+                            class="mt-0.5 flex-shrink-0 text-accent-600"></mat-icon>
+                        <span class="text-sm" *ngIf="step3Form.get('customize')?.value">{{
+                            'dev_tools_crud_gen_step3_hint' | translate }}</span>
+                        <span class="text-sm" *ngIf="!step3Form.get('customize')?.value">{{
+                            'dev_tools_crud_gen_step3_auto_message' | translate:{prefix:
+                            (step2Form.get('name')?.value || 'CRUD') | uppercase } }}</span>
+                    </div>
+                </form>
+            </div>
+            <div class="flex justify-between mt-6">
+                <button mat-stroked-button matStepperPrevious>{{ 'dev_tools_back_button' | translate }}</button>
+                <button mat-flat-button color="accent" matStepperNext>
+                    <span class="flex gap-2 items-center">
+                        <mat-icon svgIcon="heroicons_outline:arrow-right"></mat-icon>
+                        <span>{{ 'dev_tools_next_button' | translate }}</span>
+                    </span>
+                </button>
+            </div>
+        </ng-template>
+    </mat-step>
+
+    <!-- ====================================================================================================== -->
+    <!-- PASO 4: CAMPOS                                                                                         -->
+    <!-- ====================================================================================================== -->
+    <mat-step [stepControl]="step4Form">
+        <ng-template matStepLabel>{{ 'dev_tools_crud_gen_step4_label' | translate }}</ng-template>
+        <ng-template matStepContent>
+            <div class="p-6 border rounded-lg bg-card">
+                <div class="flex items-center gap-3">
+                    <mat-icon svgIcon="heroicons_outline:list-bullet" class="text-accent"></mat-icon>
+                    <h2 class="text-2xl font-semibold">{{ 'dev_tools_crud_gen_step4_title' | translate }}</h2>
+                </div>
+                <p class="text-secondary mt-1 mb-6">{{ 'dev_tools_crud_gen_step4_subtitle' | translate }}</p>
+
+                <div class="overflow-auto rounded-lg border">
+                    <table mat-table [dataSource]="fieldsDataSource" class="w-full">
+                        <ng-container matColumnDef="key">
+                            <th mat-header-cell *matHeaderCellDef
+                                class="!p-4 bg-gray-100 dark:bg-gray-700/50 uppercase text-xs tracking-wider">{{
+                                'dev_tools_crud_gen_step4_col_key' | translate }}</th>
+                            <td mat-cell *matCellDef="let row" class="!p-2 font-mono text-sm pr-4">{{ row.key }}</td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="label">
+                            <th mat-header-cell *matHeaderCellDef
+                                class="!p-4 bg-gray-100 dark:bg-gray-700/50 uppercase text-xs tracking-wider">{{
+                                'dev_tools_crud_gen_step4_col_label' | translate }}</th>
+                            <td mat-cell *matCellDef="let row" [formGroup]="row.control" class="!p-2">
+                                <mat-form-field class="w-48" appearance="outline" subscriptSizing="dynamic"><input
+                                        matInput formControlName="label"></mat-form-field>
+                            </td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="controlType">
+                            <th mat-header-cell *matHeaderCellDef
+                                class="!p-4 bg-gray-100 dark:bg-gray-700/50 uppercase text-xs tracking-wider">{{
+                                'dev_tools_crud_gen_step4_col_type' | translate }}</th>
+                            <td mat-cell *matCellDef="let row" [formGroup]="row.control" class="!p-2">
+                                <mat-form-field class="w-48" appearance="outline" subscriptSizing="dynamic">
+                                    <mat-select formControlName="controlType">
+                                        <mat-option *ngFor="let type of controlTypeChoices"
+                                            [value]="type">{{type}}</mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                            </td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="flags">
+                            <th mat-header-cell *matHeaderCellDef
+                                class="!p-4 bg-gray-100 dark:bg-gray-700/50 uppercase text-xs tracking-wider">{{
+                                'dev_tools_crud_gen_step4_col_options' | translate }}</th>
+                            <td mat-cell *matCellDef="let row" [formGroup]="row.control" class="!p-2 space-y-2">
+                                <div class="flex flex-col gap-2">
+                                    <mat-checkbox formControlName="required">{{ 'dev_tools_crud_gen_step4_opt_req' |
+                                        translate }}</mat-checkbox>
+                                    <mat-checkbox formControlName="inGrid">{{ 'dev_tools_crud_gen_step4_opt_grid' |
+                                        translate }}</mat-checkbox>
+                                    <mat-checkbox formControlName="inFilter">{{ 'dev_tools_crud_gen_step4_opt_filter' |
+                                        translate }}</mat-checkbox>
+                                    <mat-checkbox formControlName="isBaseFilter">{{
+                                        'dev_tools_crud_gen_step4_opt_basefilter' | translate }}</mat-checkbox>
+                                </div>
+                            </td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="options">
+                            <th mat-header-cell *matHeaderCellDef class="!p-4 bg-gray-100 dark:bg-gray-700/50"></th>
+                            <td mat-cell *matCellDef="let row; let i = index" class="!p-2 space-x-1">
+                                <button mat-icon-button (click)="openFieldOptions(row)"
+                                    [matTooltip]="'dev_tools_crud_gen_step4_tooltip_advanced_options' | translate"><mat-icon>settings</mat-icon></button>
+                                <button mat-icon-button (click)="openFieldBehaviors(row, i)"
+                                    [matTooltip]="'dev_tools_crud_gen_step4_tooltip_dynamic_behaviors' | translate"
+                                    [color]="hasBehavior(i) ? 'accent' : 'primary'"><mat-icon>rule</mat-icon></button>
+                            </td>
+                        </ng-container>
+
+                        <tr mat-header-row *matHeaderRowDef="displayedFieldsColumns"></tr>
+                        <tr mat-row *matRowDef="let row; columns: displayedFieldsColumns;"></tr>
+                    </table>
+                </div>
+            </div>
+            <div class="flex justify-between mt-6">
+                <button mat-stroked-button matStepperPrevious>{{ 'dev_tools_back_button' | translate }}</button>
+                <button mat-flat-button color="accent" matStepperNext [disabled]="step4Form.invalid">
+                    <span class="flex gap-2 items-center">
+                        <mat-icon svgIcon="heroicons_outline:arrow-right"></mat-icon>
+                        <span>{{ 'dev_tools_next_button' | translate }}</span>
+                    </span>
+                </button>
+            </div>
+        </ng-template>
+    </mat-step>
+
+    <!-- ====================================================================================================== -->
+    <!-- PASO 5: ACCIONES DE LA GRILLA                                                                          -->
+    <!-- ====================================================================================================== -->
+    <mat-step [stepControl]="step5Form">
+        <ng-template matStepLabel>{{ 'dev_tools_crud_gen_step5_label' | translate }}</ng-template>
+        <ng-template matStepContent>
+            <div class="p-6 border rounded-lg bg-card">
+                <div class="flex items-center gap-3">
+                    <mat-icon svgIcon="heroicons_outline:bolt" class="text-accent"></mat-icon>
+                    <h2 class="text-2xl font-semibold">{{ 'dev_tools_crud_gen_step5_title' | translate }}</h2>
+                </div>
+                <p class="text-secondary mt-1 mb-6">{{ 'dev_tools_crud_gen_step5_subtitle' | translate }}</p>
+
+                <form [formGroup]="step5Form" class="space-y-8">
+                    <!-- Opciones Generales -->
+                    <div>
+                        <h3 class="text-md font-medium text-secondary mb-3">{{ 'dev_tools_crud_gen_step5_general_options_title' | translate }}</h3>
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between py-3 border-b">
+                                <div>
+                                    <p class="font-medium">{{ 'dev_tools_crud_gen_step5_delete_toggle' | translate }}
+                                    </p>
+                                    <p class="text-sm text-secondary mt-1">{{ 'dev_tools_crud_gen_step5_delete_subtitle' | translate }}</p>
+                                </div>
+                                <mat-slide-toggle formControlName="deleteAction" color="accent"></mat-slide-toggle>
+                            </div>
+                            <div class="flex items-center justify-between py-3">
+                                <div>
+                                    <p class="font-medium">{{ 'dev_tools_crud_gen_step5_group_actions_title' | translate }}</p>
+                                    <p class="text-sm text-secondary mt-1">{{ 'dev_tools_crud_gen_step5_group_actions_subtitle' | translate }}</p>
+                                </div>
+                                <mat-slide-toggle formControlName="groupActions" color="accent"></mat-slide-toggle>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Acciones Personalizadas -->
+                    <div>
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-md font-medium text-secondary">{{
+                                'dev_tools_crud_gen_step5_custom_actions_title' | translate }}</h3>
+                            <button mat-stroked-button color="accent" (click)="addAction()">
+                                <mat-icon>add</mat-icon> {{ 'dev_tools_add_action_button' | translate }}
+                            </button>
+                        </div>
+
+                        <mat-accordion multi formArrayName="actions">
+                            <mat-expansion-panel *ngFor="let action of actions.controls; let i=index"
+                                [formGroupName]="i" [expanded]="true" class="bg-base-200/30">
+                                <mat-expansion-panel-header>
+                                    <mat-panel-title class="flex items-center gap-3">
+                                        <mat-icon *ngIf="action.get('icon')?.value"
+                                            [svgIcon]="'heroicons_outline:' + action.get('icon')?.value"></mat-icon>
+                                        <span class="font-medium">{{ action.get('name')?.value || ('dev_tools_crud_gen_step5_action_new_name' | translate)
+                                            }}</span>
+                                    </mat-panel-title>
+                                    <mat-panel-description
+                                        class="items-center justify-end gap-2 text-sm text-secondary">
+                                        <span>{{ action.get('type')?.value }}</span>
+                                        <button mat-icon-button color="warn"
+                                            (click)="removeAction(i); $event.stopPropagation()"
+                                            [matTooltip]="'dev_tools_delete_tooltip' | translate">
+                                            <mat-icon>delete</mat-icon>
+                                        </button>
+                                    </mat-panel-description>
+                                </mat-expansion-panel-header>
+
+                                <div class="pt-4 space-y-6">
+                                    <!-- Información General -->
+                                    <div>
+                                        <h4 class="font-medium text-secondary mb-3">{{ 'dev_tools_crud_gen_step5_action_general_info_title' | translate }}</h4>
+                                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                            <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                                                <mat-label>{{'dev_tools_crud_gen_step5_action_name' |
+                                                    translate}}</mat-label>
+                                                <input matInput formControlName="name" required>
+                                            </mat-form-field>
+                                            <fwk-icon-picker formControlName="icon"
+                                                [label]="'dev_tools_crud_gen_step5_action_icon' | translate"
+                                                namespace="heroicons_outline"></fwk-icon-picker>
+                                            <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                                                <mat-label>{{'dev_tools_crud_gen_step5_action_type' |
+                                                    translate}}</mat-label>
+                                                <mat-select formControlName="type">
+                                                    <mat-option *ngFor="let t of actionTypeChoices"
+                                                        [value]="t">{{t}}</mat-option>
+                                                </mat-select>
+                                            </mat-form-field>
+                                            <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                                                <mat-label>{{ 'dev_tools_crud_gen_step5_action_permission_label' | translate }}</mat-label>
+                                                <input matInput formControlName="security"
+                                                    placeholder="EJEMPLO_ACTION_PERMISSION">
+                                            </mat-form-field>
+                                        </div>
+                                    </div>
+
+                                    <div class="pt-4 border-t">
+                                        <ng-container [ngSwitch]="action.get('type').value">
+                                            <div *ngSwitchCase="'redirect'" formGroupName="redirect"
+                                                class="space-y-4 animate-fade-in">
+                                                <h4 class="font-medium text-secondary">{{ 'dev_tools_crud_gen_step5_action_redirect_options_title' | translate }}</h4>
+                                                <mat-form-field class="w-full" appearance="outline"
+                                                    subscriptSizing="dynamic">
+                                                    <mat-label>{{ 'dev_tools_crud_gen_step5_action_redirect_url_label' | translate }}</mat-label>
+                                                    <input matInput formControlName="endpoint" placeholder="/mi-ruta">
+                                                    <mat-hint>{{ 'dev_tools_crud_gen_step5_action_redirect_url_hint' | translate }}</mat-hint>
+                                                </mat-form-field>
+                                                <mat-slide-toggle formControlName="openTab">{{ 'dev_tools_crud_gen_step5_action_redirect_open_tab' | translate }}</mat-slide-toggle>
+                                            </div>
+                                            <div *ngSwitchDefault class="space-y-4 animate-fade-in">
+                                                <div *ngIf="action.get('type').value === 'form_modal'"
+                                                    class="space-y-4">
+                                                    <h4 class="font-medium text-secondary">{{ 'dev_tools_crud_gen_step5_action_modal_config_title' | translate }}</h4>
+                                                    <div class="flex gap-3 items-center">
+                                                        <button mat-stroked-button color="accent"
+                                                            (click)="defineActionForm(i)">
+                                                            <mat-icon>dynamic_form</mat-icon>{{ 'dev_tools_crud_gen_step5_action_modal_define_form' | translate }}
+                                                            ({{ getActionFormDefCount(i) }} {{ 'dev_tools_crud_gen_step5_action_modal_fields' | translate }})
+                                                        </button>
+                                                        <mat-slide-toggle formControlName="showSubmitContinue">{{ 'dev_tools_crud_gen_step5_action_modal_show_save_continue' | translate }}</mat-slide-toggle>
+                                                    </div>
+                                                    <h4 class="font-medium text-secondary pt-4 border-t">{{ 'dev_tools_crud_gen_step5_action_ws_config_modal_title' | translate }}</h4>
+                                                </div>
+                                                <h4 *ngIf="action.get('type').value !== 'form_modal'"
+                                                    class="font-medium text-secondary">{{ 'dev_tools_crud_gen_step5_action_ws_config_title' | translate }}
+                                                </h4>
+
+                                                <div formGroupName="ws" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                                    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                                                        <mat-label>{{ 'dev_tools_crud_gen_step5_action_ws_endpoint_label' | translate }}</mat-label>
+                                                        <input matInput formControlName="endpoint"
+                                                            placeholder="/mi/endpoint/accion"
+                                                            [required]="action.get('type').value !== 'form_modal'">
+                                                    </mat-form-field>
+                                                    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                                                        <mat-label>{{ 'dev_tools_crud_gen_step5_action_ws_method_label' | translate }}</mat-label>
+                                                        <mat-select formControlName="method">
+                                                            <mat-option *ngFor="let m of httpMethods"
+                                                                [value]="m">{{m}}</mat-option>
+                                                        </mat-select>
+                                                    </mat-form-field>
+                                                    <div class="flex items-center sm:col-span-2">
+                                                        <mat-slide-toggle formControlName="isRelative"
+                                                            [matTooltip]="'crud_gen_ws_relative_tooltip' | translate">
+                                                            {{ 'dev_tools_crud_gen_step5_action_ws_relative_path' | translate }}
+                                                        </mat-slide-toggle>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </ng-container>
+                                    </div>
+
+                                    <!-- Opciones Adicionales -->
+                                    <div class="pt-4 border-t space-y-6">
+                                        <div>
+                                            <h4 class="font-medium text-secondary mb-2">{{ 'dev_tools_crud_gen_step5_action_qs_title' | translate }}
+                                            </h4>
+                                            <div formArrayName="querystring" class="space-y-2">
+                                                <div *ngFor="let qs of getQuerystringArray(i).controls; let j=index"
+                                                    [formGroupName]="j" class="grid grid-cols-12 gap-x-4 items-center">
+                                                    <mat-form-field class="col-span-12 sm:col-span-5"
+                                                        appearance="outline" subscriptSizing="dynamic"><mat-label>{{ 'dev_tools_crud_gen_step5_action_qs_param_name_label' | translate }}</mat-label><input matInput
+                                                            formControlName="paramKey" placeholder="Ej: ventaId"
+                                                            required></mat-form-field>
+                                                    <mat-form-field class="col-span-12 sm:col-span-5"
+                                                        appearance="outline" subscriptSizing="dynamic"><mat-label>{{ 'dev_tools_crud_gen_step5_action_qs_param_value_label' | translate }}</mat-label><mat-select
+                                                            formControlName="paramValue" required><mat-option
+                                                                *ngFor="let field of fieldsDataSource.data"
+                                                                [value]="field.key">{{ field.key
+                                                                }}</mat-option></mat-select></mat-form-field>
+                                                    <button mat-icon-button color="warn"
+                                                        (click)="removeQuerystringParam(i, j)"
+                                                        [matTooltip]="'dev_tools_crud_gen_step5_action_qs_remove_tooltip' | translate"
+                                                        class="col-span-12 sm:col-span-2 justify-self-start sm:justify-self-center"><mat-icon>delete</mat-icon></button>
+                                                </div>
+                                            </div>
+                                            <button mat-stroked-button type="button" (click)="addQuerystringParam(i)"
+                                                class="mt-2"><mat-icon>add</mat-icon> {{ 'dev_tools_crud_gen_step5_action_qs_add_button' | translate }}</button>
+                                        </div>
+                                        <div class="pt-4 border-t">
+                                            <mat-checkbox formControlName="requiresConfirm">{{ 'dev_tools_crud_gen_step5_action_requires_confirm_check' | translate }}</mat-checkbox>
+                                            <mat-form-field *ngIf="action.get('requiresConfirm').value"
+                                                class="w-full mt-2 animate-fade-in" appearance="outline"
+                                                subscriptSizing="dynamic">
+                                                <mat-label>{{ 'dev_tools_crud_gen_step5_action_confirm_message_label' | translate }}</mat-label>
+                                                <input matInput formControlName="confirmMessage"
+                                                    placeholder="¿Está seguro?">
+                                            </mat-form-field>
+                                        </div>
+                                        <div formGroupName="displayCondition" class="pt-4 border-t">
+                                            <h4 class="font-medium text-secondary mb-2">{{ 'dev_tools_crud_gen_step5_action_display_condition_title' | translate }}</h4>
+                                            <div formGroupName="expression"
+                                                class="grid grid-cols-1 sm:grid-cols-3 gap-x-4 items-center">
+                                                <mat-form-field appearance="outline"
+                                                    subscriptSizing="dynamic"><mat-label>{{ 'dev_tools_crud_gen_step5_action_condition_field_label' | translate }}</mat-label><mat-select formControlName="key"><mat-option
+                                                            [value]="null">{{ 'dev_tools_crud_gen_step5_action_condition_no_condition' | translate }}</mat-option><mat-option
+                                                            *ngFor="let field of fieldsDataSource.data"
+                                                            [value]="field.key">{{ field.key
+                                                            }}</mat-option></mat-select></mat-form-field>
+                                                <mat-form-field appearance="outline"
+                                                    subscriptSizing="dynamic"><mat-label>{{ 'dev_tools_crud_gen_step5_action_condition_comparator_label' | translate }}</mat-label><mat-select
+                                                        formControlName="compare"><mat-option
+                                                            *ngFor="let comp of behaviorComparators" [value]="comp">{{
+                                                            comp }}</mat-option></mat-select></mat-form-field>
+                                                <mat-form-field appearance="outline"
+                                                    subscriptSizing="dynamic"><mat-label>{{ 'dev_tools_crud_gen_step5_action_condition_value_label' | translate }}</mat-label><input
+                                                        matInput formControlName="value"
+                                                        placeholder="Ej: ACTIVO, true, 10"></mat-form-field>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </mat-expansion-panel>
+                        </mat-accordion>
+                    </div>
+                </form>
+            </div>
+            <div class="flex justify-between mt-6">
+                <button mat-stroked-button matStepperPrevious>{{ 'dev_tools_back_button' | translate }}</button>
+                <button mat-flat-button color="accent" matStepperNext>
+                    <span class="flex gap-2 items-center">
+                        <mat-icon svgIcon="heroicons_outline:arrow-right"></mat-icon>
+                        <span>{{ 'dev_tools_next_button' | translate }}</span>
+                    </span>
+                </button>
+            </div>
+        </ng-template>
+    </mat-step>
+
+    <!-- ====================================================================================================== -->
+    <!-- PASO 6: CONFIGURACIÓN AVANZADA                                                                         -->
+    <!-- ====================================================================================================== -->
+    <mat-step [stepControl]="step6Form">
+        <ng-template matStepLabel>{{ 'dev_tools_crud_gen_step6_label' | translate }}</ng-template>
+        <ng-template matStepContent>
+            <div class="p-6 border rounded-lg bg-card">
+                <div class="flex items-center gap-3">
+                    <mat-icon svgIcon="heroicons_outline:cog-6-tooth" class="text-accent"></mat-icon>
+                    <h2 class="text-2xl font-semibold">{{ 'dev_tools_crud_gen_step6_title' | translate }}</h2>
+                </div>
+                <p class="text-secondary mt-1 mb-6">{{ 'dev_tools_crud_gen_step6_subtitle' | translate }}
+                </p>
+                <form [formGroup]="step6Form">
+                    <div class="space-y-6">
+                        <div class="flex items-center justify-between py-4 border-b">
+                            <div>
+                                <p class="font-medium">{{ 'dev_tools_crud_gen_step6_server_pag' | translate }}</p>
+                                <p class="text-sm text-secondary mt-1">{{ 'dev_tools_crud_gen_step6_server_pag_tooltip'
+                                    | translate }}</p>
+                            </div><mat-slide-toggle formControlName="serverPagination"
+                                color="accent"></mat-slide-toggle>
+                        </div>
+                        <div class="flex items-center justify-between py-4 border-b">
+                            <div>
+                                <p class="font-medium">{{ 'dev_tools_crud_gen_step6_mem_filter' | translate }}</p>
+                                <p class="text-sm text-secondary mt-1">{{ 'dev_tools_crud_gen_step6_mem_filter_tooltip'
+                                    | translate }}</p>
+                            </div><mat-slide-toggle formControlName="filterInMemory" color="accent"></mat-slide-toggle>
+                        </div>
+                        <div class="flex items-center justify-between py-4 border-b">
+                            <div>
+                                <p class="font-medium">{{ 'dev_tools_crud_gen_step6_no_init_search' | translate }}</p>
+                                <p class="text-sm text-secondary mt-1">{{
+                                    'dev_tools_crud_gen_step6_no_init_search_tooltip' | translate }}</p>
+                            </div><mat-slide-toggle formControlName="cancelInitSearch"
+                                color="accent"></mat-slide-toggle>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 mt-6">
+                        <mat-form-field appearance="outline"><mat-label>{{ 'dev_tools_crud_gen_step6_pagesize' |
+                                translate }}</mat-label><input matInput type="number"
+                                formControlName="pageSize"></mat-form-field>
+                        <mat-form-field appearance="outline"><mat-label>{{ 'dev_tools_crud_gen_step6_dialog_width_label' | translate }}</mat-label><input matInput
+                                formControlName="dialogWidth" placeholder="600px"></mat-form-field>
+                        <mat-form-field appearance="outline"><mat-label>{{ 'dev_tools_crud_gen_step6_action_cell_class_label' | translate }}</mat-label><input
+                                matInput formControlName="actionCellClass"
+                                placeholder="ej: justify-start"></mat-form-field>
+                        <mat-form-field appearance="outline"><mat-label>{{ 'dev_tools_crud_gen_step6_export_csv_label' | translate }}</mat-label><mat-select
+                                formControlName="exportCsv"><mat-option
+                                    value="none">{{ 'dev_tools_crud_gen_step6_export_csv_opt_none' | translate }}</mat-option><mat-option value="client">{{ 'dev_tools_crud_gen_step6_export_csv_opt_client' | translate }}</mat-option><mat-option value="server">{{ 'dev_tools_crud_gen_step6_export_csv_opt_server' | translate }}</mat-option></mat-select></mat-form-field>
+                    </div>
+                </form>
+            </div>
+            <div class="flex justify-between mt-6">
+                <button mat-stroked-button matStepperPrevious>{{ 'dev_tools_back_button' | translate }}</button>
+                <button mat-flat-button color="accent" matStepperNext>
+                    <span class="flex gap-2 items-center">
+                        <mat-icon svgIcon="heroicons_outline:arrow-right"></mat-icon>
+                        <span>{{ 'dev_tools_next_button' | translate }}</span>
+                    </span>
+                </button>
+            </div>
+        </ng-template>
+    </mat-step>
+
+    <!-- ====================================================================================================== -->
+    <!-- PASO 7: REVISIÓN Y GENERACIÓN                                                                          -->
+    <!-- ====================================================================================================== -->
+    <mat-step>
+        <ng-template matStepLabel>{{ 'dev_tools_crud_gen_step7_label' | translate }}</ng-template>
+        <ng-template matStepContent>
+            <div class="p-6 border rounded-lg bg-card">
+                <div class="flex items-center gap-3">
+                    <mat-icon svgIcon="heroicons_outline:document-check" class="text-accent"></mat-icon>
+                    <h2 class="text-2xl font-semibold">{{ 'dev_tools_crud_gen_step7_title' | translate }}</h2>
+                </div>
+                <p class="text-secondary mt-1 mb-6">{{ 'dev_tools_crud_gen_step7_subtitle' | translate }}</p>
+
+                <div class="p-6 rounded-lg bg-gray-50 dark:bg-gray-800/50 space-y-6">
+
+                    <div class="border-b pb-6">
+                        <h3 class="text-lg font-semibold mb-4 text-accent-600 dark:text-accent-400">{{
+                            'dev_tools_crud_gen_step2_title' | translate }}</h3>
+                        <table class="w-full text-left">
+                            <tr class="border-b">
+                                <td class="py-2 font-medium text-secondary w-1/3">{{ 'dev_tools_crud_gen_step7_name' |
+                                    translate }}</td>
+                                <td>{{ step2Form.value.name }}</td>
+                            </tr>
+                            <tr class="border-b">
+                                <td class="py-2 font-medium text-secondary">{{ 'dev_tools_crud_gen_step7_main_title' |
+                                    translate }}</td>
+                                <td>{{ step2Form.value.pluralName }}</td>
+                            </tr>
+                            <tr class="border-b">
+                                <td class="py-2 font-medium text-secondary">{{ 'dev_tools_crud_gen_step7_main_endpoint'
+                                    |
+                                    translate }}</td>
+                                <td class="font-mono text-sm">{{ step1Form.value.endpoint }}</td>
+                            </tr>
+                            <tr class="border-b">
+                                <td class="py-2 font-medium text-secondary">{{ 'dev_tools_crud_gen_step2_navgroup_label'
+                                    |
+                                    translate }}</td>
+                                <td>{{ getNavGroupName() }}</td>
+                            </tr>
+                            <tr>
+                                <td class="py-2 font-medium text-secondary">{{ 'dev_tools_crud_gen_step2_icon_label' |
+                                    translate }}</td>
+                                <td>{{ step2Form.value.navIcon || ('dev_tools_none' | translate) }}</td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <!-- Seguridad y Permisos -->
+                    <div class="border-b pb-6">
+                        <h3 class="text-lg font-semibold mb-4 text-accent-600 dark:text-accent-400">{{
+                            'dev_tools_crud_gen_step3_title' | translate }}</h3>
+                        <div *ngIf="step3Form.value.customize; else autoSecurity" class="animate-fade-in">
+                            <table class="w-full text-left">
+                                <tr class="border-b">
+                                    <td class="py-2 font-medium text-secondary w-1/3">{{ 'dev_tools_perm_read' |
+                                        translate
+                                        }}</td>
+                                    <td class="font-mono text-sm">{{ step3Form.value.readAccess || 'null' }}</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="py-2 font-medium text-secondary">{{ 'dev_tools_perm_create' | translate
+                                        }}
+                                    </td>
+                                    <td class="font-mono text-sm">{{ step3Form.value.createAccess || 'null' }}</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="py-2 font-medium text-secondary">{{ 'dev_tools_perm_update' | translate
+                                        }}
+                                    </td>
+                                    <td class="font-mono text-sm">{{ step3Form.value.updateAccess || 'null' }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="py-2 font-medium text-secondary">{{ 'dev_tools_perm_delete' | translate
+                                        }}
+                                    </td>
+                                    <td class="font-mono text-sm">{{ step3Form.value.deleteAccess || 'null' }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <ng-template #autoSecurity>
+                            <p class="text-secondary italic mb-2">{{ 'dev_tools_crud_gen_step7_auto_perms' | translate
+                                }}
+                            </p>
+                            <table class="w-full text-left">
+                                <tr class="border-b">
+                                    <td class="py-2 font-medium text-secondary w-1/3">{{ 'dev_tools_perm_read' |
+                                        translate
+                                        }}</td>
+                                    <td class="font-mono text-sm">{{ autoReadAccess }}</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="py-2 font-medium text-secondary">{{ 'dev_tools_perm_create' | translate
+                                        }}
+                                    </td>
+                                    <td class="font-mono text-sm">{{ autoCreateAccess }}</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="py-2 font-medium text-secondary">{{ 'dev_tools_perm_update' | translate
+                                        }}
+                                    </td>
+                                    <td class="font-mono text-sm">{{ autoUpdateAccess }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="py-2 font-medium text-secondary">{{ 'dev_tools_perm_delete' | translate
+                                        }}
+                                    </td>
+                                    <td class="font-mono text-sm">{{ autoDeleteAccess }}</td>
+                                </tr>
+                            </table>
+                        </ng-template>
+                    </div>
+
+                    <!-- Configuración de Campos -->
+                    <div class="border-b pb-6">
+                        <h3 class="text-lg font-semibold mb-4 text-accent-600 dark:text-accent-400">{{
+                            'dev_tools_crud_gen_step4_title' | translate }}</h3>
+                        <p class="text-secondary mb-3">{{ 'dev_tools_crud_gen_step7_total_fields' | translate }} <span
+                                class="font-semibold text-gray-800 dark:text-gray-200">{{ fieldsDataSource.data.length
+                                }}</span></p>
+                        <div class="space-y-3">
+                            <div>
+                                <dt class="font-medium text-secondary">{{ 'dev_tools_crud_gen_step7_grid_fields' |
+                                    translate
+                                    }} ({{gridFieldCount}})</dt>
+                                <dd class="text-sm pl-4">{{ gridFieldList }}</dd>
+                            </div>
+                            <div>
+                                <dt class="font-medium text-secondary">{{ 'dev_tools_crud_gen_step7_filter_fields' |
+                                    translate }} ({{filterFieldCount}})</dt>
+                                <dd class="text-sm pl-4">{{ filterFieldList }}</dd>
+                            </div>
+                            <div>
+                                <dt class="font-medium text-secondary">{{ 'dev_tools_crud_gen_step7_base_filter_fields'
+                                    |
+                                    translate }} ({{baseFilterFieldCount}})</dt>
+                                <dd class="text-sm pl-4">{{ baseFilterFieldList }}</dd>
+                            </div>
+                            <div *ngIf="step2Form.value.useCreate">
+                                <dt class="font-medium text-secondary">{{ 'dev_tools_crud_gen_step7_create_fields' |
+                                    translate }}</dt>
+                                <dd class="text-sm pl-4">{{ createFieldCount }}{{
+                                    'dev_tools_crud_gen_step7_create_fields_desc' | translate }}
+                                </dd>
+                            </div>
+                            <div *ngIf="step2Form.value.useUpdate">
+                                <dt class="font-medium text-secondary">{{ 'dev_tools_crud_gen_step7_update_fields' |
+                                    translate }}</dt>
+                                <dd class="text-sm pl-4">{{ updateFieldCount }} {{
+                                    'dev_tools_crud_gen_step7_update_fields_desc' | translate }}
+                                </dd>
+                            </div>
+                            <div *ngIf="step2Form.value.useRead">
+                                <dt class="font-medium text-secondary">{{ 'dev_tools_crud_gen_step7_read_fields' |
+                                    translate
+                                    }}</dt>
+                                <dd class="text-sm pl-4">{{ readFieldCount }} {{
+                                    'dev_tools_crud_gen_step7_read_fields_desc' | translate }}
+                                </dd>
+                            </div>
+                            <div *ngIf="behaviorsSummary.length > 0">
+                                <dt class="font-medium text-secondary">{{ 'dev_tools_crud_gen_step7_dynamic_behaviors' | translate }}</dt>
+                                <dd class="text-sm pl-4" [innerHTML]="behaviorsSummary"></dd>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Acciones y Características -->
+                    <div class="border-b pb-6">
+                        <h3 class="text-lg font-semibold mb-4 text-accent-600 dark:text-accent-400">{{
+                            'dev_tools_crud_gen_step7_actions_title' | translate }}</h3>
+                        <table class="w-full text-left">
+                            <tr class="border-b">
+                                <td class="py-2 font-medium text-secondary w-1/3">{{
+                                    'dev_tools_crud_gen_step7_enable_delete' | translate }}</td>
+                                <td>{{ step5Form.value.deleteAction ? ('dev_tools_yes' | translate) : ('dev_tools_no' |
+                                    translate) }}</td>
+                            </tr>
+                            <tr>
+                                <td class="py-2 font-medium text-secondary align-top">{{
+                                    'dev_tools_crud_gen_step7_custom_actions' | translate }}
+                                    ({{actions.controls.length}})
+                                </td>
+                                <td [innerHTML]="customActionsSummary"></td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <!-- Configuración Avanzada -->
+                    <div>
+                        <h3 class="text-lg font-semibold mb-4 text-accent-600 dark:text-accent-400">{{
+                            'dev_tools_crud_gen_step6_title' | translate }}</h3>
+                        <table class="w-full text-left">
+                            <tr class="border-b">
+                                <td class="py-2 font-medium text-secondary w-1/3">{{
+                                    'dev_tools_crud_gen_step6_server_pag' |
+                                    translate }}</td>
+                                <td>{{ step6Form.value.serverPagination ? ('dev_tools_yes' | translate) :
+                                    ('dev_tools_no' |
+                                    translate) }}</td>
+                            </tr>
+                            <tr class="border-b">
+                                <td class="py-2 font-medium text-secondary">{{ 'dev_tools_crud_gen_step6_mem_filter' |
+                                    translate }}</td>
+                                <td>{{ step6Form.value.filterInMemory ? ('dev_tools_yes' | translate) : ('dev_tools_no'
+                                    |
+                                    translate) }}</td>
+                            </tr>
+                            <tr class="border-b">
+                                <td class="py-2 font-medium text-secondary">{{ 'dev_tools_crud_gen_step6_no_init_search'
+                                    |
+                                    translate }}</td>
+                                <td>{{ step6Form.value.cancelInitSearch ? ('dev_tools_yes' | translate) :
+                                    ('dev_tools_no' |
+                                    translate) }}</td>
+                            </tr>
+                            <tr class="border-b">
+                                <td class="py-2 font-medium text-secondary">{{ 'dev_tools_crud_gen_step6_pagesize' |
+                                    translate }}</td>
+                                <td>{{ step6Form.value.pageSize }}</td>
+                            </tr>
+                            <tr class="border-b">
+                                <td class="py-2 font-medium text-secondary">{{ 'dev_tools_crud_gen_step7_dialog_width_review' | translate }}</td>
+                                <td>{{ step6Form.value.dialogWidth }}</td>
+                            </tr>
+                            <tr>
+                                <td class="py-2 font-medium text-secondary">{{ 'dev_tools_crud_gen_step7_export_csv_review' | translate }}</td>
+                                <td>{{ step6Form.value.exportCsv }}</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+            <div class="flex justify-between mt-6">
+                <button mat-stroked-button matStepperPrevious>{{ 'dev_tools_back_button' | translate }}</button>
+                <button mat-flat-button color="warn" [disabled]="isGenerating" (click)="generate()">
+                    <span class="flex items-center gap-2">
+                        <mat-progress-spinner *ngIf="isGenerating" [diameter]="20"
+                            mode="indeterminate"></mat-progress-spinner>
+                        <mat-icon *ngIf="!isGenerating" svgIcon="heroicons_outline:bolt"></mat-icon>
+                        <span>{{ 'dev_tools_generate_button' | translate }}</span>
+                    </span>
+                </button>
+            </div>
+        </ng-template>
+    </mat-step>
+
+</mat-stepper>

@@ -1,0 +1,78 @@
+import { ApplicationConfig, importProvidersFrom, LOCALE_ID } from '@angular/core';
+import { registerLocaleData } from '@angular/common';
+import localeEsAr from '@angular/common/locales/es';
+
+import { provideRouter, withComponentInputBinding, withInMemoryScrolling, withRouterConfig } from '@angular/router';
+import { provideAnimations } from '@angular/platform-browser/animations';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
+import { MatDialogModule } from '@angular/material/dialog';
+import { appRoutes } from './app.routes';
+import { Scheme, provideFwkAuth, provideAppAuth, provideFwkCore, provideAppNavigation, provideFwkBranding, provideFwkLayout, authInterceptor, fwkLoadingInterceptor } from '@fwk';
+import { CRUD_MODULES, loadCrudDefByPath } from './core/registries/crud.registry';
+import { NAVIGATION_GROUPS_MAP } from './core/navigation/navigation.groups';
+import { environment } from '../environments/environment';
+import { APP_CONFIG } from './core/config/app.config';
+
+registerLocaleData(localeEsAr, 'es-AR');
+
+function getInitialScheme(): Scheme {
+    const storedScheme = localStorage.getItem('fwk-theme-scheme');
+    if (storedScheme === 'light' || storedScheme === 'dark' || storedScheme === 'auto') {
+        return storedScheme;
+    }
+    return 'light';
+}
+
+const fwkConfig = {
+    brand: APP_CONFIG.brand,
+    welcome: APP_CONFIG.welcome,
+    sidebar: APP_CONFIG.sidebar,
+    search: APP_CONFIG.search,
+    routing: APP_CONFIG.routing,
+    ...environment,
+    customRoutes: APP_CONFIG.customRoutes,
+    autocompleteWaitingTime: APP_CONFIG.autocompleteWaitingTime,
+};
+
+export const appConfig: ApplicationConfig = {
+    providers: [
+        { provide: LOCALE_ID, useValue: 'es-AR' },
+
+        provideAnimations(),
+        provideHttpClient(withInterceptors([authInterceptor, fwkLoadingInterceptor])),
+        provideRouter(
+            appRoutes,
+            withInMemoryScrolling({ scrollPositionRestoration: 'enabled' }),
+            withComponentInputBinding(),
+            withRouterConfig({ onSameUrlNavigation: 'reload' })
+        ),
+        importProvidersFrom(MatDialogModule),
+
+        provideFwkBranding(fwkConfig),
+
+        provideFwkCore(),
+        provideFwkAuth(),
+        provideAppAuth(),
+        provideAppNavigation(CRUD_MODULES, NAVIGATION_GROUPS_MAP, loadCrudDefByPath),
+
+        provideFwkLayout({
+            fwk: {
+                layout: 'dense',
+                scheme: getInitialScheme(),
+                screens: {
+                    sm: '600px',
+                    md: '960px',
+                    lg: '1280px',
+                    xl: '1440px',
+                },
+                theme: 'theme-default',
+                themes: [
+                    {
+                        id: 'theme-default',
+                        name: 'Default',
+                    },
+                ],
+            },
+        }),
+    ],
+};

@@ -1,0 +1,26 @@
+export const PREFIX_DOMAIN_API = 'https://api.example.com/';
+export const PREFIX_DOMAIN_WEB = 'https://www.example.com/';
+export const PREFIX_STATS_API = PREFIX_DOMAIN_API + 'estadisticas/';
+
+export const environment = {
+    production: false,
+    security: true,
+    dummyServices: false,
+    hmr: false,
+    appId: '<%= appName.toLowerCase().replace(/\\s+/g, '_') %>',
+
+    apiBaseUrl: PREFIX_DOMAIN_API,
+    siteInstitucionalUrl: PREFIX_DOMAIN_WEB,
+    autocompleteWaitingTime: 700,
+
+    auth: {
+        signIn: PREFIX_DOMAIN_API + 'User/login',
+        signOut: PREFIX_DOMAIN_API + 'user/logout',
+        refreshToken: PREFIX_DOMAIN_API + 'Auth/refresh',
+        forgotPassword: PREFIX_DOMAIN_API + 'auth/forgot-password',
+        resetPassword: PREFIX_DOMAIN_API + 'auth/reset-password',
+        changePassword: null,
+        signUp: PREFIX_DOMAIN_API + 'auth/sign-up'
+    },
+};
+

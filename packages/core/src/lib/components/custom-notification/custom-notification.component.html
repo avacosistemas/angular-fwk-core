@@ -1,0 +1,15 @@
+<div class="custom-notification-wrapper flex items-center p-4 w-full" [ngClass]="'notification-' + data.type">
+    
+    <div class="flex-shrink-0">
+        <mat-icon class="icon-size-6 mt-2" [svgIcon]="icon"></mat-icon>
+    </div>
+
+    <div class="flex-1 ml-3 font-medium">
+        {{ data.message }}
+    </div>
+
+    <button mat-icon-button (click)="dismiss()" class="ml-4 -mr-2">
+        <mat-icon svgIcon="heroicons_solid:x-mark" class="icon-size-5"></mat-icon>
+    </button>
+
+</div>

@@ -1,0 +1,142 @@
+:root {
+    --is-dark: false;
+
+    --fwk-primary: #3b82f6;
+    --fwk-primary-rgb: 59, 130, 246;
+    --fwk-primary-50: #eff6ff;
+    --fwk-primary-50-rgb: 239, 246, 255;
+    --fwk-primary-100: #dbeafe;
+    --fwk-primary-100-rgb: 219, 234, 254;
+    --fwk-primary-200: #bfdbfe;
+    --fwk-primary-200-rgb: 191, 219, 254;
+    --fwk-primary-300: #93c5fd;
+    --fwk-primary-300-rgb: 147, 197, 253;
+    --fwk-primary-400: #60a5fa;
+    --fwk-primary-400-rgb: 96, 165, 250;
+    --fwk-primary-500: #3b82f6;
+    --fwk-primary-500-rgb: 59, 130, 246;
+    --fwk-primary-600: #3b82f6;
+    --fwk-primary-600-rgb: 59, 130, 246;
+    --fwk-primary-700: #1d4ed8;
+    --fwk-primary-700-rgb: 29, 78, 216;
+    --fwk-primary-800: #1e40af;
+    --fwk-primary-800-rgb: 30, 64, 175;
+    --fwk-primary-900: #1e3a8a;
+    --fwk-primary-900-rgb: 30, 58, 138;
+    --fwk-primary-950: #172554;
+    --fwk-primary-950-rgb: 23, 37, 84;
+
+    --fwk-accent: #3b82f6;
+    --fwk-accent-rgb: 59, 130, 246;
+    --fwk-accent-50: #eff6ff;
+    --fwk-accent-50-rgb: 239, 246, 255;
+    --fwk-accent-100: #dbeafe;
+    --fwk-accent-100-rgb: 219, 234, 254;
+    --fwk-accent-200: #bfdbfe;
+    --fwk-accent-200-rgb: 191, 219, 254;
+    --fwk-accent-300: #93c5fd;
+    --fwk-accent-300-rgb: 147, 197, 253;
+    --fwk-accent-400: #60a5fa;
+    --fwk-accent-400-rgb: 96, 165, 250;
+    --fwk-accent-500: #3b82f6;
+    --fwk-accent-500-rgb: 59, 130, 246;
+    --fwk-accent-600: #3b82f6;
+    --fwk-accent-600-rgb: 59, 130, 246;
+    --fwk-accent-700: #1d4ed8;
+    --fwk-accent-700-rgb: 29, 78, 216;
+    --fwk-accent-800: #1e40af;
+    --fwk-accent-800-rgb: 30, 64, 175;
+    --fwk-accent-900: #1e3a8a;
+    --fwk-accent-900-rgb: 30, 58, 138;
+    --fwk-accent-950: #172554;
+    --fwk-accent-950-rgb: 23, 37, 84;
+
+    --fwk-warn: #dc2626;
+    --fwk-warn-rgb: 220, 38, 38;
+    --fwk-warn-50: #fef2f2;
+    --fwk-warn-50-rgb: 254, 242, 242;
+    --fwk-warn-100: #fee2e2;
+    --fwk-warn-100-rgb: 254, 226, 226;
+    --fwk-warn-200: #fecaca;
+    --fwk-warn-200-rgb: 254, 202, 202;
+    --fwk-warn-300: #fca5a5;
+    --fwk-warn-300-rgb: 252, 165, 165;
+    --fwk-warn-400: #f87171;
+    --fwk-warn-400-rgb: 248, 113, 113;
+    --fwk-warn-500: #ef4444;
+    --fwk-warn-500-rgb: 239, 68, 68;
+    --fwk-warn-600: #dc2626;
+    --fwk-warn-600-rgb: 220, 38, 38;
+    --fwk-warn-700: #b91c1c;
+    --fwk-warn-700-rgb: 185, 28, 28;
+    --fwk-warn-800: #991b1b;
+    --fwk-warn-800-rgb: 153, 27, 27;
+    --fwk-warn-900: #7f1d1d;
+    --fwk-warn-900-rgb: 127, 29, 29;
+    --fwk-warn-950: #450a0a;
+    --fwk-warn-950-rgb: 69, 10, 10;
+
+    --fwk-bg-app-bar: #ffffff;
+    --fwk-bg-app-bar-rgb: 255, 255, 255;
+    --fwk-bg-card: #ffffff;
+    --fwk-bg-card-rgb: 255, 255, 255;
+    --fwk-bg-default: #f1f5f9;
+    --fwk-bg-default-rgb: 241, 245, 249;
+    --fwk-bg-dialog: #ffffff;
+    --fwk-bg-dialog-rgb: 255, 255, 255;
+    --fwk-bg-hover: rgba(148, 163, 184, 0.12);
+    --fwk-bg-status-bar: #cbd5e1;
+    --fwk-bg-status-bar-rgb: 203, 213, 225;
+
+    --fwk-text-default: #1e293b;
+    --fwk-text-default-rgb: 30, 41, 59;
+    --fwk-text-secondary: #64748b;
+    --fwk-text-secondary-rgb: 100, 116, 139;
+    --fwk-text-hint: #94a3b8;
+    --fwk-text-hint-rgb: 148, 163, 184;
+    --fwk-text-disabled: #94a3b8;
+    --fwk-text-disabled-rgb: 148, 163, 184;
+
+    --fwk-border: #e2e8f0;
+    --fwk-border-rgb: 226, 232, 240;
+    --fwk-divider: #e2e8f0;
+    --fwk-divider-rgb: 226, 232, 240;
+    --fwk-icon: #64748b;
+    --fwk-icon-rgb: 100, 116, 139;
+    --fwk-mat-icon: #64748b;
+    --fwk-mat-icon-rgb: 100, 116, 139;
+}
+
+.dark {
+    --is-dark: true;
+
+    --fwk-bg-app-bar: #0f172a;
+    --fwk-bg-app-bar-rgb: 15, 23, 42;
+    --fwk-bg-card: #1e293b;
+    --fwk-bg-card-rgb: 30, 41, 59;
+    --fwk-bg-default: #0f172a;
+    --fwk-bg-default-rgb: 15, 23, 42;
+    --fwk-bg-dialog: #1e293b;
+    --fwk-bg-dialog-rgb: 30, 41, 59;
+    --fwk-bg-hover: rgba(255, 255, 255, 0.05);
+    --fwk-bg-status-bar: #0f172a;
+    --fwk-bg-status-bar-rgb: 15, 23, 42;
+
+    --fwk-text-default: #ffffff;
+    --fwk-text-default-rgb: 255, 255, 255;
+    --fwk-text-secondary: #94a3b8;
+    --fwk-text-secondary-rgb: 148, 163, 184;
+    --fwk-text-hint: #64748b;
+    --fwk-text-hint-rgb: 100, 116, 139;
+    --fwk-text-disabled: #475569;
+    --fwk-text-disabled-rgb: 71, 85, 105;
+
+    --fwk-border: rgba(241, 245, 249, 0.12);
+    --fwk-border-rgb: 241, 245, 249;
+    --fwk-divider: rgba(241, 245, 249, 0.12);
+    --fwk-divider-rgb: 241, 245, 249;
+    --fwk-icon: #94a3b8;
+    --fwk-icon-rgb: 148, 163, 184;
+    --fwk-mat-icon: #94a3b8;
+    --fwk-mat-icon-rgb: 148, 163, 184;
+}

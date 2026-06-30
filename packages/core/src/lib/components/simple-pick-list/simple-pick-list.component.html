@@ -1,0 +1,38 @@
+
+<mat-card class="flex flex-col w-full h-full min-w-0"
+        [class.border-red-500]="errorMessage"
+        [class.border-2]="errorMessage"
+        [class.border-solid]="errorMessage">
+    
+    <mat-card-header class="flex items-center justify-end p-4 border-b flex-row-reverse">
+        <mat-checkbox
+            class="mr-2"
+            [checked]="isAllSelected()"
+            [disabled]="isDisabled"
+            (change)="toggleSelectAll()"
+            [matTooltip]="'table_select_all_tooltip' | translate">
+        </mat-checkbox>
+        <mat-card-title class="text-lg font-extrabold m-0">{{ titleFrom }}</mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content class="flex-auto overflow-y-auto px-2 max-h-[40vh]">
+        <mat-selection-list
+            #list
+            [compareWith]="compareFn"
+            [disabled]="isDisabled"
+            (selectionChange)="onSelectionChange()">
+            <mat-list-option
+                *ngFor="let item of allItems"
+                [value]="item"
+                [selected]="selectedItems | some:compareFn:item"
+                checkboxPosition="before"
+                class="h-auto">
+                {{ getNameElementList(item) }}
+            </mat-list-option>
+        </mat-selection-list>
+    </mat-card-content>
+
+    <div *ngIf="errorMessage" class="px-4 pb-2 pt-0">
+        <span class="text-xs text-red-500 font-medium">{{ errorMessage }}</span>
+    </div>
+</mat-card>

@@ -1,0 +1,12 @@
+<div class="w-full flex flex-col">
+
+    <div class="border rounded-md overflow-hidden transition-all duration-300" [ngClass]="{
+            'border-gray-300 dark:border-gray-500 focus-within:ring-2 focus-within:ring-primary': !errorMessage, 
+            'border-red-500 animate-shake': errorMessage,
+            'opacity-60 grayscale-[0.3] pointer-events-none': isDisabled
+         }">
+        <textarea [id]="editorId" class="invisible"></textarea>
+    </div>
+
+    <mat-error *ngIf="errorMessage" class="text-xs mt-1 animate-in fade-in duration-300">{{ errorMessage }}</mat-error>
+</div>

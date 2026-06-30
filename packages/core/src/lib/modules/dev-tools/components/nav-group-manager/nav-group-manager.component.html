@@ -1,0 +1,66 @@
+<div *ngIf="isLoading || isSaving" class="inset-0 z-10 flex items-center justify-center">
+    <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+</div>
+<div class="bg-white dark:bg-gray-800 h-full relative">
+    <div class="overflow-auto">
+        <table mat-table [dataSource]="dataSource" class="w-full">
+
+            <ng-container matColumnDef="icon">
+                <th mat-header-cell *matHeaderCellDef class="w-20 text-center bg-gray-100 dark:bg-gray-700/50 ">
+                    {{ 'dev_tools_nav_col_icon' | translate }}
+                </th>
+                <td mat-cell *matCellDef="let group" class="text-center">
+                    <mat-icon *ngIf="group.icon" [svgIcon]="group.icon" class="text-secondary"></mat-icon>
+                    <span *ngIf="!group.icon" class="text-gray-400">-</span>
+                </td>
+            </ng-container>
+
+            <ng-container matColumnDef="title">
+                <th mat-header-cell *matHeaderCellDef class="bg-gray-100 dark:bg-gray-700/50"> {{
+                    'dev_tools_nav_col_title' | translate }} </th>
+                <td mat-cell *matCellDef="let group" class="font-medium"> {{ group.title }} </td>
+            </ng-container>
+
+            <ng-container matColumnDef="id">
+                <th mat-header-cell *matHeaderCellDef class="bg-gray-100 dark:bg-gray-700/50"> {{ 'dev_tools_nav_col_id'
+                    | translate }} </th>
+                <td mat-cell *matCellDef="let group" class="font-mono text-sm text-secondary"> {{ group.id }} </td>
+            </ng-container>
+
+            <ng-container matColumnDef="type">
+                <th mat-header-cell *matHeaderCellDef class="bg-gray-100 dark:bg-gray-700/50"> Tipo </th>
+                <td mat-cell *matCellDef="let group">
+                    <span class="px-2 py-1 rounded text-xs font-medium" [ngClass]="{
+                'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300': group.type === 'collapsable',
+                'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300': group.type === 'group'
+              }">
+                        {{ group.type === 'collapsable' ? 'Colapsable' : 'Grupo' }}
+                    </span>
+                </td>
+            </ng-container>
+
+            <ng-container matColumnDef="actions">
+                <th mat-header-cell *matHeaderCellDef class="w-32 bg-gray-100 dark:bg-gray-700/50">
+                    <button mat-flat-button color="accent" (click)="openGroupDialog()">
+                        <mat-icon svgIcon="heroicons_outline:plus"></mat-icon>
+                        <span class="ml-2">{{ 'dev_tools_new_group_button' | translate }}</span>
+                    </button>
+                </th>
+                <td mat-cell *matCellDef="let group" class="text-right">
+                    <button mat-icon-button (click)="openGroupDialog(group)"
+                        [matTooltip]="'dev_tools_edit_tooltip' | translate">
+                        <mat-icon [svgIcon]="'heroicons_outline:pencil-square'"></mat-icon>
+                    </button>
+                    <button mat-icon-button color="warn" (click)="deleteGroup(group)"
+                        [matTooltip]="'dev_tools_delete_tooltip' | translate">
+                        <mat-icon [svgIcon]="'heroicons_outline:trash'"></mat-icon>
+                    </button>
+                </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="hover:bg-gray-50 dark:hover:bg-white/5">
+            </tr>
+        </table>
+    </div>
+</div>

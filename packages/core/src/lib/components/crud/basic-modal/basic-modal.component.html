@@ -1,0 +1,54 @@
+<div class="flex flex-col max-h-screen relative" [ngClass]="[data.modalKey + '-modal', currentUrl + '-modal']">
+
+    <div class="flex flex-0 items-center justify-between pl-6 pr-4 h-16">
+        <h2 class="text-2xl font-semibold">{{ titleLabel }}</h2>
+        <button mat-icon-button (click)="onNoClick()" [disabled]="_submitting"
+            [matTooltip]="'modal_button_close' | translate">
+            <mat-icon [svgIcon]="'heroicons_outline:x-mark'"></mat-icon>
+        </button>
+    </div>
+
+    <div mat-dialog-content class="flex flex-col min-h-0 p-6 pb-6 border-t border-gray-200 dark:border-gray-600 relative">
+        <mat-progress-bar *ngIf="(loading$ | async) || _submitting" mode="indeterminate" class="absolute top-0 left-0 w-full z-50"></mat-progress-bar>
+        <fwk-dynamic-form-component #dynamicForm [entity]="entity" [isEdit]="isEdit()" [fields]="fields"
+            [subFormName]="formKey" [parentForm]="form" (onChangeEntity)="onChangeEntity($event)">
+        </fwk-dynamic-form-component>
+    </div>
+
+    <div *ngIf="!notShowButton" mat-dialog-actions
+        class="flex items-center justify-end p-6 pt-4 !border-t !border-gray-200 !dark:border-gray-600">
+
+        <!-- DYNAMIC INNER ACTIONS -->
+        <ng-container *ngIf="activeInnerActions.length > 0">
+            <button *ngFor="let innerAction of activeInnerActions"
+                    mat-stroked-button 
+                    [color]="innerAction.type === 'warn' || innerAction.type === 'error' || innerAction.color === 'warn' ? 'warn' : (innerAction.type === 'info' ? 'primary' : 'accent')" 
+                    (click)="executeInnerAction(innerAction)" 
+                    [disabled]="_submitting"
+                    class="mr-auto rounded-lg h-10 px-4"
+                    [ngClass]="{
+                        'border-red-200 dark:border-red-800/50 hover:bg-red-50 dark:hover:bg-red-950/20 text-red-600 dark:text-red-400': innerAction.type === 'warn' || innerAction.type === 'error' || innerAction.color === 'warn',
+                        'border-blue-200 dark:border-blue-800/50 hover:bg-blue-50 dark:hover:bg-blue-950/20 text-blue-600 dark:text-blue-400': innerAction.type === 'info',
+                        'border-green-200 dark:border-green-800/50 hover:bg-green-50 dark:hover:bg-green-950/20 text-green-600 dark:text-green-400': innerAction.type === 'success'
+                    }">
+                <mat-icon *ngIf="innerAction.icon" class="mr-2"
+                          [ngClass]="{
+                              'text-red-600 dark:text-red-400': innerAction.type === 'warn' || innerAction.type === 'error' || innerAction.color === 'warn',
+                              'text-blue-600 dark:text-blue-400': innerAction.type === 'info',
+                              'text-green-600 dark:text-green-400': innerAction.type === 'success'
+                          }">{{ innerAction.icon }}</mat-icon>
+                <span>{{ translate(innerAction.actionNameKey) || innerAction.actionName }}</span>
+            </button>
+        </ng-container>
+
+        <button *ngIf="formDef?.showSubmitContinue" class="ml-2" mat-flat-button color="accent"
+            (click)="onSubmitNoClose()" [disabled]="form.pristine || form.invalid || _submitting">
+            {{ 'modal_button_save_and_continue' | translate }}
+        </button>
+
+        <button class="ml-2" mat-flat-button color="accent" (click)="onSubmit()"
+            [disabled]="form.pristine || form.invalid || _submitting">
+            {{ submitLabel }}
+        </button>
+    </div>
+</div>

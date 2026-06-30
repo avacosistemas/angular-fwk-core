@@ -1,0 +1,107 @@
+<div *ngIf="formsForm" [formGroup]="formsForm">
+    <mat-tab-group animationDuration="0ms">
+        <ng-container *ngFor="let formType of availableFormTypes">
+            <mat-tab [label]="formType | titlecase">
+                <ng-template matTabContent>
+                    <div>
+                        <div class="flex justify-end items-center mb-4">
+                            <button mat-stroked-button (click)="addFormField(formType)">
+                                <mat-icon>add</mat-icon>
+                                {{ 'dev_tools_add_field_button' | translate }}
+                            </button>
+                        </div>
+
+                        <div class="overflow-auto rounded-lg border" *ngIf="getFormArray(formType) as formArray; else noFields">
+                            <table mat-table [dataSource]="getDataSourceForFormType(formType)" class="w-full" [formArrayName]="formType">
+                                
+                                <ng-container matColumnDef="key">
+                                    <th mat-header-cell *matHeaderCellDef class="!p-4 bg-gray-100 dark:bg-gray-700/50 uppercase text-xs tracking-wider">
+                                        {{ 'dev_tools_def_editor_grid_col_key' | translate }}
+                                    </th>
+                                    <td mat-cell *matCellDef="let field" class="!p-2 font-mono text-sm">
+                                        {{ field.value.key }}
+                                    </td>
+                                </ng-container>
+
+                                <ng-container matColumnDef="baseFilter">
+                                    <th mat-header-cell *matHeaderCellDef class="!p-4 bg-gray-100 dark:bg-gray-700/50 uppercase text-xs tracking-wider text-center">
+                                        {{ 'dev_tools_def_editor_forms_col_basefilter' | translate }}
+                                    </th>
+                                    <td mat-cell *matCellDef="let field; let i=index" [formGroupName]="i" class="!p-2 text-center">
+                                        <mat-checkbox formControlName="baseFilter" [matTooltip]="'dev_tools_def_editor_forms_basefilter_tooltip' | translate"></mat-checkbox>
+                                    </td>
+                                </ng-container>
+
+                                <ng-container matColumnDef="labelValue">
+                                    <th mat-header-cell *matHeaderCellDef class="!p-4 bg-gray-100 dark:bg-gray-700/50 uppercase text-xs tracking-wider w-1/3">
+                                        {{ 'dev_tools_def_editor_grid_col_label' | translate }}
+                                    </th>
+                                    <td mat-cell *matCellDef="let field; let i=index" [formGroupName]="i" class="!p-2">
+                                        <mat-form-field class="w-full" appearance="outline" subscriptSizing="dynamic">
+                                            <input matInput formControlName="labelValue">
+                                        </mat-form-field>
+                                    </td>
+                                </ng-container>
+
+                                <ng-container matColumnDef="controlType">
+                                    <th mat-header-cell *matHeaderCellDef class="!p-4 bg-gray-100 dark:bg-gray-700/50 uppercase text-xs tracking-wider w-1/4">
+                                        {{ 'dev_tools_crud_gen_step4_col_type' | translate }}
+                                    </th>
+                                    <td mat-cell *matCellDef="let field; let i=index" [formGroupName]="i" class="!p-2">
+                                        <mat-form-field class="w-full" appearance="outline" subscriptSizing="dynamic">
+                                            <mat-select formControlName="controlType">
+                                                <mat-option *ngFor="let type of controlTypeChoices" [value]="type">{{ type }}</mat-option>
+                                            </mat-select>
+                                        </mat-form-field>
+                                    </td>
+                                </ng-container>
+
+                                <ng-container matColumnDef="mappingQuerystring">
+                                    <th mat-header-cell *matHeaderCellDef class="!p-4 bg-gray-100 dark:bg-gray-700/50 uppercase text-xs tracking-wider text-center">{{ 'dev_tools_def_editor_forms_col_mapping_query' | translate }}</th>
+                                    <td mat-cell *matCellDef="let field; let i=index" [formGroupName]="i" class="!p-2 text-center">
+                                        <mat-checkbox formControlName="mappingQuerystring" [matTooltip]="'dev_tools_def_editor_forms_mapping_query_tooltip' | translate"></mat-checkbox>
+                                    </td>
+                                </ng-container>
+                                
+                                <ng-container matColumnDef="actions">
+                                    <th mat-header-cell *matHeaderCellDef class="!p-4 bg-gray-100 dark:bg-gray-700/50 text-right"></th>
+                                    <td mat-cell *matCellDef="let field; let i=index" class="!p-2 text-right">
+                                        <button mat-icon-button (click)="openFieldOptions(i, formType)" [matTooltip]="'dev_tools_def_editor_forms_field_options_tooltip' | translate">
+                                            <mat-icon>settings</mat-icon>
+                                        </button>
+                                        <button mat-icon-button (click)="openFieldBehaviors(field.value, i, formType)" [color]="hasBehavior(i, formType) ? 'primary' : 'secondary'" [matTooltip]="'dev_tools_def_editor_forms_field_behaviors_tooltip' | translate">
+                                            <mat-icon>rule</mat-icon>
+                                        </button>
+                                        <button mat-icon-button color="warn" (click)="removeFormField(formType, i)" [matTooltip]="'dev_tools_delete_tooltip' | translate">
+                                            <mat-icon>delete</mat-icon>
+                                        </button>
+                                    </td>
+                                </ng-container>
+
+                                <tr mat-header-row *matHeaderRowDef="formDisplayedColumns(formType)"></tr>
+                                <tr mat-row *matRowDef="let row; let i = index; columns: formDisplayedColumns(formType);" [formGroupName]="i"></tr>
+                            </table>
+                        </div>
+
+                        <ng-template #noFields>
+                            <div class="text-center p-12 text-secondary rounded-lg border-2 border-dashed mt-2">
+                                <mat-icon class="icon-size-12" svgIcon="heroicons_outline:clipboard-document-list"></mat-icon>
+                                <p class="mt-4 font-medium">{{ 'dev_tools_def_editor_forms_no_fields' | translate }}</p>
+                            </div>
+                        </ng-template>
+                    </div>
+                </ng-template>
+            </mat-tab>
+        </ng-container>
+    </mat-tab-group>
+
+    <div class="flex justify-end mt-8 pt-6 border-t">
+        <button mat-flat-button color="accent" (click)="saveFormsConfig()" [disabled]="formsForm.pristine || formsForm.invalid || isSaving">
+            <span class="flex items-center gap-2">
+                <mat-progress-spinner *ngIf="isSaving" [diameter]="20" mode="indeterminate"></mat-progress-spinner>
+                <mat-icon *ngIf="!isSaving" svgIcon="heroicons_outline:check-circle"></mat-icon>
+                <span>{{ 'dev_tools_def_editor_forms_save_button' | translate }}</span>
+            </span>
+        </button>
+    </div>
+</div>

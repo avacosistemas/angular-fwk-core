@@ -1,0 +1,33 @@
+{
+  "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+  "version": 1,
+  "newProjectRoot": "packages",
+  "projects": {
+    "fwk-core": {
+      "projectType": "library",
+      "root": "packages/core",
+      "sourceRoot": "packages/core/src",
+      "prefix": "fwk",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-angular:ng-packagr",
+          "options": {
+            "project": "packages/core/ng-package.json"
+          },
+          "configurations": {
+            "production": {
+              "tsConfig": "packages/core/tsconfig.lib.prod.json"
+            },
+            "development": {
+              "tsConfig": "packages/core/tsconfig.lib.json"
+            }
+          },
+          "defaultConfiguration": "production"
+        }
+      }
+    }
+  },
+  "cli": {
+    "analytics": false
+  }
+}

@@ -1,0 +1,23 @@
+<div class="flex flex-col">
+    <div class="flex items-center space-x-2">
+        <mat-checkbox
+            [checked]="_value"
+            [disabled]="isDisabled"
+            [color]="errorMessage ? 'warn' : 'accent'"
+            (change)="onCheckboxChange($event.checked)">
+            <span class="leading-tight" [class.text-red-500]="errorMessage">{{ field?.label }}</span>
+        </mat-checkbox>
+    
+        <a *ngIf="field?.options?.disclaimer?.label"
+            href="#"
+            (click)="openDisclaimer($event)"
+            class="text-accent-600 dark:text-accent-400 hover:underline"
+            [class.text-red-500]="errorMessage">
+            {{ field.options.disclaimer.label }}
+        </a>
+    </div>
+
+    <div *ngIf="errorMessage" class="text-xs text-red-500 ml-3 mt-1">
+        {{ errorMessage }}
+    </div>
+</div>

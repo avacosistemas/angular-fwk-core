@@ -1,0 +1,31 @@
+<div class="flex items-center w-full space-x-2">
+    <mat-form-field class="flex-auto" appearance="outline">
+        <mat-label>{{ config.label }}</mat-label>
+        
+        <input
+            matInput
+            [ngModel]="_value" 
+            [ngModelOptions]="{standalone: true}"
+            (ngModelChange)="onValueChange($event)"
+            (blur)="onTouch()"
+            [required]="config.required"
+            [disabled]="isDisabled"
+            [placeholder]="config.label"
+            [errorStateMatcher]="matcher">
+
+        <button
+            *ngIf="config.showPreview"
+            matSuffix
+            mat-icon-button
+            type="button"
+            class="mr-2"
+            (click)="clickOpenUrl(); $event.stopPropagation()"
+            [disabled]="isDisabled || !isUrlValid" 
+            [matTooltip]="'url_input_preview_tooltip' | translate">
+            <mat-icon [svgIcon]="config.iconOpenUrl || 'heroicons_outline:eye'"></mat-icon>
+        </button>
+        <mat-error *ngIf="errorMessage">{{ errorMessage }}</mat-error>
+
+    </mat-form-field>
+    
+</div>

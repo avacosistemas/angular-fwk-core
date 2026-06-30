@@ -1,0 +1,57 @@
+<mat-form-field class="w-full" appearance="outline">
+    <mat-label>{{ config?.label }}</mat-label>
+
+    <input
+        #autoCompleteInput
+        type="text"
+        matInput
+        [formControl]="autocompleteControl"
+        [matAutocomplete]="auto"
+        [required]="config?.required"
+        [errorStateMatcher]="matcher"
+        (blur)="onInputBlur()"
+        (focus)="onInputFocus()"
+        (click)="triggerSearch()">
+
+    <button type="button" mat-icon-button matSuffix (click)="clear($event)" *ngIf="autocompleteControl.value && !autocompleteControl.disabled">
+        <mat-icon [svgIcon]="'heroicons_outline:x-mark'"></mat-icon>
+    </button>
+
+    <button
+        mat-icon-button
+        matSuffix
+        type="button"
+        (click)="openDropdown()"
+        [disabled]="autocompleteControl.disabled"
+        [matTooltip]="'autocomplete_show_options_tooltip' | translate">
+        <mat-icon [svgIcon]="'heroicons_outline:chevron-down'"></mat-icon>
+    </button>
+
+    <mat-error *ngIf="autocompleteControl.hasError('required') && !errorMessage">
+        {{ config?.options?.requiredMessage || ('autocomplete_required_error' | translate) }}
+    </mat-error>
+    <mat-error *ngIf="autocompleteControl.hasError('selectOrCleanField') && !errorMessage">
+        {{ config?.options?.selectElementOrCleanField || ('autocomplete_select_or_clean_error' | translate) }}
+    </mat-error>
+
+    <mat-error *ngIf="errorMessage">{{ errorMessage }}</mat-error>
+</mat-form-field>
+
+<mat-autocomplete #auto="matAutocomplete"
+                [displayWith]="displayWith"
+                (optionSelected)="onOptionSelected()">
+    <mat-option *ngFor="let option of filteredOptions$ | async" [value]="option">
+        <span>{{ config?.options?.elementLabel ? option[config.options.elementLabel] : option }}</span>
+    </mat-option>
+</mat-autocomplete>
+
+<div *ngIf="config?.options?.multiple && selectedItems.length > 0" class="flex flex-wrap gap-2 mt-2">
+    <div *ngFor="let item of selectedItems" 
+         class="flex items-center bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 px-3 py-1 rounded-full text-xs font-semibold border border-gray-200 dark:border-gray-700 shadow-sm transition-all duration-150">
+        <span>{{ config?.options?.elementLabel ? item[config.options.elementLabel] : item }}</span>
+        <button type="button" (click)="removeItem(item, $event)" 
+                class="ml-2 flex items-center justify-center p-0.5 rounded-full hover:bg-gray-250 dark:hover:bg-gray-700 text-gray-500 hover:text-gray-800 dark:hover:text-gray-100 cursor-pointer border-0 bg-transparent transition-colors">
+            <mat-icon [svgIcon]="'heroicons_solid:x-mark'" class="w-3.5 h-3.5"></mat-icon>
+        </button>
+    </div>
+</div>

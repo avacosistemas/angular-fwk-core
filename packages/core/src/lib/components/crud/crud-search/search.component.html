@@ -1,0 +1,84 @@
+<mat-expansion-panel #searchPanel class="border-t shadow-none rounded-none dark:bg-transparent" [expanded]="!!crudDef?.cancelInitSearch"
+    *ngIf="generalFields && generalFields.length > 0">
+    <mat-expansion-panel-header class="px-4 sm:px-6">
+        <mat-panel-title class="flex items-center space-x-3">
+            <mat-icon [svgIcon]="'heroicons_outline:magnifying-glass'"></mat-icon>
+            <span class="font-semibold">{{ 'search_title' | translate }}</span>
+        </mat-panel-title>
+        <mat-panel-description class="flex items-center justify-end">
+            <span *ngIf="activeFilterCount === 0">{{ 'search_panel_placeholder' | translate }}</span>
+            <span *ngIf="activeFilterCount > 0" class="flex items-center font-medium text-accent-400">
+                {{ activeFilterCount | i18nPlural: activeFilterCountMapping }}
+                <mat-icon class="ml-1 text-accent-400" [svgIcon]="'heroicons_solid:check-circle'"></mat-icon>
+            </span>
+        </mat-panel-description>
+    </mat-expansion-panel-header>
+
+    <form *ngIf="hasVisibleFields" class="w-full" #ngformElement="ngForm" (ngSubmit)="onSubmitSearch()"
+        (keydown)="submitOnEnter($event)" [formGroup]="form" novalidate>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pb-4">
+            <fwk-dynamic-form-component class="col-span-full" [entity]="entity" [isEdit]="true"
+                [fields]="generalFields" [parentForm]="form" (onFieldsChanges)="onChangeEntity($event.entity)">
+            </fwk-dynamic-form-component>
+        </div>
+
+    </form>
+
+    <mat-action-row class="p-4 sm:px-6">
+        <div class="flex items-center justify-end w-full space-x-2">
+
+            <button *ngIf="!columnsAltered" mat-stroked-button [matMenuTriggerFor]="columnasMenu"
+                [matTooltip]="'search_columns_tooltip' | translate">
+                <mat-icon class="icon-size-5" [svgIcon]="'heroicons_outline:view-columns'"></mat-icon>
+                <span class="ml-2 hidden sm:inline">{{ 'search_columns_button' | translate }}</span>
+            </button>
+
+            <button *ngIf="columnsAltered" mat-flat-button color="accent" [matMenuTriggerFor]="columnasMenu"
+                [matTooltip]="'search_columns_tooltip_altered' | translate">
+                <mat-icon class="icon-size-5" [svgIcon]="'heroicons_solid:view-columns'"></mat-icon>
+                <span class="ml-2 hidden sm:inline">{{ 'search_columns_button' | translate }}</span>
+            </button>
+
+            <mat-menu #columnasMenu="matMenu" class="h-[300px] overflow-y-auto rounded-2xl">
+                <div class="px-4 py-2 text-sm font-semibold border-b">{{ 'search_columns_title' | translate }}</div>
+                <ng-container *ngFor="let col of menuColumns">
+                    <div (click)="$event.stopPropagation()">
+                        <mat-checkbox class="mat-menu-item" [checked]="columnVisibility.get(col.columnDef)"
+                            (change)="toggleColumnVisibility(col.columnDef)">
+                            {{ col.columnName }}
+                        </mat-checkbox>
+                    </div>
+                </ng-container>
+            </mat-menu>
+
+            <button *ngIf="hasOptions() && !userChangeOptions()" mat-stroked-button type="button"
+                (click)="openOptions()" [matTooltip]="'search_advanced_filters_tooltip' | translate">
+                <mat-icon class="icon-size-5" [svgIcon]="'heroicons_outline:adjustments-horizontal'"></mat-icon>
+                <span class="ml-2 hidden sm:inline">{{ 'search_advanced_filters_button' | translate }}</span>
+            </button>
+
+            <button *ngIf="hasOptions() && userChangeOptions()" mat-flat-button color="accent" type="button"
+                (click)="openOptions()" [matBadge]="userChangeOptions() ? ' ' : ''" matBadgeSize="small"
+                matBadgePosition="above after" matBadgeColor="warn"
+                [matTooltip]="'search_advanced_filters_tooltip' | translate">
+                <mat-icon class="icon-size-5" [svgIcon]="'heroicons_solid:adjustments-horizontal'"></mat-icon>
+                <span class="ml-2 hidden sm:inline">{{ 'search_advanced_filters_button' | translate }}</span>
+            </button>
+
+            <button mat-stroked-button type="button" (click)="clearForm()"
+                [matTooltip]="'search_clear_tooltip' | translate">
+                <mat-icon class="icon-size-5" [svgIcon]="'heroicons_outline:x-mark'"></mat-icon>
+                <span class="ml-2 hidden sm:inline">{{ 'search_clear_button' | translate }}</span>
+            </button>
+
+            <button mat-flat-button color="accent" type="button" (click)="onSubmitSearch()"
+                [matTooltip]="'search_submit_tooltip' | translate">
+                <mat-icon class="icon-size-5" [svgIcon]="'heroicons_outline:magnifying-glass'"></mat-icon>
+                <span class="ml-2 hidden sm:inline">{{ 'search_submit_button' | translate }}</span>
+            </button>
+
+        </div>
+    </mat-action-row>
+
+</mat-expansion-panel>

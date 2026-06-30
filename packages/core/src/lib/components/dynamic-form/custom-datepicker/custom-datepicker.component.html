@@ -1,0 +1,40 @@
+<div class="flex items-center w-full space-x-2">
+    <mat-form-field *ngIf="field" class="w-full" appearance="outline">
+        <mat-label>{{ field.label }}</mat-label>
+        
+        <input
+            matInput
+            [id]="field.key"
+            [placeholder]="field.label"
+            [formControl]="internalControl"
+            [required]="field.required"
+            [errorStateMatcher]="matcher"
+            (input)="onInputChange($event)"
+            (blur)="onBlur()"
+            class="cursor-pointer">
+    
+        <button
+            *ngIf="_value && !isDisabled"
+            type="button"
+            matSuffix
+            mat-icon-button
+            class="mr-2"
+            [matTooltip]="'datepicker_clear_tooltip' | translate"
+            (click)="remove(); $event.stopPropagation()">
+            <mat-icon [svgIcon]="'heroicons_outline:x-mark'"></mat-icon>
+        </button>
+    
+        <button
+            *ngIf="!isDisabled"
+            type="button"
+            matSuffix
+            mat-icon-button
+            class="mr-2"
+            [matTooltip]="'datepicker_open_tooltip' | translate"
+            (click)="openDateModal()">
+            <mat-icon [svgIcon]="'heroicons_outline:calendar-days'"></mat-icon>
+        </button>
+        
+        <mat-error *ngIf="errorMessage">{{ errorMessage }}</mat-error>
+    </mat-form-field>
+</div>

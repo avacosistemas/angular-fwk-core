@@ -1,0 +1,106 @@
+import { Component, ViewEncapsulation } from '@angular/core';
+import { RouterOutlet } from '@angular/router';
+import { I18nService, FWK_I18N_DEF } from '@fwk';
+import { APP_I18N_DEF } from './core/i18n/app.i18n';
+import { APP_CONFIG, AppColors } from './core/config/app.config';
+
+@Component({
+    selector: 'app-root',
+    standalone: true,
+    imports: [RouterOutlet],
+    templateUrl: './app.component.html',
+    styleUrls: ['./app.component.scss'],
+    encapsulation: ViewEncapsulation.None,
+})
+export class AppComponent {
+    constructor(
+        private i18nService: I18nService
+    ) {
+        this.registerGlobalI18n();
+        this.applyBrandColors();
+    }
+
+    private registerGlobalI18n(): void {
+        this.i18nService.addI18n(FWK_I18N_DEF as any);
+        this.i18nService.addI18n(APP_I18N_DEF as any);
+    }
+
+    private applyBrandColors(): void {
+        const root = document.documentElement;
+        const c = APP_CONFIG.colors;
+        if (!c) return;
+
+        const setHex = (name: string, hex: string) => {
+            root.style.setProperty(`--fwk-${name}`, hex);
+            const rgb = this.hexToRgb(hex);
+            if (rgb) root.style.setProperty(`--fwk-${name}-rgb`, rgb);
+        };
+        const setVal = (name: string, val: string) => {
+            root.style.setProperty(`--fwk-${name}`, val);
+        };
+
+        setHex('primary', c.primary);
+        setHex('accent', c.accent);
+        setHex('warn', c.warn);
+        setHex('bg-default', c.bg.default);
+        setHex('bg-card', c.bg.card);
+        setHex('bg-dialog', c.bg.dialog);
+        setVal('bg-hover', c.bg.hover);
+        setHex('text-default', c.text.default);
+        setHex('text-secondary', c.text.secondary);
+        setHex('text-hint', c.text.hint);
+        setHex('text-disabled', c.text.disabled);
+        setHex('border', c.border);
+        setHex('divider', c.divider);
+        setHex('icon', c.icon);
+        setHex('mat-icon', c.icon);
+
+        if (c.dark) {
+            this.injectDarkStyles(c.dark);
+        }
+    }
+
+    private injectDarkStyles(d: NonNullable<AppColors['dark']>): void {
+        const existing = document.getElementById('fwk-dark-colors');
+        if (existing) existing.remove();
+
+        const getRgb = (hex: string) => this.hexToRgb(hex) || '';
+
+        const css = `.dark {
+                        --fwk-bg-default: ${d.bg.default};
+                        --fwk-bg-default-rgb: ${getRgb(d.bg.default)};
+                        --fwk-bg-card: ${d.bg.card};
+                        --fwk-bg-card-rgb: ${getRgb(d.bg.card)};
+                        --fwk-bg-dialog: ${d.bg.dialog};
+                        --fwk-bg-dialog-rgb: ${getRgb(d.bg.dialog)};
+                        --fwk-bg-hover: ${d.bg.hover};
+                        --fwk-text-default: ${d.text.default};
+                        --fwk-text-default-rgb: ${getRgb(d.text.default)};
+                        --fwk-text-secondary: ${d.text.secondary};
+                        --fwk-text-secondary-rgb: ${getRgb(d.text.secondary)};
+                        --fwk-text-hint: ${d.text.hint};
+                        --fwk-text-hint-rgb: ${getRgb(d.text.hint)};
+                        --fwk-text-disabled: ${d.text.disabled};
+                        --fwk-text-disabled-rgb: ${getRgb(d.text.disabled)};
+                        --fwk-border: ${d.border};
+                        --fwk-border-rgb: ${getRgb(d.border)};
+                        --fwk-divider: ${d.divider};
+                        --fwk-divider-rgb: ${getRgb(d.divider)};
+                        --fwk-icon: ${d.icon};
+                        --fwk-icon-rgb: ${getRgb(d.icon)};
+                        --fwk-mat-icon: ${d.icon};
+                        --fwk-mat-icon-rgb: ${getRgb(d.icon)};
+                        }`;
+        const style = document.createElement('style');
+        style.id = 'fwk-dark-colors';
+        style.textContent = css;
+        document.head.appendChild(style);
+    }
+
+    private hexToRgb(hex: string): string | null {
+        const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        return result
+            ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}`
+            : null;
+    }
+}

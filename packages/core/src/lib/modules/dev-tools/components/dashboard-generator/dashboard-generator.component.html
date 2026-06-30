@@ -1,0 +1,361 @@
+<mat-stepper [linear]="true" #stepper class="h-full"
+    [orientation]="(isScreenSmall$ | async) ? 'horizontal' : 'vertical'">
+
+    <!-- ====================================================================================================== -->
+    <!-- PASO 1: INFORMACIÓN GENERAL                                                                            -->
+    <!-- ====================================================================================================== -->
+    <mat-step [stepControl]="step1Form">
+        <ng-template matStepLabel>{{ 'dev_tools_dash_gen_step1_label' | translate }}</ng-template>
+        <ng-template matStepContent>
+            <div class="p-6 border rounded-lg bg-card">
+                <div class="flex items-center gap-3">
+                    <mat-icon svgIcon="heroicons_outline:identification" class="text-accent"></mat-icon>
+                    <h2 class="text-2xl font-semibold">{{ 'dev_tools_dash_gen_step1_title' | translate }}</h2>
+                </div>
+                <p class="text-secondary mt-1 mb-6">{{ 'dev_tools_dash_gen_step1_subtitle' | translate }}</p>
+                <form [formGroup]="step1Form">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
+                        <mat-form-field appearance="outline">
+                            <mat-label>{{ 'dev_tools_dash_gen_step1_name_label' | translate }}</mat-label>
+                            <input matInput formControlName="fileName" placeholder="ej: estadisticas-matricula"
+                                required>
+                            <mat-error *ngIf="step1Form.get('fileName')?.hasError('required')">{{
+                                'dev_tools_error_required' | translate }}</mat-error>
+                            <mat-error *ngIf="step1Form.get('fileName')?.hasError('pattern')">{{
+                                'dev_tools_dash_gen_step1_name_error' | translate }}</mat-error>
+                        </mat-form-field>
+                        <mat-form-field appearance="outline">
+                            <mat-label>{{ 'dev_tools_dash_gen_step1_title_label' | translate }}</mat-label>
+                            <input matInput formControlName="pageTitle" placeholder="Ej: Estadísticas de Matrícula"
+                                required>
+                            <mat-error>{{ 'dev_tools_error_required' | translate }}</mat-error>
+                        </mat-form-field>
+                        <mat-form-field appearance="outline">
+                            <mat-label>{{ 'dev_tools_crud_gen_step2_navgroup_label' | translate }}</mat-label>
+                            <mat-select formControlName="navGroup">
+                                <mat-option *ngFor="let group of navigationGroups" [value]="group.id">{{ group.title
+                                    }}</mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                        <fwk-icon-picker formControlName="navIcon"
+                            [label]="'dev_tools_crud_gen_step2_icon_label' | translate"
+                            namespace="heroicons_outline"></fwk-icon-picker>
+                        <div class="sm:col-span-2 pt-4 border-t mt-2">
+                            <div class="flex items-start gap-4">
+                                <mat-slide-toggle formControlName="showInMenu" color="accent"
+                                    class="mt-1"></mat-slide-toggle>
+                                <div>
+                                    <p class="font-medium">{{ 'dev_tools_crud_gen_step2_showinmenu_check' | translate }}
+                                    </p>
+                                    <p class="text-sm text-secondary">{{ 'dev_tools_dash_gen_step1_showinmenu_subtitle' | translate }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="flex justify-end mt-6">
+                <button mat-flat-button color="accent" matStepperNext [disabled]="step1Form.invalid">
+                    <span class="flex gap-2 items-center">
+                        <mat-icon svgIcon="heroicons_outline:arrow-right"></mat-icon>
+                        <span>{{ 'dev_tools_next_button' | translate }}</span>
+                    </span>
+                </button>
+            </div>
+        </ng-template>
+    </mat-step>
+
+    <!-- ====================================================================================================== -->
+    <!-- PASO 2: SEGURIDAD                                                                                      -->
+    <!-- ====================================================================================================== -->
+    <mat-step [stepControl]="step2Form">
+        <ng-template matStepLabel>{{ 'dev_tools_dash_gen_step2_label' | translate }}</ng-template>
+        <ng-template matStepContent>
+            <div class="p-6 border rounded-lg bg-card">
+                <div class="flex items-center gap-3">
+                    <mat-icon svgIcon="heroicons_outline:shield-check" class="text-accent"></mat-icon>
+                    <h2 class="text-2xl font-semibold">{{ 'dev_tools_crud_gen_step3_title' | translate }}</h2>
+                </div>
+                <p class="text-secondary mt-1 mb-6">{{ 'dev_tools_dash_gen_step2_subtitle' | translate }}</p>
+                <form [formGroup]="step2Form">
+                    <div class="flex items-start gap-4 mb-6">
+                        <mat-slide-toggle formControlName="customize" color="accent" class="mt-1"></mat-slide-toggle>
+                        <div>
+                            <p class="font-medium">{{ 'dev_tools_crud_gen_step3_customize_toggle' | translate }}</p>
+                            <p class="text-sm text-secondary">{{ 'dev_tools_dash_gen_step2_customize_subtitle' | translate }}</p>
+                        </div>
+                    </div>
+                    <div *ngIf="step2Form.get('customize')?.value" class="animate-fade-in">
+                        <mat-form-field appearance="outline" class="w-full sm:w-1/2" subscriptSizing="dynamic">
+                            <mat-icon matPrefix svgIcon="heroicons_outline:eye"></mat-icon>
+                            <mat-label>{{ 'dev_tools_perm_read' | translate }}</mat-label>
+                            <input matInput formControlName="readAccess">
+                        </mat-form-field>
+                    </div>
+                    <div
+                        class="p-4 mt-6 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-blue-800 dark:text-blue-300 animate-fade-in flex items-center gap-3">
+                        <mat-icon svgIcon="heroicons_outline:information-circle"
+                            class="mt-0.5 flex-shrink-0 text-accent-600"></mat-icon>
+                        <span class="text-sm" *ngIf="step2Form.get('customize')?.value">{{
+                            'dev_tools_crud_gen_step3_hint' | translate }}</span>
+                        <span class="text-sm" *ngIf="!step2Form.get('customize')?.value">{{
+                            'dev_tools_crud_gen_step3_auto_message' | translate:{prefix:
+                            (step2Form.get('name')?.value || 'CRUD') | uppercase } }}</span>
+                    </div>
+                </form>
+            </div>
+            <div class="flex justify-between mt-8">
+                <button mat-stroked-button matStepperPrevious>{{ 'dev_tools_back_button' | translate }}</button>
+                <button mat-flat-button color="accent" matStepperNext>
+                    <span class="flex gap-2 items-center">
+                        <mat-icon svgIcon="heroicons_outline:arrow-right"></mat-icon>
+                        <span>{{ 'dev_tools_next_button' | translate }}</span>
+                    </span>
+                </button>
+            </div>
+        </ng-template>
+    </mat-step>
+
+    <!-- ====================================================================================================== -->
+    <!-- PASO 3: WIDGETS                                                                                        -->
+    <!-- ====================================================================================================== -->
+    <mat-step [stepControl]="step3Form">
+        <ng-template matStepLabel>{{ 'dev_tools_dash_gen_step3_label' | translate }}</ng-template>
+        <ng-template matStepContent>
+            <div class="p-6 border rounded-lg bg-card">
+                <div class="flex items-center gap-3">
+                    <mat-icon svgIcon="heroicons_outline:squares-plus" class="text-accent"></mat-icon>
+                    <h2 class="text-2xl font-semibold">{{ 'dev_tools_dash_gen_step3_title' | translate }}</h2>
+                </div>
+                <p class="text-secondary mt-1 mb-6">{{ 'dev_tools_dash_gen_step3_subtitle' | translate }}</p>
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-md font-medium text-secondary">{{ 'dev_tools_dash_gen_step3_widget_list_title' | translate }}</h3>
+                    <button mat-stroked-button color="accent" (click)="addWidget()"><mat-icon
+                            svgIcon="heroicons_outline:plus"></mat-icon> {{ 'dev_tools_add_widget_button' | translate
+                        }}</button>
+                </div>
+                <form [formGroup]="step3Form">
+                    <mat-accordion multi formArrayName="widgets">
+                        <mat-expansion-panel *ngFor="let widget of widgets.controls; let i=index" [formGroupName]="i"
+                            class="border">
+                            <mat-expansion-panel-header>
+                                <mat-panel-title class="flex items-center gap-3">
+                                    <span class="font-medium">{{ widget.get('widgetTitle')?.value || ('dev_tools_dash_gen_step3_widget_new_name' | translate)
+                                        }}</span>
+                                </mat-panel-title>
+                                <mat-panel-description class="items-center justify-end gap-4 text-sm text-secondary">
+                                    <span class="flex items-center gap-1.5"><mat-icon
+                                            class="icon-size-4">dashboard</mat-icon><span>{{
+                                            widget.get('widgetType')?.value | titlecase }}</span></span>
+                                    <span class="flex items-center gap-1.5"><mat-icon
+                                            class="icon-size-4">aspect_ratio</mat-icon><span>{{
+                                            widget.get('widgetSize')?.value | titlecase }}</span></span>
+                                    <button mat-icon-button color="warn"
+                                        (click)="removeWidget(i); $event.stopPropagation()"
+                                        [matTooltip]="'dev_tools_dash_gen_step3_widget_remove_tooltip' | translate"><mat-icon>delete</mat-icon></button>
+                                </mat-panel-description>
+                            </mat-expansion-panel-header>
+
+                            <div class="pt-4 space-y-6">
+                                <!-- General -->
+                                <div>
+                                    <h4 class="font-medium text-secondary mb-3">{{ 'dev_tools_dash_gen_step3_widget_general_config_title' | translate }}</h4>
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                                        <mat-form-field class="lg:col-span-2" appearance="outline"
+                                            subscriptSizing="dynamic"><mat-label>{{ 'dev_tools_dash_gen_step3_widget_title_label' | translate }}</mat-label><input
+                                                matInput formControlName="widgetTitle" required></mat-form-field>
+                                        <mat-form-field appearance="outline"
+                                            subscriptSizing="dynamic"><mat-label>{{ 'dev_tools_dash_gen_step3_widget_type_label' | translate }}</mat-label><mat-select
+                                                formControlName="widgetType"><mat-option
+                                                    *ngFor="let type of widgetTypeChoices" [value]="type">{{type |
+                                                    titlecase}}</mat-option></mat-select></mat-form-field>
+                                        <mat-form-field appearance="outline"
+                                            subscriptSizing="dynamic"><mat-label>{{ 'dev_tools_dash_gen_step3_widget_size_label' | translate }}</mat-label><mat-select
+                                                formControlName="widgetSize"><mat-option
+                                                    *ngFor="let size of widgetSizeChoices" [value]="size">{{size |
+                                                    titlecase}}</mat-option></mat-select></mat-form-field>
+                                    </div>
+                                </div>
+
+                                <!-- Endpoint -->
+                                <div class="pt-4 border-t">
+                                    <h4 class="font-medium text-secondary mb-3">{{ 'dev_tools_dash_gen_step3_widget_data_source_title' | translate }}</h4>
+                                    <mat-form-field class="w-full" appearance="outline" subscriptSizing="dynamic">
+                                        <mat-label>{{ 'dev_tools_dash_gen_step3_widget_endpoint_label' | translate }}</mat-label>
+                                        <input matInput formControlName="widgetEndpoint"
+                                            placeholder="ej: matriculados-por-actividad" required>
+                                        <mat-hint>{{ 'dev_tools_dash_gen_step3_widget_endpoint_hint_prefix' | translate }} '{{ statsApiPrefix }}' {{ 'dev_tools_dash_gen_step3_widget_endpoint_hint_suffix' | translate }}</mat-hint>
+                                    </mat-form-field>
+                                </div>
+
+                                <!-- Filtros -->
+                                <div class="pt-4 border-t">
+                                    <div class="flex items-start gap-4">
+                                        <mat-slide-toggle formControlName="hasFilters" color="accent"
+                                            class="mt-1"></mat-slide-toggle>
+                                        <div>
+                                            <p class="font-medium">{{ 'dev_tools_dash_gen_step3_widget_add_filters_toggle' | translate }}</p>
+                                            <p class="text-sm text-secondary">{{ 'dev_tools_dash_gen_step3_widget_add_filters_subtitle' | translate }}</p>
+                                        </div>
+                                    </div>
+                                    <div *ngIf="widget.get('hasFilters')?.value"
+                                        class="pl-4 mt-4 space-y-4 animate-fade-in">
+
+                                        <div formArrayName="filters" class="overflow-auto rounded-lg border">
+                                            <table mat-table [dataSource]="dataSources[i]" class="w-full">
+                                                <ng-container matColumnDef="viewValue">
+                                                    <th mat-header-cell *matHeaderCellDef
+                                                        class="bg-gray-100 dark:bg-gray-700/50 uppercase text-xs">{{ 'dev_tools_dash_gen_step3_widget_filter_text_column' | translate }}</th>
+                                                    <td mat-cell *matCellDef="let filter" [formGroup]="filter"
+                                                        class="!p-2">
+                                                        <mat-form-field class="w-full" appearance="outline"
+                                                            subscriptSizing="dynamic">
+                                                            <input matInput formControlName="viewValue" required
+                                                                [placeholder]="'dev_tools_dash_gen_step3_widget_filter_text_placeholder' | translate">
+                                                        </mat-form-field>
+                                                    </td>
+                                                </ng-container>
+
+                                                <ng-container matColumnDef="value">
+                                                    <th mat-header-cell *matHeaderCellDef
+                                                        class="bg-gray-100 dark:bg-gray-700/50 uppercase text-xs">{{ 'dev_tools_dash_gen_step3_widget_filter_value_column' | translate }}</th>
+                                                    <td mat-cell *matCellDef="let filter" [formGroup]="filter"
+                                                        class="!p-2">
+                                                        <mat-form-field class="w-full" appearance="outline"
+                                                            subscriptSizing="dynamic">
+                                                            <input matInput formControlName="value"
+                                                                [placeholder]="'dev_tools_dash_gen_step3_widget_filter_value_placeholder' | translate">
+                                                        </mat-form-field>
+                                                    </td>
+                                                </ng-container>
+
+                                                <ng-container matColumnDef="actions">
+                                                    <th mat-header-cell *matHeaderCellDef
+                                                        class="bg-gray-100 dark:bg-gray-700/50"></th>
+                                                    <td mat-cell *matCellDef="let filter; let j=index">
+                                                        <button mat-icon-button color="warn"
+                                                            (click)="removeFilter(i, j)" [matTooltip]="'dev_tools_dash_gen_step3_widget_filter_remove_tooltip' | translate">
+                                                            <mat-icon>delete</mat-icon>
+                                                        </button>
+                                                    </td>
+                                                </ng-container>
+
+                                                <tr mat-header-row *matHeaderRowDef="['viewValue', 'value', 'actions']">
+                                                </tr>
+                                                <tr mat-row
+                                                    *matRowDef="let row; columns: ['viewValue', 'value', 'actions'];">
+                                                </tr>
+                                            </table>
+                                        </div>
+                                        <button mat-stroked-button type="button" (click)="addFilter(i)">
+                                            <mat-icon>add</mat-icon> {{ 'dev_tools_add_option_button' | translate }}
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </mat-expansion-panel>
+                    </mat-accordion>
+                </form>
+            </div>
+            <div class="flex justify-between mt-8">
+                <button mat-stroked-button matStepperPrevious>{{ 'dev_tools_back_button' | translate }}</button>
+                <button mat-flat-button color="accent" matStepperNext [disabled]="step3Form.invalid"> <span
+                        class="flex gap-2 items-center">
+                        <mat-icon svgIcon="heroicons_outline:arrow-right"></mat-icon>
+                        <span>{{ 'dev_tools_next_button' | translate }}</span>
+                    </span>
+                </button>
+            </div>
+        </ng-template>
+    </mat-step>
+
+    <!-- ====================================================================================================== -->
+    <!-- PASO 4: REVISIÓN Y GENERACIÓN                                                                          -->
+    <!-- ====================================================================================================== -->
+    <mat-step>
+        <ng-template matStepLabel>{{ 'dev_tools_dash_gen_step4_label' | translate }}</ng-template>
+        <ng-template matStepContent>
+            <div class="p-6 border rounded-lg bg-card">
+                <div class="flex items-center gap-3">
+                    <mat-icon svgIcon="heroicons_outline:document-check" class="text-accent"></mat-icon>
+                    <h2 class="text-2xl font-semibold">{{ 'dev_tools_dash_gen_step4_review_title' | translate }}</h2>
+                </div>
+                <p class="text-secondary mt-1 mb-6">{{ 'dev_tools_dash_gen_step4_review_subtitle' | translate }}</p>
+
+                <div class="p-6 rounded-lg bg-gray-50 dark:bg-gray-800/50 space-y-8">
+                    <div>
+                        <h3 class="text-lg font-semibold border-b pb-2 mb-4 text-accent-600 dark:text-accent-400">
+                            {{ 'dev_tools_dash_gen_step4_section_general_title' | translate }}</h3>
+                        <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3">
+                            <div class="flex flex-col">
+                                <dt class="font-medium text-secondary">{{ 'dev_tools_dash_gen_step4_review_filename' | translate }}</dt>
+                                <dd class="font-mono">{{ step1Form.value.fileName }}</dd>
+                            </div>
+                            <div class="flex flex-col">
+                                <dt class="font-medium text-secondary">{{ 'dev_tools_dash_gen_step4_review_pagetitle' | translate }}</dt>
+                                <dd>{{ step1Form.value.pageTitle }}</dd>
+                            </div>
+                            <div class="flex flex-col">
+                                <dt class="font-medium text-secondary">{{ 'dev_tools_dash_gen_step4_review_navgroup' | translate }}</dt>
+                                <dd>{{ getNavGroupName() }}</dd>
+                            </div>
+                            <div class="flex flex-col">
+                                <dt class="font-medium text-secondary">{{ 'dev_tools_dash_gen_step4_review_navicon' | translate }}</dt>
+                                <dd>{{ step1Form.value.navIcon || ('dev_tools_none' | translate) }}</dd>
+                            </div>
+                            <div class="flex flex-col">
+                                <dt class="font-medium text-secondary">{{ 'dev_tools_dash_gen_step4_review_showinmenu' | translate }}</dt>
+                                <dd>{{ step1Form.value.showInMenu ? ('dev_tools_yes' | translate) : ('dev_tools_no' | translate) }}</dd>
+                            </div>
+                        </dl>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold border-b pb-2 mb-4 text-accent-600 dark:text-accent-400">
+                            {{ 'dev_tools_dash_gen_step4_section_security_title' | translate }}</h3>
+                        <dl>
+                            <dt class="font-medium text-secondary">{{ 'dev_tools_dash_gen_step4_review_read_permission' | translate }}</dt>
+                            <dd class="font-mono text-sm">{{ step2Form.value.customize ? (step2Form.value.readAccess ||
+                                ('dev_tools_dash_gen_step4_review_public_permission' | translate)) : autoReadAccess }}</dd>
+                        </dl>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold border-b pb-2 mb-4 text-accent-600 dark:text-accent-400">
+                            {{ 'dev_tools_dash_gen_step4_section_widgets_title' | translate }} ({{ widgets.controls.length }})</h3>
+                        <div class="space-y-4">
+                            <div *ngFor="let widget of widgets.value; let i = index"
+                                class="p-3 border rounded-md bg-white dark:bg-gray-900">
+                                <p class="font-semibold">{{ i + 1 }}. {{ widget.widgetTitle }}</p>
+                                <p class="text-sm text-secondary">{{ 'dev_tools_dash_gen_step4_review_widget_type' | translate }} <span
+                                        class="font-medium text-gray-700 dark:text-gray-300">{{ widget.widgetType |
+                                        titlecase }}</span> | {{ 'dev_tools_dash_gen_step4_review_widget_size' | translate }} <span
+                                        class="font-medium text-gray-700 dark:text-gray-300">{{ widget.widgetSize |
+                                        titlecase }}</span></p>
+                                <p class="text-sm text-secondary font-mono">{{ 'dev_tools_dash_gen_step4_review_widget_endpoint' | translate }} {{ statsApiPrefix }}{{
+                                    widget.widgetEndpoint }}</p>
+                                <div *ngIf="widget.hasFilters && widget.filters.length > 0" class="mt-2">
+                                    <p class="text-sm font-medium text-secondary">{{ 'dev_tools_dash_gen_step4_review_widget_filters' | translate }}</p>
+                                    <ul class="list-disc list-inside text-sm pl-2">
+                                        <li *ngFor="let filter of widget.filters">"{{ filter.viewValue }}" ({{ 'dev_tools_dash_gen_step4_review_widget_filter_api_label' | translate }} {{
+                                            filter.value || 'all' }})</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="flex justify-between mt-6">
+                <button mat-stroked-button matStepperPrevious>{{ 'dev_tools_back_button' | translate }}</button>
+                <button mat-flat-button color="warn" [disabled]="isGenerating" (click)="generate()">
+                    <span class="flex items-center gap-2">
+                        <mat-progress-spinner *ngIf="isGenerating" [diameter]="20"
+                            mode="indeterminate"></mat-progress-spinner>
+                        <mat-icon *ngIf="!isGenerating" svgIcon="heroicons_outline:bolt"></mat-icon>
+                        <span>{{ 'dev_tools_generate_dashboard_button' | translate }}</span>
+                    </span>
+                </button>
+            </div>
+        </ng-template>
+    </mat-step>
+
+</mat-stepper>

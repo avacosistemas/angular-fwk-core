@@ -1,0 +1,238 @@
+<form *ngIf="form" #formDirective="ngForm" class="dynamicFormDiv grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
+    [formGroup]="form" novalidate>
+
+    <div *ngFor="let field of fields; let i = index" class="dynamicFieldDiv" [class]="field.cssClass || ''" [ngClass]="{
+                'hidden': field.controlType === 'hidden' || field.options?.hidden,
+                'sm:col-span-1 lg:col-span-1': field.colSpan === 1,
+                'sm:col-span-2 lg:col-span-2': field.colSpan === 2,
+                'sm:col-span-2 lg:col-span-3': field.colSpan === 3,
+                'col-span-full': !field.colSpan || field.colSpan === 4
+            }">
+
+        <ng-container [ngSwitch]="field.controlType">
+            <fwk-url-input *ngSwitchCase="'url_input'" class="w-full" [config]="field" [formControlName]="field.key"
+                [errorMessage]="(form.get(field.key)?.invalid && form.get(field.key)?.touched) ? getMessageErrorValidation(field) : null"
+                [cdkFocusInitial]="i === firstFocusableFieldIndex">
+            </fwk-url-input>
+
+            <fwk-custom-datepicker *ngSwitchCase="'datepicker'" class="w-full" [field]="field"
+                [formControlName]="field.key"
+                [errorMessage]="(form.get(field.key)?.invalid && form.get(field.key)?.touched) ? getMessageErrorValidation(field) : null"
+                [cdkFocusInitial]="i === firstFocusableFieldIndex">
+            </fwk-custom-datepicker>
+
+            <fwk-custom-datepicker *ngSwitchCase="'datetimepicker'" class="w-full" [field]="field"
+                [formControlName]="field.key"
+                [errorMessage]="(form.get(field.key)?.invalid && form.get(field.key)?.touched) ? getMessageErrorValidation(field) : null"
+                [cdkFocusInitial]="i === firstFocusableFieldIndex">
+            </fwk-custom-datepicker>
+            
+            <fwk-custom-datepicker *ngSwitchCase="'timepicker'" class="w-full" [field]="field"
+                [formControlName]="field.key"
+                [errorMessage]="(form.get(field.key)?.invalid && form.get(field.key)?.touched) ? getMessageErrorValidation(field) : null"
+                [cdkFocusInitial]="i === firstFocusableFieldIndex">
+            </fwk-custom-datepicker>
+
+            <fwk-file *ngSwitchCase="'file'" class="w-full" [field]="field" [formControlName]="field.key"
+                [errorMessage]="(form.get(field.key)?.invalid && form.get(field.key)?.touched) ? getMessageErrorValidation(field) : null"
+                [cdkFocusInitial]="i === firstFocusableFieldIndex">
+            </fwk-file>
+
+            <fwk-disclaimer *ngSwitchCase="'disclaimer'" class="w-full" [field]="field" [formControlName]="field.key"
+                [errorMessage]="(form.get(field.key)?.invalid && form.get(field.key)?.touched) ? getMessageErrorValidation(field) : null">
+            </fwk-disclaimer>
+
+            <fwk-float *ngSwitchCase="'float'" class="w-full" [field]="field" [formControlName]="field.key"
+                [errorMessage]="(form.get(field.key)?.invalid && form.get(field.key)?.touched) ? getMessageErrorValidation(field) : null"
+                [cdkFocusInitial]="i === firstFocusableFieldIndex">
+            </fwk-float>
+
+            <fwk-pick-list *ngSwitchCase="'pick-list'" class="w-full" [formControlName]="field.key"
+                [elementLabel]="field.options?.elementLabel" [titleFrom]="field.options?.titleFrom"
+                [titleTo]="field.options?.titleTo" [allItems]="field.options?.fromData"
+                [errorMessage]="(form.get(field.key)?.invalid && form.get(field.key)?.touched) ? getMessageErrorValidation(field) : null">
+            </fwk-pick-list>
+
+            <fwk-simple-pick-list *ngSwitchCase="'simple-pick-list'" class="w-full" [formControlName]="field.key"
+                [elementLabel]="field.options?.elementLabel" [titleFrom]="field.options?.titleFrom"
+                [errorMessage]="(form.get(field.key)?.invalid && form.get(field.key)?.touched) ? getMessageErrorValidation(field) : null"
+                [allItems]="field.options?.fromData"></fwk-simple-pick-list>
+
+            <fwk-autocomplete *ngSwitchCase="'autocomplete'" class="w-full" [formControlName]="field.key"
+                [config]="field" [searchTermInterface]="searchTermInterface(field)"
+                [errorMessage]="(form.get(field.key)?.invalid && form.get(field.key)?.touched) ? getMessageErrorValidation(field) : null"
+                [cdkFocusInitial]="i === firstFocusableFieldIndex">
+            </fwk-autocomplete>
+
+            <fwk-autocomplete-desplegable *ngSwitchCase="'autocomplete-desplegable'" class="w-full"
+                [formControlName]="field.key" [config]="field" [searchTermInterface]="searchTermInterface(field)"
+                [errorMessage]="(form.get(field.key)?.invalid && form.get(field.key)?.touched) ? getMessageErrorValidation(field) : null"
+                [cdkFocusInitial]="i === firstFocusableFieldIndex">
+            </fwk-autocomplete-desplegable>
+
+            <fwk-color-picker *ngSwitchCase="'color_picker'" class="w-full" [formControlName]="field.key"
+                [config]="getColorPickerConfig(field)"
+                [errorMessage]="(form.get(field.key)?.invalid && form.get(field.key)?.touched) ? getMessageErrorValidation(field) : null"
+                [cdkFocusInitial]="i === firstFocusableFieldIndex">
+            </fwk-color-picker>
+
+            <fwk-tags *ngSwitchCase="'tags'" class="w-full" [config]="field" [formControlName]="field.key"
+                [errorMessage]="(form.get(field.key)?.invalid && form.get(field.key)?.touched) ? getMessageErrorValidation(field) : null"
+                [cdkFocusInitial]="i === firstFocusableFieldIndex">
+            </fwk-tags>
+
+            <fwk-icon-picker *ngSwitchCase="'icon-picker'" class="w-full" [label]="field.label"
+                [namespace]="field.options?.['namespace'] || 'heroicons_outline'" [formControlName]="field.key"
+                [errorMessage]="(form.get(field.key)?.invalid && form.get(field.key)?.touched) ? getMessageErrorValidation(field) : null"
+                [cdkFocusInitial]="i === firstFocusableFieldIndex">
+            </fwk-icon-picker>
+
+            <div *ngSwitchCase="'radio-button'">
+                <mat-label class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
+                    {{ field.label }}
+                </mat-label>
+                <mat-radio-group class="flex flex-wrap gap-x-4 pt-1" [formControlName]="field.key"
+                    [cdkFocusInitial]="i === firstFocusableFieldIndex">
+                    <mat-radio-button *ngFor="let option of field.options?.options" [value]="option.value"
+                        class="dark:text-gray-200">
+                        {{ option.label }}
+                    </mat-radio-button>
+                </mat-radio-group>
+            </div>
+
+            <mat-form-field *ngSwitchCase="'textarea'" class="w-full" appearance="outline">
+                <mat-label>{{ field.label }}</mat-label>
+                <textarea matInput [formControlName]="field.key" [id]="field.key" 
+                    [rows]="field.options?.rows || 3"
+                    [cdkTextareaAutosize]="field.options?.autosize || false"
+                    [cdkAutosizeMinRows]="field.options?.minRows || 3"
+                    style="resize: vertical;"
+                    [cdkFocusInitial]="i === firstFocusableFieldIndex"></textarea>
+                <mat-error *ngIf="form.get(field.key)?.invalid">{{ getMessageErrorValidation(field) }}</mat-error>
+            </mat-form-field>
+
+            <mat-form-field *ngSwitchCase="'textbox'" [floatLabel]="getFloatLabel(field)" class="w-full"
+                appearance="outline">
+                <mat-label>{{ field.options?.matLabel ?? field.label }}</mat-label>
+                <input matInput [formControlName]="field.key" [id]="field.key" [type]="field.options?.type ?? 'text'"
+                    [cdkFocusInitial]="i === firstFocusableFieldIndex">
+                <mat-error *ngIf="form.get(field.key)?.invalid">{{ getMessageErrorValidation(field) }}</mat-error>
+            </mat-form-field>
+
+            <mat-form-field *ngSwitchCase="'number'" [floatLabel]="getFloatLabel(field)" class="w-full"
+                appearance="outline">
+                <mat-label>{{ field.options?.matLabel ?? field.label }}</mat-label>
+                <input matInput [min]="field.minValue" [formControlName]="field.key" [id]="field.key" type="number"
+                    [cdkFocusInitial]="i === firstFocusableFieldIndex">
+                <span *ngIf="field.options?.prefix" matPrefix>{{ field.options.prefix }}&nbsp;</span>
+                <mat-error *ngIf="form.get(field.key)?.invalid">{{ getMessageErrorValidation(field) }}</mat-error>
+            </mat-form-field>
+
+            <mat-form-field *ngSwitchCase="'password'" class="w-full" appearance="outline">
+                <mat-label>{{ field.label }}</mat-label>
+                <input matInput [formControlName]="field.key" [id]="field.key" type="password"
+                    [cdkFocusInitial]="i === firstFocusableFieldIndex">
+                <mat-error *ngIf="form.get(field.key)?.invalid">{{ getMessageErrorValidation(field) }}</mat-error>
+            </mat-form-field>
+
+            <mat-form-field *ngSwitchCase="'email'" class="w-full" appearance="outline">
+                <mat-label>{{ field.label }}</mat-label>
+                <input matInput [formControlName]="field.key" [id]="field.key" type="email"
+                    [cdkFocusInitial]="i === firstFocusableFieldIndex">
+                <mat-error *ngIf="form.get(field.key)?.invalid">{{ getMessageErrorValidation(field) }}</mat-error>
+            </mat-form-field>
+
+            <mat-form-field *ngSwitchCase="'date_read'" class="w-full" appearance="outline">
+                <mat-label>{{ field.label }}</mat-label>
+                <input matInput [formControlName]="field.key" [id]="field.key" readonly>
+            </mat-form-field>
+
+            <mat-form-field *ngSwitchCase="'date_time_read'" class="w-full" appearance="outline">
+                <mat-label>{{ field.label }}</mat-label>
+                <input matInput [formControlName]="field.key" [id]="field.key" readonly>
+            </mat-form-field>
+
+            <mat-form-field *ngSwitchCase="'select'" [floatLabel]="getFloatLabel(field)" class="w-full"
+                appearance="outline">
+                <mat-label>{{ field.options?.matLabel ?? field.label }}</mat-label>
+                <mat-select [formControlName]="field.key" (selectionChange)="onChangeSelect($event)"
+                    [cdkFocusInitial]="i === firstFocusableFieldIndex">
+                    <mat-option *ngFor="let data of field.options?.fromData"
+                        [value]="field.options?.elementValue ? data[field.options.elementValue] : data">
+                        {{ field.options?.elementLabel ? data[field.options.elementLabel] : data }}
+                    </mat-option>
+                </mat-select>
+                <mat-error *ngIf="form.get(field.key)?.invalid">{{ getMessageErrorValidation(field) }}</mat-error>
+            </mat-form-field>
+
+            <mat-checkbox *ngSwitchCase="'checkbox'" [formControlName]="field.key" [id]="field.key"
+                [cdkFocusInitial]="i === firstFocusableFieldIndex">{{ field.label }}</mat-checkbox>
+
+            <div *ngSwitchCase="'label'" class="flex items-center h-full pt-2 pb-4">
+                <span class="text-gray-700 dark:text-gray-300 font-medium">
+                    {{ field.label || field.value }}
+                </span>
+            </div>
+
+            <div *ngSwitchCase="'header'"
+                class="col-span-full text-lg font-bold text-secondary border-b bg-gray-100 dark:bg-gray-700 text-center py-1 my-2 rounded-md">
+                {{ field.label }}
+            </div>
+
+            <fwk-alert *ngSwitchCase="'alert'" class="col-span-full my-2"
+                [type]="field.options?.['type'] || 'info'"
+                [appearance]="field.options?.['appearance'] || 'soft'"
+                [showIcon]="field.options?.['showIcon'] !== false">
+                {{ (field.labelKey || field.label) | translate:field.value }}
+            </fwk-alert>
+
+            <div *ngSwitchCase="'chip_list'">
+                <mat-label class="block font-medium text-secondary mb-2">{{ field.label }}</mat-label>
+                <mat-chip-listbox>
+                    <mat-chip *ngFor="let data of field.value">{{ data }}</mat-chip>
+                </mat-chip-listbox>
+            </div>
+
+            <div *ngSwitchCase="'image_preview_src'" class="flex flex-col items-center justify-center w-full py-2">
+                <!-- <label *ngIf="field.label" class="block text-sm font-medium text-secondary mb-3">
+                    {{ field.label }}
+                </label> -->
+                <ng-container *ngIf="form.get(field.key)?.value || field.value; else noImagePreview">
+                    <img [src]="'data:image/jpeg;base64,' + (form.get(field.key)?.value || field.value)"
+                        alt="Previsualización"
+                        class="border-2 dark:border-gray-700 transition-transform hover:scale-105 duration-300"
+                        [ngClass]="{
+                            'rounded-full aspect-square object-cover': field.options?.shape === 'circle',
+                            'rounded-xl aspect-square object-cover': field.options?.shape === 'square',
+                            'rounded-md max-w-full h-auto object-contain': !field.options?.shape || field.options?.shape === 'original'
+                        }"
+                        [style.width]="field.options?.width || (field.options?.shape !== 'original' ? '150px' : '100%')"
+                        [style.height]="field.options?.height || (field.options?.shape !== 'original' ? '150px' : 'auto')"
+                        [style.object-fit]="field.options?.objectFit || 'cover'" />
+                </ng-container>
+
+                <ng-template #noImagePreview>
+                    <div class="flex flex-col items-center justify-center bg-gray-100 dark:bg-gray-800 border-2 border-dashed border-gray-300 dark:border-gray-600 text-gray-400"
+                        [ngClass]="{
+                            'rounded-full aspect-square': field.options?.shape === 'circle',
+                            'rounded-xl aspect-square': field.options?.shape === 'square',
+                            'rounded-lg w-full h-48': !field.options?.shape || field.options?.shape === 'original'
+                        }"
+                        [style.width]="field.options?.width || (field.options?.shape !== 'original' ? '150px' : '100%')"
+                        [style.height]="field.options?.height || (field.options?.shape !== 'original' ? '150px' : 'auto')">
+
+                        <mat-icon class="icon-size-8 mb-1" svgIcon="heroicons_outline:photo"></mat-icon>
+                        <span class="text-[10px] font-medium uppercase tracking-wider">{{ 'image_no_image' | translate }}</span>
+                    </div>
+                </ng-template>
+            </div>
+
+            <div *ngSwitchCase="'html_editor'">
+                <fwk-html-editor class="w-full" [formControlName]="field.key" [field]="field"
+                    [errorMessage]="(form.get(field.key)?.invalid && form.get(field.key)?.touched) ? getMessageErrorValidation(field) : null">
+                </fwk-html-editor>
+            </div>
+
+        </ng-container>
+    </div>
+</form>

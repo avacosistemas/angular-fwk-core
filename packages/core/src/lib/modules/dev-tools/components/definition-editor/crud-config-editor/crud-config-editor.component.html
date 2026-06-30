@@ -1,0 +1,89 @@
+<div *ngIf="crudConfigForm" [formGroup]="crudConfigForm">
+    <div class="space-y-4">
+        <h4 class="text-md font-medium text-secondary">{{ 'dev_tools_def_editor_crud_data_behavior_title' | translate }}</h4>
+
+        <div class="flex items-center justify-between py-4 border-b last:border-b-0">
+            <div>
+                <p class="font-medium">{{ 'dev_tools_def_editor_crud_pag_server' | translate }}</p>
+                <p class="text-sm text-secondary mt-1">{{ 'dev_tools_def_editor_crud_pag_server_tooltip' | translate }}
+                </p>
+            </div>
+            <mat-slide-toggle formControlName="serverPagination" color="accent"></mat-slide-toggle>
+        </div>
+
+        <div class="flex items-center justify-between py-4 border-b last:border-b-0">
+            <div>
+                <p class="font-medium">{{ 'dev_tools_def_editor_crud_filter_memory' | translate }}</p>
+                <p class="text-sm text-secondary mt-1">{{ 'dev_tools_def_editor_crud_filter_memory_tooltip' | translate
+                    }}</p>
+            </div>
+            <mat-slide-toggle formControlName="filterInMemory" color="accent"></mat-slide-toggle>
+        </div>
+
+        <div class="flex items-center justify-between py-4 border-b last:border-b-0">
+            <div>
+                <p class="font-medium">{{ 'dev_tools_def_editor_crud_no_search' | translate }}</p>
+                <p class="text-sm text-secondary mt-1">{{ 'dev_tools_def_editor_crud_no_search_tooltip' | translate }}
+                </p>
+            </div>
+            <mat-slide-toggle formControlName="cancelInitSearch" color="accent"></mat-slide-toggle>
+        </div>
+    </div>
+
+    <hr class="my-8">
+
+    <div>
+        <h4 class="text-md font-medium text-secondary mb-4">{{ 'dev_tools_def_editor_crud_ui_presentation_title' | translate }}</h4>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
+            <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                <mat-label>{{ 'dev_tools_def_editor_crud_pagesize' | translate }}</mat-label>
+                <input matInput type="number" formControlName="pageSize">
+            </mat-form-field>
+            <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                <mat-label>{{ 'dev_tools_def_editor_crud_dialog_width_label' | translate }}</mat-label>
+                <input matInput formControlName="dialogWidth" placeholder="ej: 600px">
+            </mat-form-field>
+        </div>
+    </div>
+
+    <hr class="my-8">
+
+    <div>
+        <h4 class="text-md font-medium text-secondary mb-4">{{ 'dev_tools_def_editor_crud_export_title' | translate }}</h4>
+        <div formGroupName="exportCsv" class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+            <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                <mat-label>{{ 'dev_tools_def_editor_crud_enable_export' | translate }}</mat-label>
+                <mat-select formControlName="type">
+                    <mat-option value="none">{{ 'dev_tools_def_editor_crud_export_opt_disabled' | translate }}</mat-option>
+                    <mat-option value="client">{{ 'dev_tools_def_editor_crud_export_opt_client' | translate }}</mat-option>
+                    <mat-option value="server">{{ 'dev_tools_def_editor_crud_export_opt_server' | translate }}</mat-option>
+                </mat-select>
+            </mat-form-field>
+
+            <ng-container *ngIf="crudConfigForm.get('exportCsv.type').value !== 'none'">
+                <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                    <mat-label>{{ 'dev_tools_def_editor_crud_export_filename_label' | translate }}</mat-label>
+                    <input matInput formControlName="csvExportFileName">
+                </mat-form-field>
+
+                <mat-form-field *ngIf="crudConfigForm.get('exportCsv.type').value === 'server'" appearance="outline"
+                    subscriptSizing="dynamic">
+                    <mat-label>{{ 'dev_tools_def_editor_crud_export_ws_endpoint_label' | translate }}</mat-label>
+                    <input matInput formControlName="ws">
+                    <mat-hint>{{ 'dev_tools_def_editor_crud_export_ws_endpoint_hint' | translate }}</mat-hint>
+                </mat-form-field>
+            </ng-container>
+        </div>
+    </div>
+
+    <div class="flex justify-end mt-8 pt-6 border-t">
+        <button mat-flat-button color="accent" (click)="saveCrudConfig()"
+            [disabled]="crudConfigForm.pristine || crudConfigForm.invalid || isSaving">
+            <span class="flex items-center gap-2">
+                <mat-progress-spinner *ngIf="isSaving" [diameter]="20" mode="indeterminate"></mat-progress-spinner>
+                <mat-icon *ngIf="!isSaving" svgIcon="heroicons_outline:check-circle"></mat-icon>
+                <span>{{ 'dev_tools_def_editor_crud_save_button' | translate }}</span>
+            </span>
+        </button>
+    </div>
+</div>

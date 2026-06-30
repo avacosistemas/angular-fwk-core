@@ -1,0 +1,27 @@
+<div class="flex flex-col">
+    <div mat-dialog-title class="flex items-center">
+        <mat-icon *ngIf="data.icon?.show" [svgIcon]="data.icon.name!" [ngClass]="{
+                'text-primary': data.icon.color === 'primary',
+                'text-accent': data.icon.color === 'accent',
+                'text-warn': data.icon.color === 'warn',
+                'text-green-600': data.icon.color === 'success',
+                'text-blue-600': data.icon.color === 'info'
+            }">
+        </mat-icon>
+        <span class="ml-2 text-2xl font-semibold">{{ data.title }}</span>
+    </div>
+
+    <div mat-dialog-content class="py-6 text-secondary" [innerHTML]="data.message"></div>
+
+    <div mat-dialog-actions class="flex items-center justify-end space-x-2">
+        <button *ngIf="data.actions?.cancel?.show" mat-button [disabled]="isSubmitting" (click)="onReject()">
+            {{ data.actions?.cancel?.label || ('modal_button_cancel' | translate) }}
+        </button>
+        <button *ngIf="data.actions?.confirm?.show" mat-flat-button [color]="data.actions?.confirm?.color"
+            [disabled]="isSubmitting" (click)="onSubmit()">
+            <span *ngIf="!isSubmitting">{{ data.actions?.confirm?.label || ('modal_button_confirm' | translate)
+                }}</span>
+            <mat-progress-spinner *ngIf="isSubmitting" [diameter]="24" mode="indeterminate"></mat-progress-spinner>
+        </button>
+    </div>
+</div>

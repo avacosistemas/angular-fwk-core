@@ -1,0 +1,25 @@
+<div class="flex items-center w-full px-0 py-1 bg-transparent border-none">
+    <nav class="flex overflow-x-auto no-scrollbar" [attr.aria-label]="'breadcrumb_aria_label' | translate">
+        <ol class="inline-flex items-center space-x-1">
+            <li *ngFor="let bc of breadcrumbs; let last = last" class="inline-flex items-center">
+                <div class="flex items-center">
+                    <a *ngIf="!last"
+                       [routerLink]="bc.url"
+                       [queryParams]="bc.queryParams"
+                       class="inline-flex items-center text-md font-medium text-secondary hover:text-primary transition-colors duration-200 cursor-pointer whitespace-nowrap">
+                        {{ bc.label }}
+                    </a>
+
+                    <span *ngIf="last" 
+                          class="text-md font-medium text-secondary whitespace-nowrap opacity-60">
+                        {{ bc.label }}
+                    </span>
+
+                    <mat-icon *ngIf="!last"
+                              class="text-gray-400 mx-0.5 scale-75 icon-size-4"
+                              [svgIcon]="'heroicons_outline:chevron-right'"></mat-icon>
+                </div>
+            </li>
+        </ol>
+    </nav>
+</div>

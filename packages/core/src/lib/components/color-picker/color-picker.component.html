@@ -1,0 +1,49 @@
+<div class="flex items-center w-full space-x-2 relative">
+    <mat-form-field class="flex-auto" appearance="outline">
+        <mat-label>{{ config.label }}</mat-label>
+
+        <span
+            matPrefix
+            class="w-6 h-6 mr-2 rounded border"
+            [style.background]="colorControl.value">
+        </span>
+
+        <input
+            matInput
+            [formControl]="colorControl"
+            [id]="config.key"
+            [required]="config.required"
+            [readonly]="config.disabled"
+            [errorStateMatcher]="matcher"
+            (blur)="onTouched()">
+
+        <mat-error *ngIf="colorControl.hasError('required') && !errorMessage">
+            {{ config.options?.requiredMessage || ('color_picker_required' | translate) }}
+        </mat-error>
+        <mat-error *ngIf="colorControl.hasError('invalidValue') && !errorMessage">
+            {{ config.options?.invalidValueMessage || ('color_picker_invalid' | translate) }}
+        </mat-error>
+
+        <mat-error *ngIf="errorMessage">{{ errorMessage }}</mat-error>
+    </mat-form-field>
+
+    <button
+        type="button"
+        mat-icon-button
+        class="flex-none"
+        [disabled]="config.disabled || colorControl.disabled"
+        (click)="openPicker()"
+        [matTooltip]="'color_picker_tooltip' | translate"
+        [style.background]="colorControl.value">
+        <mat-icon [svgIcon]="'heroicons_outline:swatch'"></mat-icon>
+    </button>
+
+    <input
+        #pickerDirectiveElement
+        class="hidden"
+        [colorPicker]="colorControl.value ?? '#FFFFFF'"
+        (colorPickerChange)="updateColor($event)"
+        [cpDialogDisplay]="'popup'"
+        [cpAlphaChannel]="'disabled'" />
+
+</div>

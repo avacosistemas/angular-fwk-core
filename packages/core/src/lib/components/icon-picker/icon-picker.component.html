@@ -1,0 +1,42 @@
+<mat-form-field class="w-full" appearance="outline" subscriptSizing="dynamic">
+    <mat-label>{{ label }}</mat-label>
+    
+    <mat-select [value]="_value" (selectionChange)="onSelectionChange($event.value)" [disabled]="isDisabled" [errorStateMatcher]="matcher">
+        
+        <mat-select-trigger *ngIf="_value">
+            <div class="flex items-center gap-2">
+                <mat-icon [svgIcon]="namespace + ':' + _value"></mat-icon>
+                <span class="font-mono text-sm">{{ _value }}</span>
+            </div>
+        </mat-select-trigger>
+
+        <div class="px-3 pt-2 sticky top-0 bg-white dark:bg-gray-700 z-10">
+            <input matInput #searchInput [formControl]="searchControl" [placeholder]="'icon_picker_search_placeholder' | translate" class="w-full" (keydown)="$event.stopPropagation()">
+        </div>
+
+        <mat-option [value]="null">
+            <div class="flex items-center gap-2 h-full">
+                <mat-icon class="text-secondary" svgIcon="heroicons_outline:x-circle"></mat-icon>
+                {{ 'icon_picker_none_option' | translate }}
+            </div>
+        </mat-option>
+        
+        <mat-option *ngFor="let icon of filteredIcons$ | async" [value]="icon">
+            <div class="flex items-center gap-2 h-full">
+                <mat-icon [svgIcon]="namespace + ':' + icon"></mat-icon>
+                <span class="font-mono text-sm">{{ icon }}</span>
+            </div>
+        </mat-option>
+
+    </mat-select>
+
+    <button *ngIf="_value && showClearButton && !isDisabled"
+        mat-icon-button
+        matSuffix
+        (click)="clearSelection($event)"
+        [matTooltip]="'icon_picker_clear_tooltip' | translate">
+        <mat-icon svgIcon="heroicons_outline:x-mark"></mat-icon>
+    </button>
+
+    <mat-error *ngIf="errorMessage">{{ errorMessage }}</mat-error>
+</mat-form-field>

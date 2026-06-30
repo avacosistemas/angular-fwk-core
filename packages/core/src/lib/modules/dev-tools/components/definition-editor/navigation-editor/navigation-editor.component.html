@@ -1,0 +1,53 @@
+<div *ngIf="navForm" [formGroup]="navForm">
+    <mat-form-field appearance="outline" subscriptSizing="dynamic" class="mb-4 w-full">
+        <mat-label>{{ 'dev_tools_def_editor_nav_page_title' | translate }}</mat-label>
+        <input matInput formControlName="pageTitle" required>
+        <mat-error>{{ 'dev_tools_def_editor_nav_page_title_error' | translate }}</mat-error>
+    </mat-form-field>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>{{ 'dev_tools_def_editor_nav_menu_title' | translate }}</mat-label>
+            <input matInput formControlName="title" required>
+            <mat-error>{{ 'dev_tools_def_editor_nav_menu_title_error' | translate }}</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>{{ 'dev_tools_def_editor_nav_group' | translate }}</mat-label>
+            <mat-select formControlName="group" required>
+                <mat-option *ngFor="let group of navigationGroups" [value]="group.id">{{ group.title }}</mat-option>
+            </mat-select>
+            <mat-error>{{ 'dev_tools_def_editor_nav_group_error' | translate }}</mat-error>
+        </mat-form-field>
+
+        <div class="md:col-span-2">
+            <fwk-icon-picker formControlName="icon" [label]="'dev_tools_def_editor_nav_icon' | translate"
+                namespace="heroicons_outline">
+            </fwk-icon-picker>
+        </div>
+    </div>
+
+    <hr class="my-6">
+
+    <div class="flex items-start gap-4">
+        <div class="flex-shrink-0 mt-1">
+            <mat-slide-toggle formControlName="showInMenu" color="accent"></mat-slide-toggle>
+        </div>
+        <div>
+            <p class="font-medium">{{ 'dev_tools_def_editor_nav_show_in_menu' | translate }}</p>
+            <p class="text-sm text-secondary mt-1">
+                {{ 'dev_tools_def_editor_nav_show_in_menu_subtitle' | translate }}
+            </p>
+        </div>
+    </div>
+
+    <div class="flex justify-end mt-8 pt-6 border-t">
+        <button mat-flat-button color="accent" (click)="saveNavigation()"
+            [disabled]="navForm.pristine || navForm.invalid || isSaving">
+            <span class="flex items-center gap-2">
+                <mat-progress-spinner *ngIf="isSaving" [diameter]="20" mode="indeterminate"></mat-progress-spinner>
+                <mat-icon *ngIf="!isSaving" svgIcon="heroicons_outline:check-circle"></mat-icon>
+                <span>{{ 'dev_tools_def_editor_nav_save_button' | translate }}</span>
+            </span>
+        </button>
+    </div>
+</div>

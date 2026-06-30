@@ -1,0 +1,122 @@
+<div class="fwk-vertical-navigation-wrapper">
+
+    <!-- Header -->
+    <div class="fwk-vertical-navigation-header">
+        <ng-content select="[fwkVerticalNavigationHeader]"></ng-content>
+    </div>
+
+    <!-- Content -->
+    <div
+        class="fwk-vertical-navigation-content"
+        fwkScrollbar
+        [fwkScrollbarOptions]="{wheelPropagation: inner, suppressScrollX: true}"
+        #navigationContent>
+
+        <!-- Content header -->
+        <div class="fwk-vertical-navigation-content-header">
+            <ng-content select="[fwkVerticalNavigationContentHeader]"></ng-content>
+        </div>
+
+        <!-- Items -->
+        <ng-container *ngFor="let item of navigation; trackBy: trackByFn">
+
+            <!-- Skip the hidden items -->
+            <ng-container *ngIf="(item.hidden && !item.hidden(item)) || !item.hidden">
+
+                <!-- Aside -->
+                <ng-container *ngIf="item.type === 'aside'">
+                    <fwk-vertical-navigation-aside-item
+                        [item]="item"
+                        [name]="name"
+                        [activeItemId]="activeAsideItemId"
+                        [autoCollapse]="autoCollapse"
+                        [skipChildren]="true"
+                        (click)="toggleAside(item)"></fwk-vertical-navigation-aside-item>
+                </ng-container>
+
+                <!-- Basic -->
+                <ng-container *ngIf="item.type === 'basic'">
+                    <fwk-vertical-navigation-basic-item
+                        [item]="item"
+                        [name]="name"></fwk-vertical-navigation-basic-item>
+                </ng-container>
+
+                <!-- Collapsable -->
+                <ng-container *ngIf="item.type === 'collapsable'">
+                    <fwk-vertical-navigation-collapsable-item
+                        [item]="item"
+                        [name]="name"
+                        [autoCollapse]="autoCollapse"></fwk-vertical-navigation-collapsable-item>
+                </ng-container>
+
+                <!-- Divider -->
+                <ng-container *ngIf="item.type === 'divider'">
+                    <fwk-vertical-navigation-divider-item
+                        [item]="item"
+                        [name]="name"></fwk-vertical-navigation-divider-item>
+                </ng-container>
+
+                <!-- Group -->
+                <ng-container *ngIf="item.type === 'group'">
+                    <fwk-vertical-navigation-group-item
+                        [item]="item"
+                        [name]="name"
+                        [autoCollapse]="autoCollapse"></fwk-vertical-navigation-group-item>
+                </ng-container>
+
+                <!-- Spacer -->
+                <ng-container *ngIf="item.type === 'spacer'">
+                    <fwk-vertical-navigation-spacer-item
+                        [item]="item"
+                        [name]="name"></fwk-vertical-navigation-spacer-item>
+                </ng-container>
+
+            </ng-container>
+
+        </ng-container>
+
+        <!-- Content footer -->
+        <div class="fwk-vertical-navigation-content-footer">
+            <ng-content select="[fwkVerticalNavigationContentFooter]"></ng-content>
+        </div>
+
+    </div>
+
+    <!-- Footer -->
+    <div class="fwk-vertical-navigation-footer">
+        <ng-content select="[fwkVerticalNavigationFooter]"></ng-content>
+    </div>
+
+</div>
+
+<!-- Aside -->
+<ng-container *ngIf="activeAsideItemId">
+    <div
+        class="fwk-vertical-navigation-aside-wrapper"
+        fwkScrollbar
+        [fwkScrollbarOptions]="{wheelPropagation: false, suppressScrollX: true}"
+        [@fadeInLeft]="position === 'left'"
+        [@fadeInRight]="position === 'right'"
+        [@fadeOutLeft]="position === 'left'"
+        [@fadeOutRight]="position === 'right'">
+
+        <!-- Items -->
+        <ng-container *ngFor="let item of navigation; trackBy: trackByFn">
+
+            <!-- Skip the hidden items -->
+            <ng-container *ngIf="(item.hidden && !item.hidden(item)) || !item.hidden">
+
+                <!-- Aside -->
+                <ng-container *ngIf="item.type === 'aside' && item.id === activeAsideItemId">
+                    <fwk-vertical-navigation-aside-item
+                        [item]="item"
+                        [name]="name"
+                        [autoCollapse]="autoCollapse"></fwk-vertical-navigation-aside-item>
+                </ng-container>
+
+            </ng-container>
+
+        </ng-container>
+
+    </div>
+</ng-container>

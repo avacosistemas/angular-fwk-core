@@ -1,0 +1,7 @@
+<a *ngIf="fullURL"
+   [href]="fullURL"
+   target="_blank"
+   mat-icon-button
+   [matTooltip]="('dynamic_url_go_to' | translate:{url: fullURL})">
+    <mat-icon [svgIcon]="'heroicons_outline:link'"></mat-icon>
+</a>

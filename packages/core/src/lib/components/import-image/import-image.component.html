@@ -1,0 +1,36 @@
+<div class="flex items-center w-full space-x-2">
+    <mat-form-field class="flex-auto" appearance="outline">
+        <mat-label>{{ config.label }}</mat-label>
+        <input
+            matInput
+            [value]="_value"
+            (input)="onInput($event)"
+            (blur)="onTouch()"
+            [required]="config.required"
+            [disabled]="isDisabled"
+            [placeholder]="config.label">
+    </mat-form-field>
+
+    <!-- 
+    CK FINGER
+    <button
+        mat-icon-button
+        type="button"
+        class="flex-none"
+        (click)="clickOpenCkfinder()"
+        [disabled]="isDisabled"
+        [matTooltip]="(config.options?.resourceType === 'Images' ? 'import_image_select_image_tooltip' : 'import_image_select_file_tooltip') | translate">
+        <mat-icon [svgIcon]="config.icon || 'heroicons_outline:photo'"></mat-icon>
+    </button> -->
+
+    <button
+        *ngIf="config.showPreview"
+        mat-icon-button
+        type="button"
+        class="flex-none"
+        (click)="clickOpenUrl()"
+        [disabled]="isDisabled || !_value"
+        [matTooltip]="'import_image_preview_tooltip' | translate">
+        <mat-icon [svgIcon]="config.iconOpenUrl || 'heroicons_outline:eye'"></mat-icon>
+    </button>
+</div>

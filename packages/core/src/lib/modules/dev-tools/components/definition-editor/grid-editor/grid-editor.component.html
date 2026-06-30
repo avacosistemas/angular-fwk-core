@@ -1,0 +1,289 @@
+<div *ngIf="gridForm" [formGroup]="gridForm">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div>
+            <div class="flex justify-between items-center mb-2">
+                <h4 class="font-semibold text-secondary">{{ 'dev_tools_def_editor_grid_cols_def' | translate }}</h4>
+                <button mat-stroked-button (click)="addGridColumn()">
+                    <mat-icon>add</mat-icon>{{ 'dev_tools_add_column_button' | translate }}
+                </button>
+            </div>
+            <div class="overflow-auto rounded-lg border max-h-96">
+                <table mat-table [dataSource]="gridColumnsDataSource" class="w-full" formArrayName="columnsDef">
+                    <ng-container matColumnDef="key">
+                        <th mat-header-cell *matHeaderCellDef>{{ 'dev_tools_def_editor_grid_col_key' | translate }}</th>
+                        <td mat-cell *matCellDef="let col" class="font-mono text-sm pr-4">{{ col.value.columnDef }}</td>
+                    </ng-container>
+                    <ng-container matColumnDef="columnNameValue">
+                        <th mat-header-cell *matHeaderCellDef>{{ 'dev_tools_def_editor_grid_col_label' | translate }}
+                        </th>
+                        <td mat-cell *matCellDef="let col; let i = index" [formGroupName]="i">
+                            <mat-form-field class="w-full" appearance="outline" subscriptSizing="dynamic">
+                                <input matInput formControlName="columnNameValue">
+                            </mat-form-field>
+                        </td>
+                    </ng-container>
+                    <ng-container matColumnDef="actions">
+                        <th mat-header-cell *matHeaderCellDef></th>
+                        <td mat-cell *matCellDef="let col; let i = index">
+                            <button mat-icon-button (click)="editGridColumn(i)"
+                                [matTooltip]="'dev_tools_edit_tooltip' | translate">
+                                <mat-icon>edit</mat-icon>
+                            </button>
+                            <button mat-icon-button color="warn" (click)="removeGridColumn(i)"
+                                [matTooltip]="'dev_tools_delete_tooltip' | translate">
+                                <mat-icon>delete</mat-icon>
+                            </button>
+                        </td>
+                    </ng-container>
+                    <tr mat-header-row *matHeaderRowDef="gridColDisplayedColumns"></tr>
+                    <tr mat-row *matRowDef="let row; let i = index; columns: gridColDisplayedColumns;"
+                        [formGroupName]="i"></tr>
+                </table>
+            </div>
+        </div>
+
+        <div>
+            <h4 class="font-semibold text-secondary mb-2">{{ 'dev_tools_def_editor_grid_cols_visible' | translate }}
+            </h4>
+            <div class="overflow-auto rounded-lg border min-h-[200px] max-h-96" cdkDropList
+                (cdkDropListDropped)="dropDisplayedColumn($event)">
+                <div *ngFor="let colDef of gridColumnsDef.controls" cdkDrag
+                    class="flex items-center p-2 border-b last:border-b-0 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-grab">
+                    <mat-icon cdkDragHandle class="mr-2 text-secondary cursor-move">drag_indicator</mat-icon>
+                    <mat-checkbox [checked]="isColumnDisplayed(colDef.value.columnDef)"
+                        (change)="toggleColumnDisplay(colDef.value.columnDef, $event.checked)"
+                        class="font-mono text-sm">
+                        {{ colDef.value.columnDef }}
+                    </mat-checkbox>
+                </div>
+                <div *ngIf="gridColumnsDef.controls.length === 0"
+                    class="flex flex-col items-center justify-center p-8 text-secondary">
+                    <mat-icon class="icon-size-10" svgIcon="heroicons_outline:table-cells"></mat-icon>
+                    <p class="mt-2 text-center"
+                        [innerHTML]="'dev_tools_def_editor_grid_no_cols' | translate | sanitizeHtml"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <hr class="my-8">
+
+    <div>
+        <h3 class="text-lg font-medium text-secondary mb-6">{{ 'dev_tools_def_editor_grid_general_options_section_title' | translate }}</h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-6">
+            <div class="space-y-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="font-medium">{{ 'dev_tools_def_editor_grid_group_actions_toggle' | translate }}</p>
+                        <p class="text-sm text-secondary mt-1">{{ 'dev_tools_def_editor_grid_group_actions_tooltip' | translate }}</p>
+                    </div>
+                    <mat-slide-toggle formControlName="groupActions" color="accent"></mat-slide-toggle>
+                </div>
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="font-medium">{{ 'dev_tools_def_editor_crud_enable_delete' | translate }}</p>
+                        <p class="text-sm text-secondary mt-1">{{ 'dev_tools_def_editor_crud_enable_delete_tooltip' |
+                            translate }}</p>
+                    </div>
+                    <mat-slide-toggle formControlName="deleteAction" color="accent"></mat-slide-toggle>
+                </div>
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="font-medium">{{ 'dev_tools_def_editor_crud_enable_sort' | translate }}</p>
+                        <p class="text-sm text-secondary mt-1">{{ 'dev_tools_def_editor_crud_enable_sort_tooltip' |
+                            translate }}</p>
+                    </div>
+                    <mat-slide-toggle formControlName="sortAllColumns" color="accent"></mat-slide-toggle>
+                </div>
+            </div>
+            <div>
+                <mat-form-field appearance="outline" subscriptSizing="dynamic" class="w-full">
+                    <mat-label>{{ 'dev_tools_def_editor_grid_action_cell_class_label' | translate }}</mat-label>
+                    <input matInput formControlName="actionCellClass" [placeholder]="'dev_tools_def_editor_grid_action_cell_class_placeholder' | translate">
+                </mat-form-field>
+            </div>
+        </div>
+    </div>
+
+    <hr class="my-8">
+
+    <div>
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-medium text-secondary">{{ 'dev_tools_def_editor_grid_actions_title' | translate }}
+            </h3>
+            <button mat-stroked-button (click)="addAction()">
+                <mat-icon>add</mat-icon>{{ 'dev_tools_add_action_button' | translate }}
+            </button>
+        </div>
+
+        <mat-accordion multi formArrayName="actions">
+            <mat-expansion-panel *ngFor="let action of gridActions.controls; let i=index" [formGroupName]="i"
+                class="border">
+                <mat-expansion-panel-header>
+                    <mat-panel-title class="flex items-center gap-3">
+                        <mat-icon *ngIf="action.get('icon')?.value" [svgIcon]="
+                                action.get('icon')?.value.startsWith('heroicons_outline:')
+                                ? action.get('icon')?.value
+                                : 'heroicons_outline:' + action.get('icon')?.value
+                            "></mat-icon>
+                        <span class="font-medium">{{ action.get('actionNameValue')?.value || ('dev_tools_def_editor_grid_action_new_name' | translate) }}</span>
+                    </mat-panel-title>
+                    <mat-panel-description class="items-center justify-end gap-2">
+                        <span>{{ action.get('actionType')?.value }}</span>
+                        <button mat-icon-button color="warn" (click)="removeAction(i); $event.stopPropagation()"
+                            [matTooltip]="'dev_tools_delete_tooltip' | translate">
+                            <mat-icon>delete</mat-icon>
+                        </button>
+                    </mat-panel-description>
+                </mat-expansion-panel-header>
+
+                <div class="pt-4 space-y-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4">
+                        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                            <mat-label>{{ 'dev_tools_def_editor_grid_action_name' | translate }}</mat-label>
+                            <input matInput formControlName="actionNameValue" required>
+                        </mat-form-field>
+                        <fwk-icon-picker formControlName="icon" [label]="'dev_tools_def_editor_nav_icon' | translate"
+                            namespace="heroicons_outline"></fwk-icon-picker>
+                        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                            <mat-label>{{ 'dev_tools_def_editor_grid_action_type' | translate }}</mat-label>
+                            <mat-select formControlName="actionType">
+                                <mat-option *ngFor="let type of actionTypeChoices" [value]="type">{{type}}</mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                            <mat-label>{{ 'dev_tools_def_editor_grid_action_permission' | translate }}</mat-label>
+                            <input matInput formControlName="actionSecurity"
+                                [placeholder]="'dev_tools_def_editor_grid_action_permission_placeholder' | translate">
+                        </mat-form-field>
+                    </div>
+
+                    <ng-container [ngSwitch]="action.get('actionType')?.value">
+                        <div *ngSwitchCase="'redirect'" formGroupName="redirect"
+                            class="pl-4 border-l-2 border-sky-500 space-y-4 animate-fade-in">
+                            <h4 class="font-medium text-secondary -ml-4 pl-4">{{
+                                'dev_tools_def_editor_grid_redirect_title' | translate }}</h4>
+                            <mat-form-field class="w-full" appearance="outline" subscriptSizing="dynamic">
+                                <mat-label>{{ 'dev_tools_def_editor_grid_redirect_url' | translate }}</mat-label>
+                                <input matInput formControlName="url"
+                                    [placeholder]="'dev_tools_def_editor_grid_redirect_url_placeholder' | translate">
+                            </mat-form-field>
+                            <mat-slide-toggle formControlName="openTab">{{ 'dev_tools_def_editor_grid_redirect_new_tab'
+                                | translate }}</mat-slide-toggle>
+                        </div>
+
+                        <div *ngSwitchDefault formGroupName="ws"
+                            class="pl-4 border-l-2 border-sky-500 space-y-4 animate-fade-in">
+                            <div *ngIf="action.get('actionType')?.value === 'form_modal'" class="space-y-4 -ml-4 pl-4">
+                                <button mat-stroked-button color="accent" (click)="defineActionForm(i)">
+                                    <mat-icon>dynamic_form</mat-icon>
+                                    {{ 'dev_tools_def_editor_grid_action_define_form_button' | translate }} ({{ getActionFormDefCount(i) }} {{ 'dev_tools_def_editor_grid_action_fields_label' | translate }})
+                                </button>
+                                <mat-slide-toggle formControlName="showSubmitContinue" class="mt-2 block">{{ 'dev_tools_def_editor_grid_action_show_save_continue' | translate }}</mat-slide-toggle>
+                                <h4 class="font-medium text-secondary pt-4 border-t">{{ 'dev_tools_def_editor_grid_action_ws_config_modal_title' | translate }}</h4>
+                            </div>
+                            <h4 *ngIf="action.get('actionType')?.value !== 'form_modal'"
+                                class="font-medium text-secondary -ml-4 pl-4">{{ 'dev_tools_def_editor_grid_action_ws_config_title' | translate }}</h4>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                                    <mat-label>{{ 'dev_tools_def_editor_grid_action_ws_method_label' | translate }}</mat-label>
+                                    <mat-select formControlName="method">
+                                        <mat-option *ngFor="let m of httpMethods" [value]="m">{{m}}</mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                                <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                                    <mat-label>{{ 'dev_tools_def_editor_grid_action_ws_endpoint_label' | translate }}</mat-label>
+                                    <input matInput formControlName="url"
+                                        [required]="action.get('actionType')?.value !== 'form_modal'">
+                                </mat-form-field>
+                                <div class="flex items-center sm:col-span-2">
+                                    <mat-slide-toggle formControlName="isRelative"
+                                        [matTooltip]="'dev_tools_def_editor_grid_action_ws_relative_path_tooltip' | translate">
+                                        {{ 'dev_tools_def_editor_grid_action_ws_relative_path_label' | translate }}
+                                    </mat-slide-toggle>
+                                </div>
+                            </div>
+                        </div>
+                    </ng-container>
+
+                    <div class="pt-4 mt-4 border-t space-y-4">
+                        <div *ngIf="action.get('actionType')?.value && action.get('actionType')?.value !== 'redirect'">
+                            <h4 class="font-medium text-secondary mb-2">{{ 'dev_tools_def_editor_grid_action_qs_title' | translate }}</h4>
+                            <div formArrayName="querystring" class="space-y-2">
+                                <div *ngFor="let qs of getQuerystringArray(i).controls; let j=index" [formGroupName]="j"
+                                    class="grid grid-cols-12 gap-x-4 items-center">
+                                    <mat-form-field class="col-span-5" appearance="outline"
+                                        subscriptSizing="dynamic"><mat-label>{{ 'dev_tools_def_editor_grid_action_qs_name_label' | translate }}</mat-label><input
+                                            matInput formControlName="paramKey" required></mat-form-field>
+                                    <mat-form-field class="col-span-5" appearance="outline"
+                                        subscriptSizing="dynamic"><mat-label>{{ 'dev_tools_def_editor_grid_action_qs_value_label' | translate }}</mat-label><mat-select formControlName="paramValue"
+                                            required><mat-option *ngFor="let field of gridColumnsDef.controls"
+                                                [value]="field.value.columnDef">{{ field.value.columnDef
+                                                }}</mat-option></mat-select></mat-form-field>
+                                    <button mat-icon-button color="warn" (click)="removeQuerystringParam(i, j)"
+                                        [matTooltip]="'dev_tools_def_editor_grid_action_qs_remove_tooltip' | translate"
+                                        class="col-span-2 justify-self-start"><mat-icon>delete</mat-icon></button>
+                                </div>
+                            </div>
+                            <button mat-stroked-button type="button" (click)="addQuerystringParam(i)"
+                                class="mt-2"><mat-icon>add</mat-icon> {{ 'dev_tools_def_editor_grid_action_qs_add_button' | translate }}</button>
+                        </div>
+
+                        <div class="pt-4 mt-4 border-t">
+                            <mat-checkbox formControlName="confirm">{{ 'dev_tools_def_editor_grid_action_confirm_check' | translate }}</mat-checkbox>
+                            <mat-form-field *ngIf="action.get('confirm').value" class="w-full mt-2 animate-fade-in"
+                                appearance="outline" subscriptSizing="dynamic">
+                                <mat-label>{{ 'dev_tools_def_editor_grid_action_confirm_message_label' | translate }}</mat-label>
+                                <input matInput formControlName="confirmMessage" [placeholder]="'dev_tools_def_editor_grid_action_confirm_message_placeholder' | translate">
+                            </mat-form-field>
+                        </div>
+
+                        <div formGroupName="displayCondition" class="pt-4 mt-4 border-t">
+                            <h4 class="font-medium text-secondary mb-2">{{ 'dev_tools_def_editor_grid_action_display_condition_title' | translate }}</h4>
+                            <div formGroupName="expression"
+                                class="grid grid-cols-1 sm:grid-cols-3 gap-x-4 items-center">
+                                <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                                    <mat-label>{{ 'dev_tools_def_editor_grid_action_condition_field_label' | translate }}</mat-label>
+                                    <mat-select formControlName="key">
+                                        <mat-option [value]="null">{{ 'dev_tools_def_editor_grid_action_condition_no_condition' | translate }}</mat-option>
+                                        <mat-option *ngFor="let field of gridColumnsDef.controls"
+                                            [value]="field.value.columnDef">{{ field.value.columnDef }}</mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                                <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                                    <mat-label>{{ 'dev_tools_def_editor_grid_action_condition_comparator_label' | translate }}</mat-label>
+                                    <mat-select formControlName="compare">
+                                        <mat-option *ngFor="let comp of behaviorComparators" [value]="comp">{{ comp
+                                            }}</mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                                <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                                    <mat-label>{{ 'dev_tools_def_editor_grid_action_condition_value_label' | translate }}</mat-label>
+                                    <input matInput formControlName="value" [placeholder]="'dev_tools_def_editor_grid_action_condition_value_placeholder' | translate">
+                                </mat-form-field>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </mat-expansion-panel>
+        </mat-accordion>
+
+        <div *ngIf="gridActions.controls.length === 0"
+            class="text-center p-8 text-secondary rounded-lg border-2 border-dashed">
+            <mat-icon class="icon-size-10" svgIcon="heroicons_outline:bolt"></mat-icon>
+            <p class="mt-2">{{ 'dev_tools_def_editor_grid_no_actions' | translate }}</p>
+        </div>
+    </div>
+
+    <div class="flex justify-end mt-8 pt-6 border-t">
+        <button mat-flat-button color="accent" (click)="saveGridConfig()"
+            [disabled]="gridForm.pristine || gridForm.invalid || isSaving">
+            <span class="flex items-center gap-2">
+                <mat-progress-spinner *ngIf="isSaving" [diameter]="20" mode="indeterminate"></mat-progress-spinner>
+                <mat-icon *ngIf="!isSaving" svgIcon="heroicons_outline:check-circle"></mat-icon>
+                <span>{{ 'dev_tools_def_editor_grid_save_button' | translate }}</span>
+            </span>
+        </button>
+    </div>
+</div>

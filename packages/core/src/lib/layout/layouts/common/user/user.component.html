@@ -1,0 +1,53 @@
+<div *ngIf="user?.name">
+    <button mat-button [matTooltip]="'user_menu_tooltip' | translate" class="h-10 rounded-full px-2"
+        [matMenuTriggerFor]="userActions">
+        <div class="flex items-center justify-center gap-1">
+            <span class="relative items-center flex ">
+                <img class="w-7 h-7 rounded-full" *ngIf="showAvatar && user.avatar" [src]="user.avatar"
+                    alt="User avatar">
+                <mat-icon *ngIf="!showAvatar || !user.avatar"
+                    [svgIcon]="'heroicons_outline:user'"></mat-icon>
+            </span>
+            <span class="text-md font-medium">{{user.name}}</span>
+        </div>
+    </button>
+
+    <mat-menu [xPosition]="'before'" #userActions="matMenu" class="rounded-xl">
+        <div mat-menu-item (click)="$event.stopPropagation();" class="focus:outline-none">
+            <mat-button-toggle-group class="flex" [value]="config.scheme" (change)="setScheme($event.value)">
+                <mat-button-toggle [value]="'light'" [matTooltip]="'theme_light_tooltip' | translate" class="flex-1">
+                    <mat-icon [svgIcon]="'heroicons_outline:sun'" class="mr-0"></mat-icon>
+                </mat-button-toggle>
+                <mat-button-toggle [value]="'dark'" [matTooltip]="'theme_dark_tooltip' | translate" class="flex-1">
+                    <mat-icon [svgIcon]="'heroicons_outline:moon'" class="mr-0"></mat-icon>
+                </mat-button-toggle>
+                <mat-button-toggle [value]="'auto'" [matTooltip]="'theme_auto_tooltip' | translate" class="flex-1">
+                    <mat-icon [svgIcon]="'heroicons_outline:computer-desktop'" class="mr-0"></mat-icon>
+                </mat-button-toggle>
+            </mat-button-toggle-group>
+        </div>
+
+        <mat-divider class="my-2"></mat-divider>
+
+        <button mat-menu-item (click)="toggleFullscreen()">
+            <mat-icon [svgIcon]="'heroicons_outline:arrows-pointing-out'"></mat-icon>
+            <span>{{ 'fullscreen_toggle' | translate }}</span>
+        </button>
+
+        <ng-container *ngIf="showChangePassword">
+            <mat-divider class="my-2"></mat-divider>
+            <button mat-menu-item (click)="changePassword()">
+                <mat-icon [svgIcon]="'heroicons_outline:key'"></mat-icon>
+                <span>{{ 'change_password' | translate }}</span>
+            </button>
+        </ng-container>
+
+        <mat-divider class="my-2"></mat-divider>
+        
+        <button mat-menu-item (click)="signOut()" class="text-red-500 dark:text-red-400">
+            <mat-icon [svgIcon]="'heroicons_outline:arrow-right-on-rectangle'"
+                class="text-red-500 dark:text-red-400"></mat-icon>
+            <span>{{ 'sign_out_button' | translate }}</span>
+        </button>
+    </mat-menu>
+</div>

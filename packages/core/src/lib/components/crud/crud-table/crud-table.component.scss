@@ -1,0 +1,243 @@
+.h-65vh {
+    height: 65vh;
+}
+
+.h-72vh {
+    height: 72vh;
+}
+
+.relative {
+    position: relative;
+}
+
+.absolute {
+    position: absolute;
+}
+
+.inset-0 {
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+}
+
+.z-10 {
+    z-index: 10;
+}
+
+.bg-card {
+    background-color: var(--fwk-bg-card);
+}
+
+.transition-opacity {
+    transition: opacity 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.text-nowrap {
+    white-space: nowrap !important;
+}
+
+.text-wrap {
+    white-space: normal !important;
+    word-break: break-word !important;
+    line-height: 1.4;
+}
+
+:host ::ng-deep {
+    --table-border: var(--fwk-border);
+    --row-hover-bg: var(--fwk-primary-100);
+    --header-bg: #f8fafc;
+}
+
+:host-context(.dark) ::ng-deep {
+    --table-border: var(--fwk-border-dark, rgba(255, 255, 255, 0.12));
+    --row-hover-bg: var(--fwk-primary-900);
+    --header-bg: var(--mat-paginator-container-background-color);
+}
+
+:host ::ng-deep {
+
+    .container-table {
+        display: block;
+        width: 100%;
+        overflow: auto;
+        background: var(--fwk-bg-card);
+
+        mat-table {
+            display: table !important;
+            width: 100% !important;
+            table-layout: auto !important;
+            border-collapse: collapse;
+            background: transparent;
+        }
+
+        .mat-mdc-header-row,
+        .mat-mdc-row {
+            display: table-row !important;
+        }
+
+        .mat-mdc-header-row {
+            background-color: var(--header-bg) !important;
+        }
+
+        .mat-mdc-header-cell,
+        .mat-mdc-cell {
+            display: table-cell !important;
+            vertical-align: middle;
+            border-bottom: 1px solid var(--table-border) !important;
+            padding: 12px 8px;
+            white-space: normal;
+            word-break: break-word;
+            min-width: 90px;
+
+            &:first-child {
+                padding-left: 18px !important;
+            }
+
+            &:last-child {
+                padding-right: 18px !important;
+            }
+        }
+    }
+
+    .mat-mdc-table .mdc-data-table__row:not(.mdc-data-table__row--selected):hover {
+        background-color: var(--row-hover-bg) !important;
+
+        &::before {
+            opacity: 0.5;
+        }
+    }
+
+    .mat-mdc-row.active-row {
+        background-color: var(--row-hover-bg) !important;
+
+        &::before {
+            opacity: 1;
+        }
+    }
+
+}
+
+:host-context(.dark) ::ng-deep .mat-mdc-table .mdc-data-table__row:hover .mat-mdc-cell {
+    color: var(--fwk-text-default-dark) !important;
+}
+
+:host ::ng-deep {
+
+    .column-action-table {
+        min-width: 50px !important;
+        width: 50px !important;
+        padding: 0px !important;
+        text-align: center;
+    }
+
+    .mat-mdc-checkbox {
+        display: block !important;
+    }
+
+    .mat-mdc-icon-button {
+        width: auto !important;
+        padding: 0 7px !important;
+        background-color: rgba(112, 118, 158, 0.09) !important;
+
+        &:hover {
+            background-color: rgba(112, 118, 158, 0.15) !important;
+        }
+    }
+
+    .mat-mdc-checkbox .mdc-form-field {
+        padding: 0px !important;
+    }
+
+    .mat-mdc-header-cell.text-center .mat-sort-header-container {
+        justify-content: center !important;
+    }
+
+    .mat-mdc-header-cell.text-right .mat-sort-header-container {
+        justify-content: flex-end !important;
+    }
+
+    .fit-content {
+        width: 1% !important;
+        white-space: nowrap !important;
+    }
+
+    .text-center {
+        text-align: center !important;
+    }
+
+    .text-right {
+        text-align: right !important;
+    }
+
+    .text-left {
+        text-align: left !important;
+    }
+
+    .mat-mdc-paginator-range-actions {
+        gap: 5px;
+    }
+}
+
+.relative.group-table-scroll {
+    position: relative;
+    overflow: hidden;
+}
+
+.scroll-shadow-zone {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 40px;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+
+    transition: all 0.3s ease;
+
+    mat-icon {
+        color: white;
+        background: rgba(0, 0, 0, 0.5);
+        border-radius: 50%;
+        width: 24px;
+        height: 24px;
+        font-size: 24px;
+        opacity: 0;
+        transition: opacity 0.2s;
+    }
+
+    &:hover {
+        width: 50px;
+
+        mat-icon {
+            opacity: 1;
+        }
+    }
+}
+
+.left-zone {
+    left: 0;
+    background: linear-gradient(to right, rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.1) 40%, rgba(0, 0, 0, 0) 100%);
+}
+
+.right-zone {
+    right: 0;
+    background: linear-gradient(to left, rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.1) 40%, rgba(0, 0, 0, 0) 100%);
+}
+
+:host-context(.dark),
+.dark .scroll-shadow-zone {
+    mat-icon {
+        color: black;
+    }
+
+    &.left-zone {
+        background: linear-gradient(to right, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0) 100%);
+    }
+
+    &.right-zone {
+        background: linear-gradient(to left, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0) 100%);
+    }
+}

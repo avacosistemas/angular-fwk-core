@@ -1,0 +1,75 @@
+<div class="flex flex-col w-full h-full max-h-[90vh] bg-card rounded-2xl overflow-hidden shadow-2xl">
+    <div class="flex items-center justify-between px-6 py-4 border-b bg-white dark:bg-gray-900 z-10">
+        <div class="flex items-center min-w-0 gap-4">
+            <div
+                class="flex items-center justify-center w-10 h-10 rounded-full bg-accent-50 dark:bg-accent-900/20 text-accent-600">
+                <mat-icon [svgIcon]="fileIcon"></mat-icon>
+            </div>
+
+            <div class="flex flex-col min-w-0">
+                <h2 class="text-lg font-semibold leading-tight truncate" [matTooltip]="data.fileName">
+                    {{ data.fileName }}
+                </h2>
+                <div class="flex items-center text-sm text-secondary truncate" *ngIf="data.fileUsername">
+                    <mat-icon class="icon-size-3.5 mr-1" svgIcon="heroicons_outline:user"></mat-icon>
+                    <span>{{ 'preview_uploaded_by' | translate:{username: data.fileUsername} }}</span>
+                </div>
+            </div>
+        </div>
+
+        <button mat-icon-button (click)="closeModal()"
+            class="ml-4 text-secondary hover:text-accent-500 transition-colors">
+            <mat-icon svgIcon="heroicons_outline:x-mark"></mat-icon>
+        </button>
+    </div>
+
+    <div class="flex-auto relative overflow-hidden bg-gray-50 dark:bg-gray-950 flex items-center justify-center w-[80vh] h-[65vh]">
+
+        <div *ngIf="isLoading"
+            class="absolute inset-0 flex flex-col items-center justify-center z-20 bg-gray-50/80 dark:bg-gray-900/80 backdrop-blur-sm">
+            <mat-spinner [diameter]="40"></mat-spinner>
+            <span class="mt-3 text-sm font-medium text-secondary animate-pulse">{{ 'preview_loading' | translate }}</span>
+        </div>
+
+        <div *ngIf="hasError" class="flex flex-col items-center text-center p-6 text-secondary">
+            <mat-icon class="icon-size-16 text-red-400 mb-4" svgIcon="heroicons_outline:exclamation-circle"></mat-icon>
+            <p class="text-lg font-semibold text-gray-800 dark:text-gray-200">{{ 'preview_load_error_title' | translate }}</p>
+            <p class="text-sm">{{ 'preview_load_error_description' | translate }}</p>
+        </div>
+
+        <ng-container *ngIf="!hasError">
+            <div *ngIf="isImageUrl; else iframeView"
+                class="w-full h-full flex items-center justify-center p-4 overflow-auto">
+                <div class="relative shadow-lg rounded bg-white image-checkerboard">
+                    <img [src]="sanitizedUrl" class="max-w-full max-h-[65vh] object-contain rounded block"
+                        alt="Vista previa" [class.opacity-0]="isLoading">
+                </div>
+            </div>
+
+            <ng-template #iframeView>
+                <iframe [src]="sanitizedUrl" class="w-full h-full border-0" (load)="onIframeLoad()">
+                </iframe>
+            </ng-template>
+        </ng-container>
+    </div>
+
+    <div class="flex items-center justify-between px-6 py-4 border-t bg-white dark:bg-gray-900">
+
+        <div class="hidden sm:flex flex-col text-xs text-secondary">
+            <span *ngIf="fileSize" class="font-medium">{{ 'preview_size_label' | translate:{size: fileSize} }}</span>
+            <span *ngIf="imageMeta" class="mt-0.5">{{ 'preview_dimensions_label' | translate:{width: imageMeta.width, height: imageMeta.height} }}</span>
+        </div>
+
+        <div class="flex items-center gap-3 ml-auto">
+            <button mat-stroked-button (click)="closeModal()" class="hidden sm:inline-flex">
+                {{ 'action_close' | translate }}
+            </button>
+            <a [href]="sanitizedDownloadUrl" [download]="data.fileName" target="_blank">
+                <button mat-flat-button color="accent">
+                    <mat-icon class="icon-size-5 mr-2" svgIcon="heroicons_outline:arrow-down-tray"></mat-icon>
+                    {{ 'preview_download_button' | translate }}
+                </button>
+            </a>
+        </div>
+    </div>
+</div>

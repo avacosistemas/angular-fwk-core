@@ -1,0 +1,127 @@
+<div class="flex h-full bg-white dark:bg-gray-800 shadow-lg overflow-hidden w-full">
+
+    <div class="flex flex-col border-r transition-all duration-300 ease-in-out"
+        [ngClass]="{
+        'w-1/4 min-w-[300px]': isSidebarOpen,
+        'w-0 min-w-0 p-0': !isSidebarOpen
+     }">
+
+        <div class="p-4 border-b flex-shrink-0" *ngIf="isSidebarOpen">
+            <h2 class="text-xl font-semibold">{{ 'dev_tools_def_editor_sidebar_title' | translate }}</h2>
+            <p class="text-sm text-secondary">{{ 'dev_tools_def_editor_sidebar_subtitle' | translate }}</p>
+
+            <mat-form-field class="w-full mt-4" appearance="outline" subscriptSizing="dynamic">
+                <mat-label>{{ 'dev_tools_def_editor_sidebar_search' | translate }}</mat-label>
+                <input matInput [(ngModel)]="listFilter" autocomplete="off">
+            </mat-form-field>
+        </div>
+
+        <div class="flex-auto overflow-y-auto relative" *ngIf="isSidebarOpen">
+            <div *ngIf="isLoadingList"
+                class="inset-0 top-0 z-10 flex items-center justify-center">
+                <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+            </div>
+
+            <mat-selection-list [multiple]="false" *ngIf="!isLoadingList">
+                <mat-list-option *ngFor="let def of definitions | filter:listFilter:'name'"
+                    (click)="selectDefinition(def)" [value]="def.id" [selected]="selectedDefinition?.id === def.id">
+                    {{ def.name }}
+                </mat-list-option>
+            </mat-selection-list>
+
+            <div *ngIf="!isLoadingList && (definitions | filter:listFilter:'name').length === 0"
+                class="flex flex-col items-center justify-center text-center p-8 text-secondary">
+                <mat-icon class="icon-size-12" svgIcon="heroicons_outline:document-magnifying-glass"></mat-icon>
+                <p class="mt-2 font-medium">{{ 'dev_tools_def_editor_sidebar_no_results_title' | translate }}</p>
+                <p class="text-sm">{{ 'dev_tools_def_editor_sidebar_no_results_subtitle' | translate }}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="flex flex-col relative transition-all duration-300 ease-in-out flex-1 min-w-0">
+
+        <div class="p-4 border-b flex items-center justify-between bg-gray-100 dark:bg-gray-800 min-h-[89px] flex-shrink-0">
+            <div class="flex items-center">
+                <button mat-icon-button (click)="toggleSidebar()" class="mr-3"
+                    [matTooltip]="(isSidebarOpen ? 'dev_tools_def_editor_panel_hide_tooltip' : 'dev_tools_def_editor_panel_show_tooltip') | translate">
+                    <mat-icon
+                        [svgIcon]="isSidebarOpen ? 'heroicons_outline:chevron-double-left' : 'heroicons_outline:chevron-double-right'"></mat-icon>
+                </button>
+
+                <div *ngIf="selectedDefinition; else noSelection">
+                    <h2 class="text-xl font-semibold">{{ selectedDefinition.name }}</h2>
+                    <p class="text-sm text-secondary font-mono">{{ selectedDefinition.id }}.def.ts</p>
+                </div>
+                <ng-template #noSelection>
+                    <div class="flex items-center text-secondary">
+                        <mat-icon svgIcon="heroicons_outline:arrow-left"></mat-icon>
+                        <span class="ml-2">{{ 'dev_tools_def_editor_header_no_selection' | translate }}</span>
+                    </div>
+                </ng-template>
+            </div>
+            
+            <div *ngIf="selectedDefinition">
+                <button mat-icon-button [matMenuTriggerFor]="editorMenu" [matTooltip]="'dev_tools_def_editor_sections_menu_tooltip' | translate">
+                    <mat-icon [svgIcon]="'heroicons_outline:bars-3'"></mat-icon>
+                </button>
+                <mat-menu #editorMenu="matMenu"  class="rounded-xl">
+                    <button mat-menu-item (click)="selectSection('overview')">
+                        <mat-icon svgIcon="heroicons_outline:home"></mat-icon>
+                        <span>{{ 'dev_tools_def_editor_section_overview_title' | translate }}</span>
+                    </button>
+                    <mat-divider></mat-divider>
+                    <button *ngFor="let section of availableSections" mat-menu-item (click)="selectSection(section.id)">
+                        <mat-icon [svgIcon]="section.icon"></mat-icon>
+                        <span>{{ section.title | translate }}</span>
+                    </button>
+                </mat-menu>
+            </div>
+        </div>
+
+        <div *ngIf="isLoadingDetail"
+            class="inset-0 top-0 z-10 flex flex-col items-center justify-center">
+            <mat-progress-bar mode="indeterminate" class="w-full"></mat-progress-bar>
+            <p class="mt-4 font-medium text-secondary">{{ 'dev_tools_def_editor_loading' | translate }}</p>
+        </div>
+
+        <div class="flex-auto overflow-y-auto p-6" *ngIf="selectedDefinition && !isLoadingDetail" [ngSwitch]="activeView" 
+                [ngClass]="{ 'bg-gray-100 dark:bg-gray-800': activeView === 'overview' }">
+
+            <ng-container *ngSwitchCase="'overview'">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 animate-fade-in">
+                    <div *ngFor="let section of availableSections"
+                        class="bg-white rounded-2xl p-6 dark:bg-gray-900 flex flex-col items-start cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-200 border"
+                        (click)="selectSection(section.id)">
+                        <mat-icon class="icon-size-10 text-accent" [svgIcon]="section.icon"></mat-icon>
+                        <h3 class="text-xl font-semibold mt-4">{{ section.title | translate }}</h3>
+                        <p class="text-secondary mt-1 text-sm flex-auto">{{ section.description | translate }}</p>
+                        <div class="text-accent font-medium mt-4 flex items-center">
+                            <span>{{ 'dev_tools_def_editor_section_edit_button' | translate }}</span>
+                            <mat-icon class="ml-1" svgIcon="heroicons_outline:arrow-right"></mat-icon>
+                        </div>
+                    </div>
+                </div>
+            </ng-container>
+
+            <ng-container *ngFor="let section of availableSections">
+                <div *ngSwitchCase="section.id" class="animate-fade-in">
+                    <div class="flex items-center gap-2 mb-4">
+                        <button mat-icon-button (click)="goBackToOverview()" [matTooltip]="'dev_tools_def_editor_back_to_overview_tooltip' | translate">
+                            <mat-icon svgIcon="heroicons_outline:arrow-left"></mat-icon>
+                        </button>
+                        <mat-icon class="icon-size-6 text-accent" [svgIcon]="section.icon"></mat-icon>
+                        <h3 class="text-xl font-semibold">{{ section.title | translate }}</h3>
+                    </div>
+                    
+                    <fwk-navigation-editor *ngIf="section.id === 'navigation'" [definitionId]="selectedDefinition.id" [definitionData]="definitionData" [navigationGroups]="navigationGroups"></fwk-navigation-editor>
+                    <fwk-security-editor *ngIf="section.id === 'security'" [definitionId]="selectedDefinition.id" [securityData]="definitionData?.security" [isDashboardDef]="!!definitionData?.dashboardConfig"></fwk-security-editor>
+                    <fwk-crud-config-editor *ngIf="section.id === 'crud-config'" [definitionId]="selectedDefinition.id" [crudConfigData]="definitionData"></fwk-crud-config-editor>
+                    <fwk-grid-editor *ngIf="section.id === 'grid'" [definitionId]="selectedDefinition.id" [gridData]="definitionData?.grid" [allPossibleFields]="allPossibleFields"></fwk-grid-editor>
+                    <fwk-forms-editor *ngIf="section.id === 'forms'" [definitionId]="selectedDefinition.id" [formsData]="definitionData?.forms" [allPossibleFields]="allPossibleFields"></fwk-forms-editor>
+                    <fwk-dashboard-editor *ngIf="section.id === 'dashboard'" [definitionId]="selectedDefinition.id" [dashboardData]="definitionData?.dashboardConfig"></fwk-dashboard-editor>
+                </div>
+            </ng-container>
+            
+        </div>
+    </div>
+</div>

@@ -1,0 +1,53 @@
+/* ------------------------------------------------------------------
+ * Global styles
+ * ------------------------------------------------------------------
+ * @avacosistemas/core styles are loaded from node_modules via angular.json.
+ *
+ * Colors are configured in src/app/core/config/app.config.ts.
+ * The AppComponent applies them as CSS variables automatically.
+ *
+ * To override any CSS variable, uncomment and change below.
+ * These have higher specificity than AppComponent's injected styles.
+ * ------------------------------------------------------------------ */
+ 
+@import 'node_modules/@avacosistemas/core/assets/styles/tailwind.scss';
+@import 'node_modules/@avacosistemas/core/assets/styles/themes.scss';
+@import 'node_modules/@avacosistemas/core/assets/styles/main.scss';
+@import 'src/assets/styles/style.css';
+
+@tailwind utilities;
+/*
+:root {
+  --fwk-primary: #6366f1;
+  --fwk-primary-rgb: 99, 102, 241;
+  --fwk-accent: #8b5cf6;
+  --fwk-accent-rgb: 139, 92, 246;
+  --fwk-warn: #ef4444;
+  --fwk-warn-rgb: 239, 68, 68;
+  --fwk-bg-default: #f1f5f9;
+  --fwk-bg-card: #ffffff;
+  --fwk-bg-dialog: #ffffff;
+  --fwk-bg-hover: rgba(148, 163, 184, 0.12);
+  --fwk-text-default: #1e293b;
+  --fwk-text-secondary: #64748b;
+  --fwk-text-hint: #94a3b8;
+  --fwk-text-disabled: #94a3b8;
+  --fwk-border: #e2e8f0;
+  --fwk-divider: #e2e8f0;
+  --fwk-icon: #64748b;
+}
+.dark {
+  --fwk-bg-default: #0f172a;
+  --fwk-bg-card: #1e293b;
+  --fwk-bg-dialog: #1e293b;
+  --fwk-bg-hover: rgba(255, 255, 255, 0.05);
+  --fwk-text-default: #ffffff;
+  --fwk-text-secondary: #94a3b8;
+  --fwk-text-hint: #64748b;
+  --fwk-text-disabled: #475569;
+  --fwk-border: rgba(241, 245, 249, 0.12);
+  --fwk-divider: rgba(241, 245, 249, 0.12);
+  --fwk-icon: #94a3b8;
+}
+*/
+

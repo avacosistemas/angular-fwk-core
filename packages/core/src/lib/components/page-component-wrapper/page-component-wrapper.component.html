@@ -1,0 +1,74 @@
+<div class="flex flex-col flex-auto min-w-0" *ngIf="definition">
+    <div class="flex flex-col items-center justify-center border-b bg-card dark:bg-transparent ">
+        <div class="flex flex-col sm:flex-row flex-0 sm:items-center sm:justify-between p-4 sm:px-6 pt-0 w-full">
+            <div class="flex-1 min-w-0">
+                <fwk-breadcrumb></fwk-breadcrumb>
+                <div class="flex items-center gap-2">
+                    <div class="text-3xl font-extrabold tracking-tight leading-7 sm:leading-10 truncate">
+                        {{ pageTitle || ('page_title_default' | translate) }}
+                    </div>
+                    <back-button *ngIf="definition.backButton" color="accent"></back-button>
+                </div>
+                <div class="text-lg text-secondary" *ngIf="parentTitle">
+                    {{ parentTitle }}
+                </div>
+                <div class="mt-2 text-lg text-secondary" *ngIf="!parentTitle && definition['subtitleKey']">
+                    {{ definition['subtitleKey'] | translate:definition.i18n?.name }}
+                </div>
+            </div>
+
+            <div class="flex shrink-0 items-center mt-6 sm:mt-0 sm:ml-4 space-x-2 print:hidden">
+                <ng-container *ngFor="let action of getVisibleActions()">
+                    <ng-container *ngIf="!action.hidden" [ngSwitch]="action.appearance">
+
+                        <button *ngSwitchCase="'flat'"
+                            mat-flat-button
+                            [color]="action.color || 'accent'"
+                            [disabled]="action.disabled"
+                            [matTooltip]="action.actionName"
+                            (click)="executeAction(action)">
+                            <mat-icon *ngIf="action.icon" [svgIcon]="action.icon"></mat-icon>
+                            <span class="ml-2">{{ action.actionName }}</span>
+                        </button>
+
+                        <button *ngSwitchCase="'basic'"
+                            mat-button
+                            [color]="action.color || 'accent'"
+                            [disabled]="action.disabled"
+                            [matTooltip]="action.actionName"
+                            (click)="executeAction(action)">
+                            <mat-icon *ngIf="action.icon" [svgIcon]="action.icon"></mat-icon>
+                            <span class="ml-2">{{ action.actionName }}</span>
+                        </button>
+
+                        <button *ngSwitchCase="'icon'"
+                            mat-icon-button
+                            [color]="action.color || 'accent'"
+                            [disabled]="action.disabled"
+                            [matTooltip]="action.actionName"
+                            (click)="executeAction(action)">
+                            <mat-icon *ngIf="action.icon" [svgIcon]="action.icon"></mat-icon>
+                        </button>
+
+                        <button *ngSwitchDefault
+                            mat-stroked-button
+                            [color]="action.color || 'accent'" 
+                            [disabled]="action.disabled"
+                            [matTooltip]="action.actionName"
+                            (click)="executeAction(action)">
+                            <mat-icon *ngIf="action.icon" [svgIcon]="action.icon"></mat-icon>
+                            <span class="ml-2">{{ action.actionName }}</span>
+                        </button>
+
+                    </ng-container>
+                </ng-container>
+            </div>
+        </div>
+    </div>
+
+    <div class="flex-auto">
+        <div class="h-full relative overflow-hidden">
+            <ng-template #contentContainer></ng-template>
+        </div>
+    </div>
+</div>

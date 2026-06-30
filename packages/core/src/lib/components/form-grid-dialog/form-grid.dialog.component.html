@@ -1,0 +1,45 @@
+<div class="{{ data.dialog?.modalKey }}-modal {{ getUrl() }}-modal">
+    <div class="clear-div">
+        <button (click)="onNoClick()" mat-icon-button class="mat-icon-button_">
+            <mat-icon [attr.aria-label]="'action_close' | translate">clear</mat-icon>
+        </button>
+    </div>
+
+    <h1 mat-dialog-title *ngIf="titleLabel">{{ titleLabel }}</h1>
+
+    <div mat-dialog-content class='basic-modal-content' *ngIf="data.dialog?.form?.fields">
+      <fwk-dynamic-form-component 
+            [entity]="entity"    
+            [isEdit]="isEdit"
+            [fields]="data.dialog.form.fields"
+            [subFormName]="formKey"
+            [parentForm]="form"
+            (objectModified)="objectModified($event)"
+            (onChangeEntity)="onChangeEntity($event)">
+      </fwk-dynamic-form-component>
+      
+      <div *ngFor="let grid of data.dialog?.grids" class="styleBox_dialog-grids">
+        <h2 *ngIf="grid.title" class="styleText_gird-title">{{ grid.title }}</h2>
+        <fwk-crud-table 
+              [datasource]="getDataSource(grid, entity)" 
+              [grid]="grid">
+        </fwk-crud-table>
+      </div>
+    </div>
+
+    <div mat-dialog-actions>
+      <div *ngIf="data.dialog" class="custom-actions">
+        <button mat-button *ngFor="let action of data.dialog.actions" (click)="submitAction(action)" class="modal-component_button-a">
+          {{ action.actionName }}
+        </button>
+        <button mat-button 
+                *ngIf="isAdd || isEdit" 
+                type="submit" 
+                (click)="onSubmit()" 
+                [disabled]="!isObjectModified || form.invalid || submitting" 
+                cdkFocusInitial>
+                {{ submitLabel }}
+        </button>
+      </div>
+    </div>
+</div>

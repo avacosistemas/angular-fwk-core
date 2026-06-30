@@ -1,0 +1,90 @@
+<div class="flex flex-col max-h-[90vh]">
+    <div class="flex flex-0 items-center justify-between pl-6 pr-4 h-16 border-b">
+        <h2 class="text-2xl font-semibold truncate">{{ 'dev_tools_def_editor_behaviors_title' | translate }} "{{ data.triggerFieldKey }}"</h2>
+        <button mat-icon-button (click)="onCancel()" [matTooltip]="'modal_button_close' | translate">
+            <mat-icon [svgIcon]="'heroicons_outline:x-mark'"></mat-icon>
+        </button>
+    </div>
+
+    <div mat-dialog-content class="flex-auto overflow-y-auto p-6" [formGroup]="form">
+        <div formArrayName="behaviors" class="space-y-6">
+            <div *ngFor="let behavior of behaviorsArray.controls; let i = index" [formGroupName]="i" class="p-4 border rounded-lg relative bg-base-200/30">
+                <button mat-icon-button color="warn" (click)="removeBehavior(i)" class="absolute top-2 right-2" [matTooltip]="'dev_tools_def_editor_behaviors_remove_rule_tooltip' | translate">
+                    <mat-icon>close</mat-icon>
+                </button>
+                <h3 class="text-lg font-medium text-secondary">{{ 'dev_tools_def_editor_behaviors_rule_title' | translate }}{{ i + 1 }}</h3>
+
+                <div formGroupName="condition" class="mt-4">
+                    <div formArrayName="if" class="pl-4 border-l-4 border-blue-400 space-y-2">
+                        <h4 class="font-semibold text-blue-600 dark:text-blue-400">{{ 'dev_tools_def_editor_behaviors_if_title' | translate }}</h4>
+                        <div *ngFor="let condition of getBehaviorConditions(behavior).controls; let j = index" [formGroupName]="j" class="flex flex-col sm:flex-row items-start gap-2">
+                            <mat-form-field class="flex-1" appearance="outline" subscriptSizing="dynamic">
+                                <mat-label>{{ 'dev_tools_def_editor_behaviors_if_field_label' | translate }}</mat-label>
+                                <mat-select formControlName="key">
+                                    <mat-option *ngFor="let f of data.availableFields" [value]="f.key">{{ f.label }} ({{f.key}})</mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                            <mat-form-field class="flex-1" appearance="outline" subscriptSizing="dynamic">
+                                <mat-label>{{ 'dev_tools_def_editor_behaviors_if_comparator_label' | translate }}</mat-label>
+                                <mat-select formControlName="compare">
+                                    <mat-option *ngFor="let c of behaviorComparators" [value]="c">{{ c }}</mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                            <mat-form-field class="flex-1" appearance="outline" subscriptSizing="dynamic">
+                                <mat-label>{{ 'dev_tools_def_editor_behaviors_if_value_label' | translate }}</mat-label>
+                                <input matInput formControlName="value" [placeholder]="'dev_tools_def_editor_behaviors_if_value_placeholder' | translate">
+                            </mat-form-field>
+                            <button mat-icon-button color="warn" (click)="removeCondition(behavior, j)" [matTooltip]="'dev_tools_def_editor_behaviors_remove_condition_tooltip' | translate" class="mt-2">
+                                <mat-icon>delete_outline</mat-icon>
+                            </button>
+                        </div>
+                        <button mat-button type="button" (click)="addCondition(behavior)">
+                            <mat-icon>add</mat-icon>{{ 'dev_tools_def_editor_behaviors_add_condition_button' | translate }}
+                        </button>
+                    </div>
+
+                    <div formArrayName="then" class="pl-4 border-l-4 border-green-500 space-y-2 mt-4">
+                        <h4 class="font-semibold text-green-600 dark:text-green-400">{{ 'dev_tools_def_editor_behaviors_then_title' | translate }}</h4>
+                        <div *ngFor="let then of getBehaviorThen(behavior).controls; let k = index" [formGroupName]="k" class="p-2 border rounded bg-green-50/50 dark:bg-green-900/10 grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2 relative">
+                            <button mat-icon-button color="warn" (click)="removeThen(behavior, k)" class="absolute -top-1 -right-1" [matTooltip]="'dev_tools_def_editor_behaviors_remove_action_tooltip' | translate">
+                                <mat-icon class="icon-size-4">close</mat-icon>
+                            </button>
+                            <mat-form-field class="sm:col-span-2" appearance="outline" subscriptSizing="dynamic">
+                                <mat-label>{{ 'dev_tools_def_editor_behaviors_then_target_field_label' | translate }}</mat-label>
+                                <mat-select formControlName="key">
+                                    <mat-option *ngFor="let f of data.availableFields" [value]="f.key">{{ f.label }} ({{f.key}})</mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                            <mat-checkbox formControlName="required">{{ 'dev_tools_def_editor_behaviors_then_required_check' | translate }}</mat-checkbox>
+                            <mat-checkbox formControlName="disabled">{{ 'dev_tools_def_editor_behaviors_then_disabled_check' | translate }}</mat-checkbox>
+                            <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                                <mat-label>{{ 'dev_tools_def_editor_behaviors_then_set_value_label' | translate }}</mat-label>
+                                <input matInput formControlName="value">
+                            </mat-form-field>
+                            <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                                <mat-label>{{ 'dev_tools_def_editor_behaviors_then_control_type_label' | translate }}</mat-label>
+                                <mat-select formControlName="controlType">
+                                    <mat-option [value]="''">{{ 'dev_tools_def_editor_behaviors_then_control_type_no_change' | translate }}</mat-option>
+                                    <mat-option *ngFor="let type of controlTypeChoices" [value]="type">{{ type }}</mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                        </div>
+                        <button mat-button type="button" color="accent" (click)="addThen(behavior)">
+                            <mat-icon>add</mat-icon>{{ 'dev_tools_def_editor_behaviors_add_action_button' | translate }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <button mat-stroked-button (click)="addBehavior()" class="mt-4">
+            <mat-icon>add</mat-icon> {{ 'dev_tools_def_editor_behaviors_add_rule_button' | translate }}
+        </button>
+    </div>
+
+    <div mat-dialog-actions class="flex items-center justify-end p-6 border-t">
+        <button mat-button (click)="onCancel()">{{ 'modal_button_cancel' | translate }}</button>
+        <button mat-flat-button color="accent" (click)="onSave()" [disabled]="form.invalid">
+            {{ 'modal_button_save' | translate }}
+        </button>
+    </div>
+</div>

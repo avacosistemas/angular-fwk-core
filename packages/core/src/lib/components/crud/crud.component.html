@@ -1,0 +1,102 @@
+<div class="flex flex-col flex-auto min-w-0" *ngIf="crudDef && name">
+    <div class="flex flex-col items-center justify-center border-b bg-card dark:bg-transparent ">
+        <div class="flex flex-col sm:flex-row flex-0 sm:items-center sm:justify-between p-4 sm:px-6 pt-0 w-full">
+            <div class="flex-1 min-w-0">
+                <fwk-breadcrumb></fwk-breadcrumb>
+                <div class="flex items-center gap-2">
+                    <div class="text-3xl font-extrabold tracking-tight leading-7 sm:leading-10 truncate">
+                        {{ crudDef.i18n?.words?.['page_title'] || ('page_title_default' | translate) }}
+                    </div>
+                    <back-button *ngIf="crudDef.backButton" color="accent"></back-button>
+                </div>
+
+                <div class="text-lg text-secondary" *ngIf="parentTitle && !isInCluster">
+                    {{ parentTitle }}
+                </div>
+
+                <div class="mt-2 text-lg text-secondary" *ngIf="!parentTitle && crudDef.subtitleKey">
+                    {{ crudDef.subtitleKey | translate:crudDef.i18n?.name }}
+                </div>
+            </div>
+
+            <div class="flex shrink-0 items-center mt-6 sm:mt-0 sm:ml-4 space-x-2 print:hidden">
+                <ng-container *ngIf="showCrudActions()">
+                    <button *ngFor="let action of getCrudActions()" mat-stroked-button color="accent"
+                        [matTooltip]="action.actionName"
+                        [disabled]="isTableLoading || actionLoadingStates.get(action.actionNameKey || action.actionName || 'default')"
+                        (click)="executeCrudAction(action)">
+                        <ng-container
+                            *ngIf="!actionLoadingStates.get(action.actionNameKey || action.actionName || 'default')">
+                            <mat-icon *ngIf="action.icon" [svgIcon]="action.icon"></mat-icon>
+                            <span class="ml-2 hidden sm:inline">{{ action.actionName }}</span>
+                        </ng-container>
+                        <mat-progress-spinner
+                            *ngIf="actionLoadingStates.get(action.actionNameKey || action.actionName || 'default')"
+                            [diameter]="24" mode="indeterminate"></mat-progress-spinner>
+                    </button>
+                </ng-container>
+
+                <button *ngIf="showDeleteButton() && display.selects" mat-stroked-button [color]="'warn'"
+                    [matTooltip]="'delete_selected_tooltip' | translate" [disabled]="isTableLoading"
+                    (click)="openDeleteDialog()">
+                    <mat-icon [svgIcon]="'heroicons_outline:trash'"></mat-icon>
+                    <span class="ml-2 hidden sm:inline">{{ 'crud_delete_button' | translate }} ({{ selects.length }})</span>
+                </button>
+
+                <button *ngIf="crudDef.exportCsv" mat-icon-button color="accent" (click)="exportCsv()"
+                    [matTooltip]="'export_csv_tooltip' | translate" [disabled]="isTableLoading">
+                    <mat-icon [svgIcon]="'heroicons_outline:printer'"></mat-icon>
+                </button>
+
+                <button *ngIf="crudDef.downloadBoleta" mat-icon-button color="accent" (click)="downloadBoleta()"
+                    [matTooltip]="'crud_download_boleta_tooltip' | translate" [disabled]="isTableLoading">
+                    <mat-icon [svgIcon]="'heroicons_outline:document-text'"></mat-icon>
+                </button>
+
+                <button *ngIf="crudDef.openLink" mat-icon-button color="accent" (click)="goToLink(crudDef.openLink)"
+                    [matTooltip]="crudDef.openLinkTitle || ('crud_open_link_default_tooltip' | translate)"
+                    [disabled]="isTableLoading">
+                    <mat-icon [svgIcon]="'heroicons_outline:envelope'"></mat-icon>
+                </button>
+
+                <button *ngIf="showAddButton()" mat-stroked-button color="accent" [disabled]="isTableLoading"
+                    (click)="openAddDialog()">
+                    <mat-icon [svgIcon]="'heroicons_outline:plus'"></mat-icon>
+                    <span class="ml-2">{{ 'add_button' | translate:crudDef.i18n?.name }}</span>
+                </button>
+            </div>
+        </div>
+
+        <div *ngIf="deniedCreateAlerts.length > 0 || generalAlerts.length > 0" class="flex flex-col gap-2 w-full p-4 sm:px-6 pt-0">
+            <fwk-alert *ngFor="let alert of deniedCreateAlerts"
+                class="max-w-full" [type]="alert.type" [appearance]="'soft'" [showIcon]="true">
+                {{ alert.messageKey | translate:alert.params:crudDef.i18n?.name }}
+            </fwk-alert>
+
+            <fwk-alert *ngFor="let alert of generalAlerts"
+                class="max-w-full" [type]="alert.type" [appearance]="'soft'" [showIcon]="true">
+                {{ alert.messageKey | translate:alert.params:crudDef.i18n?.name }}
+            </fwk-alert>
+        </div>
+
+        <div *ngIf="crudDef.forms?.filter" class="w-full print:hidden">
+            <fwk-search #searchComponent [fields]="crudDef.forms.filter"
+                (onChangeSearchEntity)="filterSearchEntity($event)" [forceFirstSubmit]="true" [crudDef]="crudDef"
+                [columnsDef]="crudDef.grid?.columnsDef" [displayedColumns]="crudDef.grid?.displayedColumns"
+                (displayedColumnsChange)="onDisplayedColumnsChange($event)" [i18n]="i18nComponent">
+            </fwk-search>
+        </div>
+    </div>
+
+    <div class="flex-auto">
+        <div class="relative overflow-hidden">
+            <fwk-crud-table *ngIf="crudDef.grid" [containerClass]="isTableLoading ? 'h-[67vh]' : ''"
+                [onClickRow]="onClickRow" [datasource]="dataSource" [canDelete]="showDeleteButton()"
+                [searchPerformed]="searchPerformed" [grid]="crudDef.grid" [crud]="this" [isLoading]="isTableLoading"
+                [hasActiveFilters]="hasActiveFilters" [canAdd]="showAddButton()" (status)="statusChanged($event)"
+                (onChangePagination)="handlePageChange()" (onAddClicked)="openAddDialog()"
+                (onClearFiltersClicked)="clearFilters()" (onRowClicked)="handleRowClick($event)">
+            </fwk-crud-table>
+        </div>
+    </div>
+</div>

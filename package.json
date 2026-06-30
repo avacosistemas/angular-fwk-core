@@ -1,0 +1,53 @@
+{
+  "name": "fwk-core-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Monorepo for @fwk/* packages — CPAU Admin Framework",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "ng build fwk-core && tsc -p packages/core/tsconfig.schematics.json",
+    "build:core": "ng build fwk-core && tsc -p packages/core/tsconfig.schematics.json",
+    "postbuild": "node -e \"require('fs-extra').copySync('tools/scripts/_scripts', 'dist/packages/core/_scripts', { overwrite: true })\"",
+    "postbuild:core": "node -e \"require('fs-extra').copySync('tools/scripts/_scripts', 'dist/packages/core/_scripts', { overwrite: true })\"",
+    "build:core:watch": "ng build fwk-core --watch --configuration development",
+    "build:all": "ng build fwk-core",
+    "lint": "ng lint fwk-core",
+    "test": "ng test fwk-core"
+  },
+  "devDependencies": {
+    "@angular-devkit/build-angular": "^17.0.3",
+    "@angular/animations": "^17.0.3",
+    "@angular/cdk": "^17.0.3",
+    "@angular/cli": "^17.0.3",
+    "@angular/common": "^17.0.3",
+    "@angular/compiler": "^17.0.3",
+    "@angular/compiler-cli": "^17.0.3",
+    "@angular/core": "^17.0.3",
+    "@angular/forms": "^17.0.3",
+    "@angular/material": "^17.0.3",
+    "@angular/material-date-fns-adapter": "^17.0.3",
+    "@angular/platform-browser": "^17.0.3",
+    "@angular/router": "^17.0.3",
+    "@tailwindcss/typography": "0.5.10",
+    "@tinymce/tinymce-angular": "^7.0.0",
+    "apexcharts": "3.44.0",
+    "autoprefixer": "10.4.16",
+    "fs-extra": "^11.3.5",
+    "ng-apexcharts": "1.8.0",
+    "ng-packagr": "^17.0.0",
+    "ngx-color-picker": "16.0.0",
+    "postcss": "8.4.31",
+    "rxjs": "7.8.1",
+    "tailwindcss": "3.3.5",
+    "typescript": "5.2.2",
+    "zone.js": "0.14.2"
+  },
+  "dependencies": {
+    "date-fns": "^2.30.0",
+    "lodash-es": "^4.17.21",
+    "luxon": "^3.4.0",
+    "perfect-scrollbar": "^1.5.5"
+  }
+}

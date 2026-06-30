@@ -1,0 +1,26 @@
+<mat-form-field
+    *ngIf="field"
+    [floatLabel]="getFloatLabel()"
+    appearance="outline"
+    class="w-full">
+
+    <mat-label *ngIf="!field.options?.matLabel">{{ field.label }}</mat-label>
+    <mat-label *ngIf="field.options?.matLabel">{{ field.options.matLabel }}</mat-label>
+
+    <input
+        matInput
+        [placeholder]="field.label"
+        [ngModel]="_value"
+        [ngModelOptions]="{standalone: true}"
+        (ngModelChange)="onValueChange($event)"
+        (blur)="onBlur()"
+        [disabled]="isDisabled"
+        [required]="field.required"
+        [restrictionKeys]="restrictionKeys"
+        [errorStateMatcher]="matcher">
+
+    <span *ngIf="field.options?.prefix" matPrefix>{{ field.options.prefix }}&nbsp;</span>
+
+    <mat-error *ngIf="errorMessage">{{ errorMessage }}</mat-error>
+
+</mat-form-field>

@@ -1,0 +1,131 @@
+<fwk-loading-bar></fwk-loading-bar>
+
+<fwk-vertical-navigation class="dark bg-gray-900 print:hidden" [appearance]="navigationAppearance"
+    [mode]="isScreenSmall ? 'over' : 'side'" [name]="'mainNavigation'" [navigation]="navigation.default"
+    [opened]="sidebarOpened && !isScreenSmall">
+
+    <ng-container fwkVerticalNavigationContentHeader>
+        <div [routerLink]="'/'" class="flex items-center cursor-pointer justify-center h-20">
+            <fwk-logo context="sidebar" size="small" type="icon"></fwk-logo>
+        </div>
+    </ng-container>
+
+    <ng-container fwkVerticalNavigationContentFooter>
+        <div class="flex flex-col items-center justify-center w-full p-4 space-y-2">
+            <button *ngIf="isDevMode" mat-icon-button [routerLink]="'/dev-tools'" color="accent"
+                [matTooltip]="'dev_tools_sidebar_tooltip' | translate">
+                <mat-icon [svgIcon]="'heroicons_outline:wrench-screwdriver'"></mat-icon>
+            </button>
+
+            <button *ngIf="showCollapseSidebarIcon" class="hidden md:inline-flex" mat-icon-button
+                (click)="toggleNavigationAppearance()">
+                <mat-icon [svgIcon]="'heroicons_outline:arrows-right-left'"></mat-icon>
+            </button>
+        </div>
+    </ng-container>
+</fwk-vertical-navigation>
+
+<div class="flex flex-col flex-auto w-full min-w-0 h-screen overflow-auto">
+    <div
+        class="bg-card dark:bg-transparent dark:shadow-none flex flex-0 items-center p-2 sm:px-4 print:hidden relative w-full z-49">
+        <div class="flex items-center space-x-2">
+            <button mat-icon-button (click)="toggleNavigation('mainNavigation')">
+                <mat-icon [svgIcon]="'heroicons_outline:bars-3'"></mat-icon>
+            </button>
+        </div>
+
+        <span class="w-1 h-6 mx-1 border-r border-gray-300 dark:border-gray-700"></span>
+
+        <fwk-search-button></fwk-search-button>
+
+        <div class="flex items-center pl-2 mr-2 ml-auto space-x-0.5 sm:space-x-2">
+            <user></user>
+        </div>
+    </div>
+
+    <div class="flex flex-auto overflow-hidden" [ngClass]="{'border-t': showClusterSidebar}">
+        
+        <!-- Cluster Sidebar -->
+        <div *ngIf="showClusterSidebar" 
+             class="flex flex-col flex-shrink-0 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 transition-all duration-300 ease-in-out select-none"
+             [ngClass]="clusterCollapsed ? 'w-16' : 'w-64'">
+        
+            <div class="flex items-center justify-between p-4 border-gray-100 dark:border-gray-800"
+                 [ngClass]="clusterCollapsed ? 'flex-col space-y-4' : 'flex-row'">
+                
+                <div *ngIf="!clusterCollapsed" class="flex flex-col min-w-0 pr-2">
+                    <span *ngIf="clusterConfig?.titlePrefixKey" class="text-[10px] font-bold text-gray-400 dark:text-gray-500 tracking-wider uppercase">
+                        {{ translate(clusterConfig.titlePrefixKey) }}
+                    </span>
+                    <span class="text-base font-extrabold text-gray-800 dark:text-gray-100 uppercase tracking-tight truncate"
+                          [title]="currentParentTitle">
+                        {{ currentParentTitle}}
+                    </span>
+                </div>
+
+                <button mat-icon-button (click)="toggleClusterCollapse()" class="text-gray-400 dark:text-gray-500">
+                    <mat-icon>{{ clusterCollapsed ? 'chevron_right' : 'chevron_left' }}</mat-icon>
+                </button>
+            </div>
+
+            <div *ngIf="!clusterCollapsed && activeProfileActions.length > 0" class="px-4">
+                <button type="button" [matMenuTriggerFor]="actionsMenu" class="flex items-center justify-center w-full px-4 py-2.5 text-sm font-semibold rounded-lg border-0 bg-blue-600 hover:bg-blue-700 text-white cursor-pointer transition-all duration-150 select-none shadow-sm">
+                    <mat-icon class="mr-2 text-white">menu</mat-icon>
+                    <span>{{ translate('cluster_actions_button') }}</span>
+                </button>
+                <mat-menu #actionsMenu="matMenu" class="rounded-xl shadow-xl border border-gray-100 dark:border-gray-800 max-h-[300px] overflow-y-auto">
+                    <button mat-menu-item *ngFor="let action of activeProfileActions" (click)="executeAction(action)" 
+                        class="flex items-center text-sm font-medium py-2"
+                        [class.menu-item-warn]="action.color === 'warn'">
+                        <mat-icon *ngIf="action.icon.includes(':')" [svgIcon]="action.icon" class="mr-3" [class.text-gray-500]="action.color !== 'warn'"></mat-icon>
+                        <mat-icon *ngIf="!action.icon.includes(':')" class="mr-3" [class.text-gray-500]="action.color !== 'warn'">{{ action.icon }}</mat-icon>
+                        <span>{{ translate(action.actionNameKey) }}</span>
+                    </button>
+                </mat-menu>
+            </div>
+ 
+            <div *ngIf="clusterCollapsed && activeProfileActions.length > 0" class="flex justify-center pt-4">
+                <button mat-icon-button [matMenuTriggerFor]="actionsMenuCollapsed" color="primary" [matTooltip]="translate('cluster_actions_button')" matTooltipPosition="right">
+                    <mat-icon>menu</mat-icon>
+                </button>
+                <mat-menu #actionsMenuCollapsed="matMenu" class="rounded-xl shadow-xl border border-gray-100 dark:border-gray-800 profile-actions-menu-panel" panelClass="profile-actions-menu-panel">
+                    <button mat-menu-item *ngFor="let action of activeProfileActions" (click)="executeAction(action)" 
+                        class="flex items-center text-sm font-medium py-2"
+                        [class.menu-item-warn]="action.color === 'warn'">
+                        <mat-icon *ngIf="action.icon.includes(':')" [svgIcon]="action.icon" class="mr-3" [class.text-gray-500]="action.color !== 'warn'"></mat-icon>
+                        <mat-icon *ngIf="!action.icon.includes(':')" class="mr-3" [class.text-gray-500]="action.color !== 'warn'">{{ action.icon }}</mat-icon>
+                        <span>{{ translate(action.actionNameKey) }}</span>
+                    </button>
+                </mat-menu>
+            </div>
+
+            <div class="flex-auto py-2 overflow-y-auto space-y-1 px-2 mt-3">
+                <a *ngFor="let item of activeSidebarItems"
+                   (click)="navigateTo(item)"
+                   class="flex items-center px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 cursor-pointer group"
+                   [ngClass]="isItemActive(item) ? 
+                              'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 font-semibold' : 
+                              'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-gray-100'"
+                   [matTooltip]="clusterCollapsed ? (translate(item.actionNameKey) || item.label) : ''"
+                   matTooltipPosition="right">
+                    
+                    <mat-icon *ngIf="item.icon.includes(':')" [svgIcon]="item.icon" 
+                              class="icon-size-5 flex-shrink-0 transition-transform group-hover:scale-110"
+                              [ngClass]="isItemActive(item) ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500'"></mat-icon>
+                    
+                    <mat-icon *ngIf="!item.icon.includes(':')" 
+                              class="icon-size-5 flex-shrink-0 transition-transform group-hover:scale-110"
+                              [ngClass]="isItemActive(item) ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500'">{{ item.icon }}</mat-icon>
+                    
+                    <span *ngIf="!clusterCollapsed" class="ml-3 truncate">{{ translate(item.actionNameKey) || item.label }}</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Main -->
+        <div class="flex-auto overflow-y-auto relative bg-white dark:bg-transparent"  [ngClass]="{'pt-3': showClusterSidebar}">
+            <router-outlet *ngIf="true"></router-outlet>
+        </div>
+    </div>
+
+</div>

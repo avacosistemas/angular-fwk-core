@@ -1,0 +1,23 @@
+{
+  "$schema": "../../node_modules/ng-packagr/ng-package.schema.json",
+  "dest": "../../dist/packages/core",
+  "lib": {
+    "entryFile": "src/index.ts",
+    "styleIncludePaths": [
+      "src/lib/layout/infrastructure/styles"
+    ]
+  },
+  "allowedNonPeerDependencies": [
+    "lodash-es",
+    "perfect-scrollbar",
+    "date-fns",
+    "luxon"
+  ],
+  "assets": [
+    { "glob": "**/*", "input": "src/lib/assets", "output": "assets" },
+    { "glob": "**/*", "input": "src/lib/layout/infrastructure/styles", "output": "assets/styles" },
+    { "glob": "**/*", "input": "src/lib/layout/infrastructure/tailwind/plugins", "output": "tailwind/plugins" },
+    { "glob": "**/*", "input": "schematics", "output": "schematics" },
+    { "glob": "tailwind-preset.js", "input": ".", "output": "." }
+  ]
+}

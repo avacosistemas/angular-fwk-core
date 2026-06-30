@@ -1,0 +1,19 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "../../dist/packages/core/schematics",
+    "baseUrl": ".",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "inlineSources": false,
+    "types": ["node"],
+    "target": "ES2021",
+    "esModuleInterop": true,
+    "skipLibCheck": true
+  },
+  "include": ["schematics/**/*.ts"],
+  "exclude": ["**/*.spec.ts", "**/test.ts"]
+}

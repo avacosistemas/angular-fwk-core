@@ -1,0 +1,16 @@
+{
+  "$schema": "../../../node_modules/@angular-devkit/schematics/collection-schema.json",
+  "schematics": {
+    "ng-add": {
+      "description": "Adds @avacosistemas/core to an Angular project and generates boilerplate",
+      "factory": "./ng-add/index#ngAdd",
+      "schema": "./ng-add/schema.json"
+    },
+    "init": {
+      "description": "Initialize @avacosistemas/core in an existing Angular project",
+      "factory": "./init/index#init",
+      "schema": "./init/schema.json"
+    }
+  }
+}
+

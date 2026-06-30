@@ -1,0 +1,105 @@
+{
+  "name": "@avacosistemas/core",
+  "version": "1.0.0",
+  "description": "Admin FWK - CRUD engine, auth, layout and dynamic forms",
+  "schematics": "./schematics/collection.json",
+  "peerDependencies": {
+    "@angular/animations": "^17.0.0",
+    "@angular/cdk": "^17.0.0",
+    "@angular/common": "^17.0.0",
+    "@angular/core": "^17.0.0",
+    "@angular/forms": "^17.0.0",
+    "@angular/material": "^17.0.0",
+    "@angular/platform-browser": "^17.0.0",
+    "@angular/router": "^17.0.0",
+    "rxjs": "^7.8.0",
+    "tailwindcss": "^3.3.0",
+    "apexcharts": "^3.44.0",
+    "ng-apexcharts": "^1.8.0",
+    "ngx-color-picker": "^16.0.0",
+    "@tinymce/tinymce-angular": "^7.0.0",
+    "tinymce": "^7.0.0",
+    "@angular/material-date-fns-adapter": "^17.0.0"
+  },
+  "dependencies": {
+    "lodash-es": "^4.17.21",
+    "perfect-scrollbar": "^1.5.5",
+    "date-fns": "^2.30.0",
+    "luxon": "^3.4.0"
+  },
+  "sideEffects": false,
+  "exports": {
+    "./package.json": {
+      "default": "./package.json"
+    },
+    ".": {
+      "types": "./index.d.ts",
+      "esm2022": "./esm2022/fwk-core.mjs",
+      "esm": "./esm2022/fwk-core.mjs",
+      "default": "./fesm2022/fwk-core.mjs"
+    },
+    "./auth/*": {
+      "types": "./lib/auth/*.d.ts",
+      "esm2022": "./esm2022/lib/auth/*.mjs",
+      "default": "./esm2022/lib/auth/*.mjs"
+    },
+    "./components/*": {
+      "types": "./lib/components/*.d.ts",
+      "esm2022": "./esm2022/lib/components/*.mjs",
+      "default": "./esm2022/lib/components/*.mjs"
+    },
+    "./directive/*": {
+      "types": "./lib/directive/*.d.ts",
+      "esm2022": "./esm2022/lib/directive/*.mjs",
+      "default": "./esm2022/lib/directive/*.mjs"
+    },
+    "./i18n/*": {
+      "types": "./lib/i18n/*.d.ts",
+      "esm2022": "./esm2022/lib/i18n/*.mjs",
+      "default": "./esm2022/lib/i18n/*.mjs"
+    },
+    "./layout/*": {
+      "types": "./lib/layout/*.d.ts",
+      "esm2022": "./esm2022/lib/layout/*.mjs",
+      "default": "./esm2022/lib/layout/*.mjs"
+    },
+    "./model/*": {
+      "types": "./lib/model/*.d.ts",
+      "esm2022": "./esm2022/lib/model/*.mjs",
+      "default": "./esm2022/lib/model/*.mjs"
+    },
+    "./modules/*": {
+      "types": "./lib/modules/*.d.ts",
+      "esm2022": "./esm2022/lib/modules/*.mjs",
+      "default": "./esm2022/lib/modules/*.mjs"
+    },
+    "./navigation/*": {
+      "types": "./lib/navigation/*.d.ts",
+      "esm2022": "./esm2022/lib/navigation/*.mjs",
+      "default": "./esm2022/lib/navigation/*.mjs"
+    },
+    "./pipe/*": {
+      "types": "./lib/pipe/*.d.ts",
+      "esm2022": "./esm2022/lib/pipe/*.mjs",
+      "default": "./esm2022/lib/pipe/*.mjs"
+    },
+    "./providers/*": {
+      "types": "./lib/providers/*.d.ts",
+      "esm2022": "./esm2022/lib/providers/*.mjs",
+      "default": "./esm2022/lib/providers/*.mjs"
+    },
+    "./services/*": {
+      "types": "./lib/services/*.d.ts",
+      "esm2022": "./esm2022/lib/services/*.mjs",
+      "default": "./esm2022/lib/services/*.mjs"
+    },
+    "./utils/*": {
+      "types": "./lib/utils/*.d.ts",
+      "esm2022": "./esm2022/lib/utils/*.mjs",
+      "default": "./esm2022/lib/utils/*.mjs"
+    },
+    "./tailwind-preset": {
+      "default": "./tailwind-preset.js"
+    }
+  }
+}

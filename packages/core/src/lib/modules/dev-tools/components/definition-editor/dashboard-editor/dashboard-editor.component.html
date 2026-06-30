@@ -1,0 +1,130 @@
+<div *ngIf="dashboardForm" [formGroup]="dashboardForm">
+
+    <div formArrayName="widgets">
+        <mat-accordion multi>
+            <mat-expansion-panel *ngFor="let widget of dashboardWidgets.controls; let i=index" [formGroupName]="i"
+                class="border">
+                <mat-expansion-panel-header>
+                    <mat-panel-title class="flex items-center gap-4">
+                        <span class="font-medium">{{ widget.get('titleValue')?.value || ('dev_tools_def_editor_dash_widget_new_name' | translate) }}</span>
+                    </mat-panel-title>
+                    <mat-panel-description class="items-center justify-end gap-4 text-sm text-secondary">
+                        <span class="flex items-center gap-1.5">
+                            <mat-icon class="icon-size-4">dashboard</mat-icon>
+                            <span>{{ widget.get('type')?.value | titlecase }}</span>
+                        </span>
+                        <span class="flex items-center gap-1.5">
+                            <mat-icon class="icon-size-4">aspect_ratio</mat-icon>
+                            <span>{{ widget.get('size')?.value | titlecase }}</span>
+                        </span>
+                        <button mat-icon-button color="warn" (click)="removeWidget(i); $event.stopPropagation()"
+                            [matTooltip]="'dev_tools_delete_tooltip' | translate">
+                            <mat-icon>delete</mat-icon>
+                        </button>
+                    </mat-panel-description>
+                </mat-expansion-panel-header>
+
+                <div class="pt-4 space-y-6">
+                    <div>
+                        <h4 class="font-medium text-secondary mb-3">{{ 'dev_tools_def_editor_dash_widget_general_config_title' | translate }}</h4>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                            <mat-form-field class="lg:col-span-2" appearance="outline" subscriptSizing="dynamic">
+                                <mat-label>{{ 'dev_tools_def_editor_dash_widget_title_label' | translate }}</mat-label>
+                                <input matInput formControlName="titleValue" required>
+                            </mat-form-field>
+                            <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                                <mat-label>{{ 'dev_tools_def_editor_dash_widget_type' | translate }}</mat-label>
+                                <mat-select formControlName="type">
+                                    <mat-option *ngFor="let type of widgetTypeChoices" [value]="type">{{type |
+                                        titlecase}}</mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                            <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                                <mat-label>{{ 'dev_tools_def_editor_dash_widget_size' | translate }}</mat-label>
+                                <mat-select formControlName="size">
+                                    <mat-option *ngFor="let size of widgetSizeChoices" [value]="size">{{size |
+                                        titlecase}}</mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                        </div>
+                    </div>
+
+                    <div formGroupName="ws" class="pt-4 border-t">
+                        <h4 class="font-medium text-secondary mb-3">{{ 'dev_tools_def_editor_dash_widget_data_source_title' | translate }}</h4>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                                <mat-label>{{ 'dev_tools_def_editor_dash_widget_endpoint' | translate }}</mat-label>
+                                <input matInput formControlName="url" required
+                                    [placeholder]="'dev_tools_def_editor_dash_widget_endpoint_placeholder' | translate">
+                            </mat-form-field>
+                        </div>
+                    </div>
+
+                    <div formGroupName="filterConfig" class="pt-4 border-t">
+                        <mat-slide-toggle formControlName="show" color="accent">{{
+                            'dev_tools_def_editor_dash_widget_add_filters' | translate }}</mat-slide-toggle>
+                        <div *ngIf="widget.get('filterConfig.show')?.value" class="pl-4 mt-4 space-y-4 animate-fade-in">
+                            <h4 class="font-medium text-secondary">{{ 'dev_tools_def_editor_dash_widget_filter_options'
+                                | translate }}</h4>
+                            <div formArrayName="options" class="overflow-auto rounded-lg border">
+                                <table mat-table [dataSource]="dataSources[i]" class="w-full">
+                                    <ng-container matColumnDef="viewValue">
+                                        <th mat-header-cell *matHeaderCellDef
+                                            class="bg-gray-100 dark:bg-gray-700/50 uppercase text-xs">{{ 'dev_tools_def_editor_dash_widget_filter_text_column' | translate }}</th>
+                                        <td mat-cell *matCellDef="let filter" [formGroup]="filter" class="!p-2">
+                                            <mat-form-field class="w-full" appearance="outline"
+                                                subscriptSizing="dynamic">
+                                                <input matInput formControlName="viewValue"
+                                                    [placeholder]="'dev_tools_def_editor_dash_widget_filter_text_placeholder' | translate" required>
+                                            </mat-form-field>
+                                        </td>
+                                    </ng-container>
+                                    <ng-container matColumnDef="value">
+                                        <th mat-header-cell *matHeaderCellDef
+                                            class="bg-gray-100 dark:bg-gray-700/50 uppercase text-xs">{{ 'dev_tools_def_editor_dash_widget_filter_value_column' | translate }}</th>
+                                        <td mat-cell *matCellDef="let filter" [formGroup]="filter" class="!p-2">
+                                            <mat-form-field class="w-full" appearance="outline"
+                                                subscriptSizing="dynamic">
+                                                <input matInput formControlName="value"
+                                                    [placeholder]="'dev_tools_def_editor_dash_widget_filter_value_placeholder' | translate">
+                                            </mat-form-field>
+                                        </td>
+                                    </ng-container>
+                                    <ng-container matColumnDef="actions">
+                                        <th mat-header-cell *matHeaderCellDef class="bg-gray-100 dark:bg-gray-700/50">
+                                        </th>
+                                        <td mat-cell *matCellDef="let filter; let j=index">
+                                            <button mat-icon-button color="warn" (click)="removeFilter(i, j)"
+                                                [matTooltip]="'dev_tools_delete_tooltip' | translate">
+                                                <mat-icon>delete</mat-icon>
+                                            </button>
+                                        </td>
+                                    </ng-container>
+                                    <tr mat-header-row *matHeaderRowDef="['viewValue', 'value', 'actions']"></tr>
+                                    <tr mat-row *matRowDef="let row; columns: ['viewValue', 'value', 'actions'];"></tr>
+                                </table>
+                            </div>
+                            <button mat-stroked-button type="button" (click)="addFilter(i)">
+                                <mat-icon>add</mat-icon> {{ 'dev_tools_add_option_button' | translate }}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </mat-expansion-panel>
+        </mat-accordion>
+    </div>
+    <button mat-stroked-button color="accent" (click)="addWidget()" class="mt-6">
+        <mat-icon svgIcon="heroicons_outline:plus"></mat-icon> {{ 'dev_tools_add_widget_button' | translate }}
+    </button>
+
+    <div class="mt-8 flex justify-end items-center pt-6 border-t">
+        <button mat-flat-button color="accent" (click)="saveDashboardConfig()"
+            [disabled]="dashboardForm.pristine || dashboardForm.invalid || isSaving">
+            <span class="flex items-center gap-2">
+                <mat-progress-spinner *ngIf="isSaving" [diameter]="20" mode="indeterminate"></mat-progress-spinner>
+                <mat-icon *ngIf="!isSaving" svgIcon="heroicons_outline:check-circle"></mat-icon>
+                <span>{{ 'dev_tools_def_editor_dash_save_button' | translate }}</span>
+            </span>
+        </button>
+    </div>
+</div>

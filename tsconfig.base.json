@@ -1,0 +1,54 @@
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "allowSyntheticDefaultImports": true,
+    "baseUrl": ".",
+    "declaration": true,
+    "declarationMap": true,
+    "downlevelIteration": true,
+    "experimentalDecorators": true,
+    "importHelpers": true,
+    "moduleResolution": "node",
+    "sourceMap": true,
+    "target": "ES2022",
+    "module": "ES2022",
+    "useDefineForClassFields": false,
+    "lib": [
+      "ES2022",
+      "dom"
+    ],
+    "paths": {
+      "@fwk": ["packages/core/src/index.ts"],
+      "@fwk/*": ["packages/core/src/lib/*"],
+      "@fwk-layout": ["packages/core/src/lib/layout/index.ts"],
+      "@fwk-layout/*": ["packages/core/src/lib/layout/infrastructure/*"],
+      "@angular/*": [
+        "../perfil-cpau/node_modules/@angular/*"
+      ],
+      "@angular/cdk/*": [
+        "../perfil-cpau/node_modules/@angular/cdk/*"
+      ],
+      "@angular/material/*": [
+        "../perfil-cpau/node_modules/@angular/material/*"
+      ],
+      "rxjs": [
+        "../perfil-cpau/node_modules/rxjs"
+      ],
+      "rxjs/*": [
+        "../perfil-cpau/node_modules/rxjs/*"
+      ],
+      "date-fns": [
+        "../perfil-cpau/node_modules/date-fns"
+      ],
+      "date-fns/*": [
+        "../perfil-cpau/node_modules/date-fns/*"
+      ],
+      "ng-apexcharts": [
+        "../perfil-cpau/node_modules/ng-apexcharts"
+      ]
+    }
+  },
+  "angularCompilerOptions": {
+    "enableI18nLegacyMessageIdFormat": false
+  }
+}

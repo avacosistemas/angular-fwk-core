@@ -1,0 +1,70 @@
+import { Route } from '@angular/router';
+import { initialDataResolver } from './app.resolvers';
+import { AuthGuard, NoAuthGuard } from '@fwk';
+import { InitialRedirectComponent, SignedInRedirectComponent } from '@fwk';
+import { LayoutComponent } from '@fwk';
+import { generateFwkPageRoutes } from '@fwk';
+import { APP_CONFIG } from './core/config/app.config';
+import { CRUD_MODULES } from './core/registries/crud.registry';
+
+export const appRoutes: Route[] = [
+    {
+        path: '',
+        pathMatch: 'full',
+        canActivate: [NoAuthGuard],
+        component: InitialRedirectComponent
+    },
+    { path: 'signed-in-redirect', pathMatch: 'full', component: SignedInRedirectComponent },
+
+    {
+        path: '',
+        canActivate: [NoAuthGuard],
+        canActivateChild: [NoAuthGuard],
+        component: LayoutComponent,
+        data: { layout: 'empty' },
+        children: [
+            { path: 'confirmation-required', loadComponent: () => import('@avacosistemas/core').then(m => m.AuthConfirmationRequiredComponent) },
+            { path: 'forgot-password', loadComponent: () => import('@avacosistemas/core').then(m => m.AuthForgotPasswordComponent) },
+            { path: 'reset-password', loadComponent: () => import('@avacosistemas/core').then(m => m.AuthResetPasswordComponent) },
+            { path: 'sign-in', loadComponent: () => import('@avacosistemas/core').then(m => m.AuthSignInComponent) },
+            { path: 'sign-up', loadComponent: () => import('@avacosistemas/core').then(m => m.AuthSignUpComponent) }
+        ]
+    },
+
+    {
+        path: '',
+        canActivate: [AuthGuard],
+        canActivateChild: [AuthGuard],
+        component: LayoutComponent,
+        resolve: { initialData: initialDataResolver },
+        children: [
+            { path: 'unlock-session', data: { layout: 'empty' }, loadComponent: () => import('@avacosistemas/core').then(m => m.AuthUnlockSessionComponent) },
+            {
+                path: 'change-password',
+                data: { layout: 'empty' },
+                loadComponent: () => import('@avacosistemas/core').then(m => m.AuthChangePasswordComponent)
+            },
+            ...(APP_CONFIG.customRoutes || []),
+            ...CRUD_MODULES.map(crudModule => ({
+                path: crudModule.path,
+                data: {
+                    //
+                },
+                loadChildren: () => Promise.resolve(generateFwkPageRoutes(crudModule.loader))
+            })),
+        ]
+    },
+
+    {
+        path: '',
+        component: LayoutComponent,
+        data: { layout: 'empty' },
+        children: [
+            { path: 'sign-out', loadComponent: () => import('@avacosistemas/core').then(m => m.AuthSignOutComponent) },
+        ]
+    },
+
+    { path: '403', loadComponent: () => import('@avacosistemas/core').then(m => m.Error403Component) },
+    { path: '404', loadComponent: () => import('@avacosistemas/core').then(m => m.Error404Component) },
+    { path: '**', redirectTo: '/404' }
+];

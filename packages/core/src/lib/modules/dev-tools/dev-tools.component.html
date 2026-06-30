@@ -1,0 +1,83 @@
+<div class="flex flex-col flex-auto min-w-0">
+    <div
+        class="flex flex-col sm:flex-row flex-0 sm:items-center sm:justify-between p-6 pt-0 border-b bg-card dark:bg-transparent">
+        <div class="min-w-0">
+            <ng-container *ngIf="!selectedTool">
+                <div
+                    class="text-3xl font-extrabold tracking-tight items-center flex gap-3 leading-7 sm:leading-10 truncate">
+                    <mat-icon class="icon-size-6" [svgIcon]="'heroicons_solid:wrench-screwdriver'"></mat-icon>
+                    <span>{{ 'dev_tools_title' | translate }}</span>
+                </div>
+                <div class="text-base text-secondary">{{ 'dev_tools_subtitle' | translate }}</div>
+            </ng-container>
+
+            <ng-container *ngIf="selectedTool">
+                <div class="flex items-center gap-4">
+                    <div>
+                        <div
+                            class="text-3xl font-extrabold tracking-tight items-center flex gap-3 leading-7 sm:leading-10 truncate">
+                            {{ selectedTool.titleKey | translate }}
+                        </div>
+                        <div class="text-base text-secondary">{{ selectedTool.descriptionKey | translate }}</div>
+                    </div>
+                </div>
+            </ng-container>
+        </div>
+
+        <div class="flex items-center mt-6 sm:mt-0 sm:ml-4">
+            <button mat-stroked-button [matMenuTriggerFor]="toolsMenu">
+                <span class="flex gap-1 items-center">
+                    <mat-icon class="mr-2" [svgIcon]="'heroicons_outline:bars-3'"></mat-icon>
+                    <span>{{ 'dev_tools_menu_button' | translate }}</span>
+                </span>
+            </button>
+            <mat-menu #toolsMenu="matMenu" class="rounded-xl">
+                <button mat-menu-item (click)="goBackToTools()">
+                    <mat-icon svgIcon="heroicons_outline:home"></mat-icon>
+                    <span>{{ 'dev_tools_back_to_overview' | translate }}</span>
+                </button>
+                <mat-divider></mat-divider>
+                <button *ngFor="let tool of tools" mat-menu-item (click)="selectTool(tool.id)">
+                    <mat-icon [svgIcon]="tool.icon"></mat-icon>
+                    <span>{{ tool.titleKey | translate }}</span>
+                </button>
+            </mat-menu>
+        </div>
+    </div>
+
+    <div class="flex-auto">
+        <div *ngIf="!selectedTool; else toolSelectedContent"
+            class="p-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+
+            <div *ngFor="let tool of tools"
+                class="group bg-card rounded-2xl shadow-lg p-6 flex flex-col items-start cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-200"
+                (click)="selectTool(tool.id)">
+
+                <mat-icon class="icon-size-10 text-accent" [svgIcon]="tool.icon"></mat-icon>
+                <h3 class="text-xl font-semibold mt-4">{{ tool.titleKey | translate }}</h3>
+                <p class="text-secondary mt-1 text-sm flex-auto">{{ tool.descriptionKey | translate }}</p>
+
+                <div class="text-accent font-medium mt-4 flex items-center">
+                    <span>{{ tool.actionKey | translate }}</span>
+                    <mat-icon class="ml-1 transition transform duration-300 group-hover:translate-x-3"
+                        svgIcon="heroicons_outline:arrow-right" style="color: inherit !important;">
+                    </mat-icon>
+                </div>
+            </div>
+        </div>
+
+        <ng-template #toolSelectedContent>
+            <div [ngSwitch]="selectedTool.id" class="h-full">
+                <fwk-crud-generator *ngSwitchCase="'crud-gen'"></fwk-crud-generator>
+                <fwk-dashboard-generator *ngSwitchCase="'dash-gen'"></fwk-dashboard-generator>
+                <fwk-nav-group-manager *ngSwitchCase="'nav-gen'"></fwk-nav-group-manager>
+                <fwk-i18n-manager *ngSwitchCase="'i18n-gen'"></fwk-i18n-manager>
+                <fwk-definition-editor *ngSwitchCase="'def-editor'"></fwk-definition-editor>
+            </div>
+        </ng-template>
+    </div>
+
+    <ng-container *ngIf="overlayState$ | async as state">
+        <fwk-generation-success-overlay *ngIf="state.show" [message]="state.message"></fwk-generation-success-overlay>
+    </ng-container>
+</div>

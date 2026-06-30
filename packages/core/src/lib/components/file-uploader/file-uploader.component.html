@@ -1,0 +1,82 @@
+<div class="flex flex-col w-full">
+    <label *ngIf="label" class="block text-sm font-medium text-secondary mb-2">
+        {{ label }} <span *ngIf="required" class="text-red-500">*</span>
+    </label>
+
+    <input hidden type="file" #fileInput (change)="onFileSelected($event)" [accept]="accept" [multiple]="multiple"
+        [disabled]="isDisabled || isLoading">
+
+    <div class="relative w-full cursor-pointer group" (click)="!isDisabled && !isLoading && triggerFileInput()"
+        [class.cursor-not-allowed]="isDisabled || isLoading" (dragover)="onDragOver($event)"
+        (dragleave)="onDragLeave($event)" (drop)="onDrop($event)">
+
+        <div class="flex transition-all duration-500 ease-in-out border-2 border-dashed rounded-xl overflow-hidden"
+            [ngClass]="{
+            'flex-row items-center p-2 border-green-500 bg-green-50/30 dark:bg-green-900/10 h-auto': hasFiles && !isLoading && !errorMessage,
+            'flex-col items-center justify-center min-h-[220px] border-gray-300 dark:border-gray-600 hover:border-accent-400 hover:bg-gray-50 dark:hover:bg-gray-800': !hasFiles && !isLoading && !errorMessage,
+            'flex-col items-center justify-center min-h-[220px] border-accent-500 bg-accent-50/50 dark:bg-accent-900/20': isLoading || isDragging,
+            'flex-col items-center justify-center min-h-[220px] border-red-500 bg-red-50 dark:bg-red-900/10': errorMessage
+         }">
+
+            <ng-container *ngIf="!hasFiles && !isLoading">
+                <div class="flex flex-col items-center w-full justify-center animate-fadeIn px-6 py-10">
+                    <div
+                        class="p-5 rounded-full bg-accent-50 dark:bg-accent-900/30 text-accent-600 mb-4 group-hover:scale-110 transition-transform duration-300">
+                        <mat-icon class="icon-size-12" color="accent" [svgIcon]="icon"></mat-icon>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-800 dark:text-gray-100 text-center">
+                        {{ title || ('file_uploader_default_title' | translate) }}
+                    </h3>
+                    <p class="mt-2 text-sm text-secondary text-center max-w-xs">
+                        {{ description || ('file_uploader_default_description' | translate) }}
+                    </p>
+                    <p *ngIf="accept" class="mt-2 text-xs text-gray-400 uppercase tracking-wide">
+                        {{ accept.split(',').join(', ') }}
+                    </p>
+                </div>
+            </ng-container>
+
+            <ng-container *ngIf="isLoading">
+                <div class="flex flex-col items-center justify-center w-full p-6">
+                    <mat-spinner [diameter]="48" color="accent" mode="indeterminate" class="mb-4"></mat-spinner>
+                    <span class="text-accent-600 font-bold animate-pulse tracking-wide">
+                        {{ loadingText || ('file_uploader_processing' | translate) }}
+                    </span>
+                </div>
+            </ng-container>
+
+            <ng-container *ngIf="hasFiles && !isLoading">
+                <div class="flex flex-col w-full gap-2">
+                    <div *ngFor="let file of files; let i = index"
+                        class="flex items-center justify-between w-full animate-slideInRight bg-white dark:bg-gray-800 p-2 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700">
+                        <div class="flex items-center space-x-4 min-w-0">
+                            <div class="flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-full shadow-sm transition-colors duration-200"
+                                [ngClass]="getFileColorClass(file)">
+                                <mat-icon class="icon-size-5" style="color: inherit;" [svgIcon]="getFileIcon(file)"></mat-icon>
+                            </div>
+
+                            <div class="flex flex-col overflow-hidden min-w-0">
+                                <span class="text-sm font-bold text-gray-900 dark:text-gray-100 truncate"
+                                    [matTooltip]="file.name">
+                                    {{ file.name }}
+                                </span>
+                                <span class="text-[10px] text-gray-500 dark:text-gray-400">
+                                    {{ formatBytes(file.size) }}
+                                </span>
+                            </div>
+                        </div>
+
+                        <button mat-icon-button color="warn" (click)="removeFile(i, $event)"
+                            [matTooltip]="'file_uploader_remove' | translate">
+                            <mat-icon class="icon-size-5" svgIcon="heroicons_outline:trash"></mat-icon>
+                        </button>
+                    </div>
+                </div>
+            </ng-container>
+        </div>
+    </div>
+
+    <mat-error *ngIf="errorMessage" class="text-xs mt-2 ml-1">
+        {{ errorMessage }}
+    </mat-error>
+</div>

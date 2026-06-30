@@ -1,0 +1,13 @@
+import { Injector, inject } from '@angular/core';
+import { NavigationService } from '@fwk';
+import { forkJoin } from 'rxjs';
+
+export const initialDataResolver = () =>
+{
+    const injector = inject(Injector);
+    const navigationService = injector.get(NavigationService);
+
+    return forkJoin([
+        navigationService.get(),
+    ]);
+};

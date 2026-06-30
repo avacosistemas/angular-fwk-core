@@ -1,0 +1,25 @@
+:host {
+    display: block;
+    width: 100%;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+
+.no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.text-secondary {
+    color: var(--fwk-text-secondary);
+}
+
+.hover\:text-primary:hover {
+    color: var(--fwk-primary) !important;
+}
+
+.opacity-60 {
+    opacity: 0.6;
+}

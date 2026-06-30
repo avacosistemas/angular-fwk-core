@@ -1,0 +1,89 @@
+<div class="flex flex-col max-h-[90vh]">
+    <div class="flex flex-0 items-center justify-between pl-6 pr-4 h-16 border-b">
+        <h2 class="text-2xl font-semibold truncate">{{ 'dev_tools_crud_gen_action_form_modal_title' | translate }} "{{
+            data.actionName }}"</h2>
+        <button mat-icon-button (click)="onCancel()" [matTooltip]="'modal_button_close' | translate">
+            <mat-icon [svgIcon]="'heroicons_outline:x-mark'"></mat-icon>
+        </button>
+    </div>
+
+    <div mat-dialog-content class="flex-auto overflow-y-auto p-6" [formGroup]="form">
+        <div formArrayName="fields" class="overflow-auto rounded-lg border">
+            <table mat-table [dataSource]="dataSource" class="w-full">
+
+                <!-- Key Column -->
+                <ng-container matColumnDef="key">
+                    <th mat-header-cell *matHeaderCellDef> {{ 'dev_tools_crud_gen_action_form_modal_col_key' | translate
+                        }} </th>
+                    <td mat-cell *matCellDef="let fieldGroup; let i = index" [formGroupName]="i">
+                        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                            <mat-select formControlName="key" required
+                                (selectionChange)="onFieldKeyChange(fieldGroup, $event.value)">
+                                <mat-option *ngFor="let f of data.allAvailableFields" [value]="f.key">{{ f.key
+                                    }}</mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </td>
+                </ng-container>
+
+                <!-- Label Column -->
+                <ng-container matColumnDef="label">
+                    <th mat-header-cell *matHeaderCellDef> {{ 'dev_tools_crud_gen_action_form_modal_col_label' |
+                        translate }} </th>
+                    <td mat-cell *matCellDef="let fieldGroup; let i = index" [formGroupName]="i">
+                        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                            <input matInput formControlName="label" required>
+                        </mat-form-field>
+                    </td>
+                </ng-container>
+
+                <!-- Control Type Column -->
+                <ng-container matColumnDef="controlType">
+                    <th mat-header-cell *matHeaderCellDef> {{ 'dev_tools_crud_gen_action_form_modal_col_control_type' |
+                        translate }} </th>
+                    <td mat-cell *matCellDef="let fieldGroup; let i = index" [formGroupName]="i">
+                        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                            <mat-select formControlName="controlType" required>
+                                <mat-option *ngFor="let type of controlTypeChoices" [value]="type">{{ type
+                                    }}</mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </td>
+                </ng-container>
+
+                <!-- Required Column -->
+                <ng-container matColumnDef="required">
+                    <th mat-header-cell *matHeaderCellDef class="justify-center"> {{
+                        'dev_tools_crud_gen_action_form_modal_col_required' | translate }} </th>
+                    <td mat-cell *matCellDef="let fieldGroup; let i = index" [formGroupName]="i" class="text-center">
+                        <mat-checkbox formControlName="required"></mat-checkbox>
+                    </td>
+                </ng-container>
+
+                <!-- Actions Column -->
+                <ng-container matColumnDef="actions">
+                    <th mat-header-cell *matHeaderCellDef></th>
+                    <td mat-cell *matCellDef="let element; let i = index;">
+                        <button mat-icon-button color="warn" (click)="removeField(i)"
+                            [matTooltip]="'dev_tools_delete_tooltip' | translate">
+                            <mat-icon>delete</mat-icon>
+                        </button>
+                    </td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+            </table>
+        </div>
+        <button mat-stroked-button color="accent" (click)="addField()" class="mt-4">
+            <mat-icon>add</mat-icon> {{ 'dev_tools_add_field_button' | translate }}
+        </button>
+    </div>
+
+    <div mat-dialog-actions class="flex items-center justify-end p-6 border-t">
+        <button mat-button (click)="onCancel()">{{ 'modal_button_cancel' | translate }}</button>
+        <button mat-flat-button color="accent" (click)="onSave()" [disabled]="form.invalid">
+            {{ 'modal_button_save' | translate }}
+        </button>
+    </div>
+</div>

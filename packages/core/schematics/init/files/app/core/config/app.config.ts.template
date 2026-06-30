@@ -1,0 +1,132 @@
+import { Route } from '@angular/router';
+import { FwkConfig } from '@avacosistemas/core';
+
+export interface AppColors {
+    primary: string;
+    accent: string;
+    warn: string;
+    bg: {
+        default: string;
+        card: string;
+        dialog: string;
+        hover: string;
+    };
+    text: {
+        default: string;
+        secondary: string;
+        hint: string;
+        disabled: string;
+    };
+    border: string;
+    divider: string;
+    icon: string;
+    dark?: {
+        bg: {
+            default: string;
+            card: string;
+            dialog: string;
+            hover: string;
+        };
+        text: {
+            default: string;
+            secondary: string;
+            hint: string;
+            disabled: string;
+        };
+        border: string;
+        divider: string;
+        icon: string;
+    };
+}
+
+export const APP_CONFIG: {
+    brand: NonNullable<FwkConfig['brand']>;
+    welcome: NonNullable<FwkConfig['welcome']>;
+    sidebar: NonNullable<FwkConfig['sidebar']>;
+    search: NonNullable<FwkConfig['search']>;
+    routing: NonNullable<FwkConfig['routing']>;
+    colors: AppColors;
+    customRoutes: Route[];
+    autocompleteWaitingTime: number;
+} = {
+    brand: {
+        name: '<%= appName %>',
+        logo: {
+            auth: 'assets/images/logo/logo.svg',
+            sidebar: 'assets/images/logo/logo.svg',
+        },
+        isologo: 'assets/images/logo/logo.svg',
+        style: {
+            auth: {
+                showName: false,
+                containerClass: 'justify-start',
+                imgClass: 'h-10 w-16',
+                nameClass: 'text-xl font-bold',
+            },
+            sidebar: {
+                showName: false,
+                containerClass: 'w-16',
+                imgClass: 'h-10',
+                nameClass: 'text-xl font-bold',
+            },
+        },
+    },
+    welcome: {
+        titleLine1: 'Administrador de',
+        titleLine2: 'Contenidos',
+        signInSubtitle: '¡Bienvenido! Desde aquí podrás gestionar los contenidos.',
+    },
+    sidebar: {
+        opened: true,
+        collapseIcon: true,
+    },
+    search: {
+        showButton: true,
+    },
+    routing: {
+        redirectOnLogout: '/sign-in',
+        defaultRedirect: null,
+        welcomeDashboard: true,
+    },
+    colors: {
+        primary: '#3b82f6',
+        accent: '#3b82f6',
+        warn: '#dc2626',
+        bg: {
+            default: '#f1f5f9',
+            card: '#ffffff',
+            dialog: '#ffffff',
+            hover: 'rgba(148, 163, 184, 0.12)',
+        },
+        text: {
+            default: '#1e293b',
+            secondary: '#64748b',
+            hint: '#94a3b8',
+            disabled: '#94a3b8',
+        },
+        border: '#e2e8f0',
+        divider: '#e2e8f0',
+        icon: '#64748b',
+        dark: {
+            bg: {
+                default: '#0f172a',
+                card: '#1e293b',
+                dialog: '#1e293b',
+                hover: 'rgba(255, 255, 255, 0.05)',
+            },
+            text: {
+                default: '#ffffff',
+                secondary: '#94a3b8',
+                hint: '#64748b',
+                disabled: '#475569',
+            },
+            border: '#f1f5f9',
+            divider: '#f1f5f9',
+            icon: '#94a3b8',
+        },
+    },
+    customRoutes: [
+        { path: 'welcome', loadChildren: () => import('app/modules/welcome/welcome.routes') }
+    ],
+    autocompleteWaitingTime: 700,
+};

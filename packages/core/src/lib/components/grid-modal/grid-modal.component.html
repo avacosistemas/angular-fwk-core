@@ -1,0 +1,32 @@
+<div class="flex flex-col max-h-screen">
+
+    <div class="flex flex-0 items-center justify-between pl-6 pr-4 h-16 border-b">
+        <h2 class="text-2xl font-semibold">{{ data.title || ('grid_modal_default_title' | translate) }}</h2>
+        <button
+            mat-icon-button
+            (click)="onNoClick()"
+            [matTooltip]="'modal_button_close' | translate">
+            <mat-icon [svgIcon]="'heroicons_outline:x-mark'"></mat-icon>
+        </button>
+    </div>
+
+    <div mat-dialog-content class="flex-auto overflow-y-auto p-6">
+        <div class="relative overflow-hidden rounded-2xl shadow bg-card">
+            <fwk-crud-table
+                *ngIf="dataSource"
+                [datasource]="dataSource"
+                [grid]="data.gridDef">
+            </fwk-crud-table>
+        </div>
+    </div>
+
+    <div mat-dialog-actions class="flex items-center justify-end p-6 border-t">
+        <button
+            mat-flat-button
+            color="accent"
+            (click)="onNoClick()">
+            {{ 'modal_button_close' | translate }}
+        </button>
+    </div>
+
+</div>

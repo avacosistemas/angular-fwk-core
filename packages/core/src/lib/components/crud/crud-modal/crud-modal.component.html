@@ -1,0 +1,49 @@
+<div class="flex flex-col max-h-screen crud-modal" [ngClass]="[getFuncName() + '-modal', getUrl() + '-modal']">
+
+    <div class="flex flex-0 items-center justify-between pl-6 pr-4 h-16 relative">
+        <h2 class="text-2xl font-semibold">{{ titleLabel }}</h2>
+        <button mat-icon-button (click)="onNoClick()" [disabled]="submitting"
+            [matTooltip]="'modal_button_close' | translate">
+            <mat-icon [svgIcon]="'heroicons_outline:x-mark'"></mat-icon>
+        </button>
+
+        <mat-progress-bar *ngIf="(loading$ | async) || submitting" mode="indeterminate" class="absolute bottom-0 left-0 w-full z-50"></mat-progress-bar>
+    </div>
+
+    <div mat-dialog-content class="flex-auto overflow-y-auto p-6 border-t border-gray-200 dark:border-gray-700 relative">
+        <fwk-dynamic-form-component cdkFocusInitial #dynamicForm [entity]="entity" [isEdit]="isEdit" [fields]="fields"
+            [handlerFieldSourceData]="handlerFieldSourceData" [parentForm]="form"
+            (objectModified)="objectModified($event)" (onFieldsChanges)="fieldsChanges(fields, $event)"
+            (onChangeEntity)="onChangeEntity($event)">
+        </fwk-dynamic-form-component>
+    </div>
+
+    <div mat-dialog-actions
+        class="flex items-center justify-end p-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+        <ng-container *ngIf="!isEdit">
+            <button class="ml-2 fwk-mat-button-large" mat-stroked-button (click)="onNoClick()" [disabled]="submitting">
+                {{ 'modal_button_close' | translate }}
+            </button>
+        </ng-container>
+        <ng-container *ngIf="formDef">
+
+            <ng-container *ngFor="let action of getActions(formDef)">
+                <button mat-button (click)="submitAction(action)">
+                    {{ action.actionName }}
+                </button>
+            </ng-container>
+
+            <ng-container *ngIf="isEdit">
+                <button *ngIf="formDef?.showSubmitContinue" class="ml-2" mat-flat-button color="accent"
+                    (click)="onSubmit(true)" [disabled]="form.pristine || form.invalid || submitting">
+                    {{ 'modal_button_save_and_continue' | translate }}
+                </button>
+ 
+                <button class="ml-2" mat-flat-button color="accent" (click)="onSubmit()"
+                    [disabled]="form.pristine || form.invalid || submitting">
+                    {{ 'modal_button_save' | translate }}
+                </button>
+            </ng-container>
+        </ng-container>
+    </div>
+</div>

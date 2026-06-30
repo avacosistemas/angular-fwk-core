@@ -1,0 +1,26 @@
+<div class="flex flex-col max-h-screen" [ngClass]="data.modalName ? data.modalName + '-html-modal' : ''">
+
+    <div class="flex flex-0 items-center justify-between pl-6 pr-4 h-16 border-b">
+        <h2 class="text-2xl font-semibold">{{ data.title || ('html_modal_default_title' | translate) }}</h2>
+        <button
+            mat-icon-button
+            (click)="close()"
+            [matTooltip]="'modal_button_close' | translate">
+            <mat-icon [svgIcon]="'heroicons_outline:x-mark'"></mat-icon>
+        </button>
+    </div>
+
+    <div mat-dialog-content class="flex-auto overflow-y-auto p-6 prose dark:prose-invert">
+        <div [innerHTML]="data.html | sanitizeHtml"></div>
+    </div>
+
+    <div mat-dialog-actions class="flex items-center justify-end p-6 border-t">
+        <button
+            mat-flat-button
+            color="accent"
+            (click)="close()">
+            {{ 'modal_button_close' | translate }}
+        </button>
+    </div>
+
+</div>

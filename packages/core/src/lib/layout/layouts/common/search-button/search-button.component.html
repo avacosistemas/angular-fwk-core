@@ -1,0 +1,16 @@
+<button
+    *ngIf="searchEnabled"
+    mat-button
+    class="hidden md:inline-flex px-3"
+    (click)="openSearchModal($event)">
+    <mat-icon [svgIcon]="'heroicons_outline:document-magnifying-glass'"></mat-icon>
+    <span class="ml-2 text-sm text-secondary">{{ 'search_button_label' | translate }}</span>
+</button>
+
+<button
+    *ngIf="searchEnabled"
+    mat-icon-button
+    class="md:hidden px-3"
+    (click)="openSearchModal($event)">
+    <mat-icon [svgIcon]="'heroicons_outline:magnifying-glass'"></mat-icon>
+</button>

@@ -1,0 +1,34 @@
+<mat-form-field
+    class="w-full"
+    [style.width]="config.options?.width"
+    appearance="outline">
+
+    <mat-label>{{ config.label || ('tags' | translate) }}</mat-label>
+
+    <mat-chip-grid #chipGrid [attr.aria-label]="'tags_input_aria_label' | translate" [errorStateMatcher]="matcher">
+        <mat-chip-row
+            *ngFor="let item of items"
+            [removable]="!isDisabled"
+            (removed)="remove(item)"
+            (click)="copyToClipboard(item)"
+            [matTooltip]="'tags_copy_tooltip' | translate:{value: item}"
+            [class.cursor-pointer]="!isDisabled"
+            [class.cursor-default]="isDisabled">
+            {{ item }}
+            <button matChipRemove [disabled]="isDisabled" *ngIf="!isDisabled">
+                <mat-icon>cancel</mat-icon>
+            </button>
+        </mat-chip-row>
+    </mat-chip-grid>
+
+    <input
+        [placeholder]="config.options?.inputPlaceholder || ('tags_add_placeholder' | translate)"
+        [matChipInputFor]="chipGrid"
+        [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+        [matChipInputAddOnBlur]="true"
+        (matChipInputTokenEnd)="add($event)"
+        [disabled]="isDisabled"/>
+
+    <mat-error *ngIf="errorMessage">{{ errorMessage }}</mat-error>
+
+</mat-form-field>

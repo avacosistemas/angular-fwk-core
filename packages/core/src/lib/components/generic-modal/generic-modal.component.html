@@ -1,0 +1,33 @@
+<div class="flex flex-col max-h-screen min-w-[320px] max-w-[600px]">
+    <div class="flex items-center justify-between pl-6 pr-4 h-16 border-b" [ngClass]="getHeaderClass()">
+
+        <div class="flex items-center gap-3">
+            <div class="flex items-center justify-center w-8 h-8 rounded-full" [ngClass]="getIconBackgroundClass()">
+                <mat-icon [svgIcon]="getIconName()" [class]="getIconColorClass()"></mat-icon>
+            </div>
+            <h2 class="text-xl font-semibold m-0">{{ data.title }}</h2>
+        </div>
+
+        <button *ngIf="data.showCloseButton !== false" mat-icon-button (click)="onClose()" [matTooltip]="'action_close' | translate">
+            <mat-icon [svgIcon]="'heroicons_outline:x-mark'"></mat-icon>
+        </button>
+    </div>
+
+    <div mat-dialog-content class="flex-auto overflow-y-auto p-6">
+        <div *ngIf="data.message" class="text-base text-secondary" [innerHTML]="data.message">
+        </div>
+
+        <div #customComponentContainer class="mt-4"></div>
+    </div>
+
+    <div mat-dialog-actions class="flex items-center justify-end p-6 pt-2 gap-2">
+        <button *ngIf="data.cancelButtonText" mat-stroked-button (click)="onCancel()">
+            {{ data.cancelButtonText }}
+        </button>
+
+        <button *ngIf="data.showConfirmButton !== false" mat-flat-button [color]="getConfirmColor()"
+            (click)="onConfirm()" [disabled]="data.customComponent && !isCustomComponentValid">
+            {{ data.confirmButtonText || ('modal_button_confirm' | translate) }}
+        </button>
+    </div>
+</div>

@@ -1,0 +1,162 @@
+<div class="flex flex-col max-h-screen">
+    <div
+        class="flex-shrink-0 flex items-center justify-between pr-4 pl-6 h-16 border-b border-gray-200 dark:border-gray-600">
+        <h2 mat-dialog-title class="text-xl font-semibold truncate m-0 p-0 flex items-center">
+            <button *ngIf="currentView !== 'main'" mat-icon-button (click)="changeView('main')" class="mr-2">
+                <mat-icon [svgIcon]="'heroicons_outline:arrow-left'"></mat-icon>
+            </button>
+            <mat-icon [svgIcon]="'heroicons_outline:calendar-days'" class="text-accent-500 mr-2"></mat-icon>
+            {{ data.title }}
+        </h2>
+        <button mat-icon-button (click)="onCancel()" [matTooltip]="'action_close' | translate">
+            <mat-icon [svgIcon]="'heroicons_outline:x-mark'"></mat-icon>
+        </button>
+    </div>
+
+    <div mat-dialog-content class="p-6 pb-3" [formGroup]="form">
+        <div [ngSwitch]="currentView">
+            <div *ngSwitchCase="'main'">
+                <h3 class="text-sm font-medium text-secondary mb-2">{{ 'datepicker_select_date_title' | translate }}</h3>
+                <div class="flex gap-3 w-full">
+                    <button type="button" (click)="changeView('day')"
+                        class="flex w-1/4 flex-col items-center justify-center rounded-lg border border-gray-300 dark:border-gray-800 hover:border-gray-100 bg-gray-100 dark:bg-gray-700 hover:dark:bg-gray-900 py-2 px-3 text-center transition-colors hover:border-accent-400 hover:bg-gray-200"
+                        [ngClass]="{'border-red-500': form.get('day').invalid && form.get('day').touched, 'border-gray-200': !form.get('day').invalid || !form.get('day').touched}">
+                        <span class=" text-xs text-gray-500 dark:text-gray-200">{{ 'day_label' | translate }}</span>
+                        <span class="text-xl font-medium text-gray-800 dark:text-white">{{ form.get('day').value || '--'
+                            }}</span>
+                    </button>
+
+                    <button type="button" (click)="changeView('month')"
+                        class="flex flex-grow flex-col items-center justify-center rounded-lg border border-gray-300 dark:border-gray-800 hover:border-gray-100 bg-gray-100 dark:bg-gray-700 hover:dark:bg-gray-900 py-2 px-3 text-center transition-colors hover:border-accent-400 hover:bg-gray-200">
+                        <span class=" text-xs text-gray-500 dark:text-gray-200">{{ 'month_label' | translate }}</span>
+                        <span class="text-xl font-medium text-gray-800 dark:text-white capitalize">{{
+                            getMonthName(form.get('month').value) || '----' }}</span>
+                    </button>
+
+                    <button type="button" (click)="changeView('year')"
+                        class="flex w-1/4 flex-col items-center justify-center rounded-lg border border-gray-300 dark:border-gray-800 hover:border-gray-100 bg-gray-100 dark:bg-gray-700 hover:dark:bg-gray-900 py-2 px-3 text-center transition-colors hover:border-accent-400 hover:bg-gray-200">
+                        <span class=" text-xs text-gray-500 dark:text-gray-200">{{ 'year_label' | translate }}</span>
+                        <span class="text-xl font-medium text-gray-800 dark:text-white">{{ form.get('year').value ||
+                            '----' }}</span>
+                    </button>
+                </div>
+                <mat-error *ngIf="form.hasError('invalidDate') && form.get('day').touched" class="mt-1 text-xs">
+                    {{ 'datepicker_invalid_date_message' | translate }}
+                </mat-error>
+
+                <div *ngIf="data.withHourAndMin" class="mt-4">
+                    <div class="flex gap-3 w-full">
+                        <button type="button" (click)="changeView('hour')"
+                            class="flex w-1/2 flex-col items-center justify-center rounded-lg border border-gray-300 dark:border-gray-800 hover:border-gray-100 bg-gray-100 dark:bg-gray-700 hover:dark:bg-gray-900 py-2 px-3 text-center transition-colors hover:border-accent-400 hover:bg-gray-200">
+                            <span class=" text-xs text-gray-500 dark:text-gray-200">{{ 'hour_label' | translate
+                                }}</span>
+                            <span class="text-xl font-medium text-gray-800 dark:text-white">{{ form.get('hour').value |
+                                number: '2.0' }}</span>
+                        </button>
+                        <button type="button" (click)="changeView('minute')"
+                            class="flex w-1/2 flex-col items-center justify-center rounded-lg border border-gray-300 dark:border-gray-800 hover:border-gray-100 bg-gray-100 dark:bg-gray-700 hover:dark:bg-gray-900 py-2 px-3 text-center transition-colors hover:border-accent-400 hover:bg-gray-200">
+                            <span class=" text-xs text-gray-500 dark:text-gray-200">{{ 'minute_label' | translate
+                                }}</span>
+                            <span class="text-xl font-medium text-gray-800 dark:text-white">{{ form.get('minute').value
+                                | number: '2.0' }}</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="mt-6 pt-4 border-t border-gray-200 dark:border-gray-600">
+                    <mat-checkbox formControlName="useCurrentDateTime">
+                        {{ data.withHourAndMin ? ('datepicker_use_current_datetime' | translate) : ('datepicker_use_current_date' | translate) }}
+                    </mat-checkbox>
+                </div>
+            </div>
+
+            <div *ngSwitchCase="'day'">
+                <div class="grid grid-cols-7 gap-1 mb-2">
+                    <div *ngFor="let day of weekDays" class="text-center text-sm font-bold text-gray-400">{{ day }}
+                    </div>
+                </div>
+                <div class="grid grid-cols-7 gap-1">
+                    <button *ngFor="let day of calendarDays" type="button" (click)="selectDay(day)"
+                        class="flex h-10 w-full items-center justify-center rounded-lg text-sm transition-colors"
+                        [ngClass]="{
+                            'bg-accent-600 text-white font-semibold hover:bg-accent-700': day.day === form.get('day').value && day.isCurrentMonth,
+                            'hover:bg-gray-200 dark:hover:bg-gray-700': day.isCurrentMonth && day.day !== form.get('day').value,
+                            'text-gray-400 dark:text-gray-700 cursor-default': !day.isCurrentMonth
+                        }">
+                        {{ day.day }}
+                    </button>
+                </div>
+            </div>
+
+            <div *ngSwitchCase="'month'">
+                <div class="grid grid-cols-3 gap-2">
+                    <button *ngFor="let m of months" type="button" (click)="selectValue('month', m.value)"
+                        class="flex h-12 items-center justify-center rounded-lg text-sm capitalize transition-colors"
+                        [ngClass]="{
+                            'bg-accent-600 text-white font-semibold hover:bg-accent-700': m.value === form.get('month').value,
+                            'hover:bg-gray-200 bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-600': m.value !== form.get('month').value
+                        }">
+                        {{ m.label }}
+                    </button>
+                </div>
+            </div>
+
+            <div *ngSwitchCase="'year'">
+                <div class="grid max-h-52 grid-cols-4 gap-2 overflow-y-auto pr-2">
+                    <button *ngFor="let y of years" type="button" (click)="selectValue('year', y)"
+                        class="flex h-10 items-center justify-center rounded-lg text-sm transition-colors" [ngClass]="{
+                            'bg-accent-600 text-white font-semibold hover:bg-accent-700': y === form.get('year').value,
+                            'hover:bg-gray-200 bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-600': y !== form.get('year').value
+                        }">
+                        {{ y }}
+                    </button>
+                </div>
+                <mat-divider class="my-4"></mat-divider>
+                <p class="text-sm text-gray-500 mb-2">{{ 'datepicker_custom_year_label' | translate }}</p>
+                <mat-form-field appearance="outline" subscriptSizing="dynamic" class="w-full">
+                    <mat-label>{{ 'year_label' | translate }}</mat-label>
+                    <input matInput type="number" formControlName="year" (change)="form.get('year').markAsDirty()">
+                </mat-form-field>
+            </div>
+
+            <div *ngSwitchCase="'hour'">
+                <div class="grid grid-cols-6 gap-2">
+                    <button *ngFor="let h of hours" type="button" (click)="selectValue('hour', h)"
+                        class="flex h-10 items-center justify-center rounded-lg text-sm transition-colors" [ngClass]="{
+                            'bg-accent-600 text-white font-semibold hover:bg-accent-700': h === form.get('hour').value,
+                            'hover:bg-gray-200 bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-600': h !== form.get('hour').value
+                        }">
+                        {{ h | number: '2.0' }}
+                    </button>
+                </div>
+            </div>
+            <div *ngSwitchCase="'minute'">
+                <div class="grid grid-cols-4 gap-2">
+                    <button *ngFor="let min of minuteOptions" type="button" (click)="selectValue('minute', min)"
+                        class="flex h-10 items-center justify-center rounded-lg text-sm transition-colors" [ngClass]="{
+                            'bg-accent-600 text-white font-semibold hover:bg-accent-700': min === form.get('minute').value,
+                            'hover:bg-gray-200 bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-600': min !== form.get('minute').value
+                        }">
+                        {{ min | number: '2.0' }}
+                    </button>
+                </div>
+
+                <mat-divider class="my-4"></mat-divider>
+                <p class="text-sm text-gray-500 mb-2">{{ 'datepicker_custom_minute_label' | translate }}</p>
+                <mat-form-field appearance="outline" subscriptSizing="dynamic" class="w-full">
+                    <mat-label>{{ 'minute_label' | translate }}</mat-label>
+                    <input matInput type="number" formControlName="minute" (change)="form.get('minute').markAsDirty()">
+                </mat-form-field>
+            </div>
+        </div>
+    </div>
+
+    <div mat-dialog-actions
+        class="flex flex-shrink-0 items-center justify-end p-6 pt-4 border-none">
+        <button mat-button (click)="onCancel()">{{ 'modal_button_cancel' | translate }}</button>
+        <button mat-flat-button color="accent" (click)="onSave()"
+            [disabled]="form.invalid && !form.get('useCurrentDateTime').value">
+            {{ 'modal_button_confirm' | translate }}
+        </button>
+    </div>
+</div>

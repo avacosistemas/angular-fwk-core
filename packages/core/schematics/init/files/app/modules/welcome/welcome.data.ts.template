@@ -1,0 +1,36 @@
+import { WelcomeSection } from './welcome.types';
+
+/**
+ * Welcome page sections and cards.
+ * Edit this file to customize the welcome page for your application.
+ * Cards without 'permission' are always visible.
+ */
+export const WELCOME_DATA: WelcomeSection[] = [
+    {
+        title: 'Accesos Rápidos',
+        items: [
+            {
+                title: 'Cambiar Contraseña',
+                description: 'Actualiza tu clave de acceso al sistema.',
+                icon: 'heroicons_outline:lock-closed',
+                route: '/change-password',
+                color: 'primary',
+            },
+            {
+                title: 'Configuración',
+                description: 'Ajustes de la aplicación y preferencias.',
+                icon: 'heroicons_outline:cog-6-tooth',
+                route: '/settings',
+                color: 'slate',
+            },
+            {
+                title: 'Cerrar Sesión',
+                description: 'Finaliza tu sesión actual de forma segura.',
+                icon: 'heroicons_outline:arrow-right-on-rectangle',
+                route: '/sign-out',
+                color: 'rose',
+            },
+        ],
+    },
+];
+

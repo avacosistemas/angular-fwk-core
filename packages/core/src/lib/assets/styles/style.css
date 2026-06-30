@@ -1,0 +1,272 @@
+.cdk-overlay-dark-backdrop {
+    background: rgba(0, 0, 0, 0.32);
+    backdrop-filter: blur(6px) !important;
+}
+
+.mat-mdc-form-field-bottom-align::before {
+    display: none !important;
+}
+
+.mat-mdc-form-field-error-wrapper {
+    position: relative !important;
+    margin-top: 5px !important;
+}
+
+.color-picker {
+    top: 40px !important;
+    left: 8px !important;
+    border-radius: 10px !important;
+    left: 0 !important;
+    overflow: hidden !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    margin: 0 auto !important;
+    height: min-content !important;
+    position: absolute !important;
+}
+
+color-piker {
+    bottom: 0 !important;
+    position: absolute !important;
+    margin: 0 auto !important;
+}
+
+.mat-expansion-panel:not(.mat-expanded) .mat-expansion-panel-header:not([aria-disabled=true]):hover {
+    background: inherit !important;
+}
+
+.mat-expansion-panel-body {
+    padding-top: 0px !important;
+}
+
+.mdc-text-field--outlined.mdc-text-field--disabled .mdc-text-field__input {
+    color: #1e293b !important;
+}
+
+.mdc-text-field--outlined.mdc-text-field--disabled .mdc-floating-label,
+.mdc-text-field--outlined.mdc-text-field--disabled .mdc-floating-label--float-above {
+    color: #3a475d !important;
+}
+
+.dark {
+    .mat-mdc-radio-button .mdc-radio__outer-circle {
+        border-color: rgba(255, 255, 255, 0.6) !important;
+    }
+
+    .mat-mdc-radio-button.mat-mdc-radio-checked .mdc-radio__outer-circle {
+        border-color: #2887fb !important;
+    }
+
+    .mat-mdc-radio-button.mat-mdc-radio-checked .mdc-radio__inner-circle {
+        border-color: #2887fb !important;
+    }
+
+    .mat-mdc-radio-button .mat-mdc-radio-ripple .mat-ripple-element {
+        background-color: rgba(129, 140, 248, 0.3) !important;
+    }
+
+    .mat-mdc-radio-button.mat-mdc-radio-disabled label {
+        color: rgba(255, 255, 255, 0.38) !important;
+    }
+
+    .mdc-text-field--outlined.mdc-text-field--disabled .mdc-text-field__input {
+        color: #f3f7ff !important;
+    }
+
+    .mdc-text-field--outlined.mdc-text-field--disabled .mdc-floating-label,
+    .mdc-text-field--outlined.mdc-text-field--disabled .mdc-floating-label--float-above {
+        color: #96abcf !important;
+    }
+
+    input[disabled] {
+        -webkit-text-fill-color: rgb(239 243 249) !important;
+    }
+
+    textarea[disabled] {
+        -webkit-text-fill-color: rgb(239 243 249) !important;
+    }
+}
+
+:root {
+    --color-primary: #2563eb;
+    --color-primary-hover: #3b82f6;
+    --color-error: #ef4444;
+    --color-error-hover: #f87171;
+}
+
+.theme-default {
+    --focus-color: var(--color-primary);
+    --error-color: var(--color-error);
+}
+
+.theme-default.dark {
+    --focus-color: #60a5fa;
+    --error-color: #f87171;
+}
+
+.theme-default .mat-mdc-form-field.mat-focused:not(.mat-form-field-invalid) {
+    --mdc-outlined-field-focus-outline-color: var(--focus-color);
+    --mdc-outlined-field-focus-label-text-color: var(--focus-color);
+    --mdc-outlined-field-active-label-text-color: var(--focus-color);
+}
+
+.theme-default .mat-focused:not(.mat-form-field-invalid) .mdc-floating-label {
+    color: var(--focus-color) !important;
+}
+
+.theme-default .mat-form-field-invalid {
+    --mdc-outlined-field-error-outline-color: var(--error-color);
+    --mdc-outlined-field-error-focus-outline-color: var(--error-color);
+    --mdc-outlined-field-error-hover-outline-color: var(--error-color);
+
+    --mdc-outlined-field-error-label-text-color: var(--error-color);
+    --mdc-outlined-field-error-focus-label-text-color: var(--error-color);
+}
+
+.theme-default .mat-mdc-form-field-error,
+.theme-default .mat-mdc-form-field-hint {
+    color: var(--error-color) !important;
+}
+
+.theme-default .mat-form-field-invalid .mdc-floating-label,
+.theme-default .mat-form-field-invalid .mdc-text-field__input {
+    color: var(--error-color) !important;
+    caret-color: var(--error-color) !important;
+}
+
+.theme-default .mdc-text-field__input {
+    caret-color: var(--focus-color);
+}
+
+button mat-icon.mat-icon {
+    color: inherit !important;
+}
+
+.mat-mdc-tab-label-container {
+    background-color: white !important;
+    margin-left: 0px !important;
+    margin-right: 0px !important;
+}
+
+.dark .mat-mdc-tab-label-container {
+    background-color: #111827 !important;
+}
+
+.mat-step-icon-content {
+    color: white !important;
+}
+
+/* -------------------------------------------------------------------------- */
+/*  @ Mat Autocomplete Overrides
+/* -------------------------------------------------------------------------- */
+.mat-mdc-autocomplete-panel {
+    min-width: 100% !important;
+}
+
+.crud-actions-menu.mat-mdc-menu-panel {
+    max-height: 300px; 
+    overflow-y: auto;
+}
+
+/* -------------------------------------------------------------------------- */
+/*  @ Alert Modal Backdrop
+/* -------------------------------------------------------------------------- */
+.alert-modal-backdrop {
+    backdrop-filter: blur(6px) !important;
+    -webkit-backdrop-filter: blur(6px) !important;
+    background-color: rgba(15, 23, 42, 0.35) !important; 
+}
+
+/* -------------------------------------------------------------------------- */
+/*  @ Menu Item Warn Colors
+/* -------------------------------------------------------------------------- */
+.menu-item-warn {
+    color: rgb(220, 38, 38) !important;
+}
+.menu-item-warn mat-icon {
+    color: rgb(220, 38, 38) !important;
+}
+.menu-item-warn:hover {
+    background-color: rgba(254, 226, 226, 0.5) !important;
+    color: rgb(185, 28, 28) !important;
+}
+.menu-item-warn:hover mat-icon {
+    color: rgb(185, 28, 28) !important;
+}
+
+/* Dark mode */
+.dark .menu-item-warn {
+    color: rgb(248, 113, 113) !important;
+}
+.dark .menu-item-warn mat-icon {
+    color: rgb(248, 113, 113) !important;
+}
+.dark .menu-item-warn:hover {
+    background-color: rgba(127, 29, 29, 0.25) !important;
+    color: rgb(248, 113, 113) !important;
+}
+.dark .menu-item-warn:hover mat-icon {
+    color: rgb(248, 113, 113) !important;
+}
+
+.mat-button-toggle .mat-pseudo-checkbox {
+    display: none !important;
+}
+
+:host {
+    display: flex;
+    flex: 1 1 auto;
+    width: 100%;
+    height: 100%;
+}
+
+mat-dialog-container .mat-mdc-dialog-container,
+mat-dialog-container .mdc-dialog__surface {
+    padding: 0px !important;
+}
+
+fwk-question-modal-component .mdc-dialog__title,
+fwk-question-modal-component .mdc-dialog__actions {
+    padding: 14px 22px !important;
+}
+
+fwk-question-modal-component .mdc-dialog__content {
+    padding: 0px 25px !important;
+}
+
+apx-chart.absolute {
+    position: relative !important;
+}
+
+.mat-mdc-select-panel {
+    padding-top: 0px !important;
+    border-radius: 15px !important;
+}
+
+.mat-mdc-select-panel input {
+    border: 1px solid rgb(171, 171, 171) !important;
+    padding: 5px !important;
+    border-radius: 6px !important;
+    height: 44px !important;
+    margin-bottom: 10px !important;
+}
+
+fwk-icon-picker .mat-mdc-text-field-wrapper.mdc-text-field--outlined .mat-mdc-form-field-infix {
+    padding-bottom: 0px !important;
+}
+
+.mat-mdc-select-arrow { 
+    color: #1e293b !important;
+}
+
+.dark .mat-mdc-select-arrow { 
+    color: #5c6b85 !important;
+}
+
+.mat-mdc-select-disabled {
+    color: #1e293b !important;
+}
+
+.dark .mat-mdc-select-disabled {
+    color: #f3f7ff !important;
+}
