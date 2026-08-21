@@ -8,6 +8,7 @@ export interface BaseFieldOptions {
     fromWs?: WsDef;
     baseFilter?: boolean;
     hidden?: boolean;
+    html?: string;
 }
 
 export interface TextboxOptions extends BaseFieldOptions {
@@ -57,6 +58,10 @@ export interface PickListOptions extends BaseFieldOptions {
     titleToKey?: string;
     elementLabel: string;
     fromData?: any[];
+    icon?: string;
+    showSelectAll?: boolean;
+    hideSelectAll?: boolean;
+    fallback?: string;
 }
 
 export interface SimplePickListOptions extends PickListOptions {

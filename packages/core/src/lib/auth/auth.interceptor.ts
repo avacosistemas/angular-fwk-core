@@ -13,7 +13,7 @@ export const authInterceptor = (req: HttpRequest<unknown>, next: HttpHandlerFn):
     const token = authService.getToken();
 
     let authReq = req;
-    if (token) {
+    if (token && !req.headers.has('Authorization')) {
         authReq = addTokenHeader(req, token);
     }
 
@@ -44,7 +44,15 @@ const handle401Error = (req: HttpRequest<any>, next: HttpHandlerFn, authService:
 
     return authService.refreshToken().pipe(
         switchMap((tokenResponse: any) => {
-            return next(addTokenHeader(req, tokenResponse.token));
+            const token = typeof tokenResponse === 'string'
+                ? tokenResponse
+                : (tokenResponse?.data?.token || tokenResponse?.token || authService.getToken());
+            if (!token) {
+                authService.signOut().subscribe();
+                const errorMessage = i18nService.getDictionary('fwk')?.translate?.('interceptor_session_expired_no_renew') ?? 'interceptor_session_expired_no_renew';
+                return throwError(() => new Error(errorMessage));
+            }
+            return next(addTokenHeader(req, token));
         }),
         catchError((err) => {
             authService.signOut().subscribe();

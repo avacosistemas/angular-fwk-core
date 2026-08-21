@@ -80,7 +80,6 @@ function updateAngularJson(host: Tree, sourceRoot: string): Tree {
 
   buildOpts.preserveSymlinks = true;
 
-  // Keep only the default styles.scss, remove framework stylesheet references since they are loaded via @import in src/styles.scss
   const styles = buildOpts.styles || [];
   const staleStyles = [
     'node_modules/@avacosistemas/core/assets/styles/tailwind.scss',
@@ -98,7 +97,6 @@ function updateAngularJson(host: Tree, sourceRoot: string): Tree {
   }
   buildOpts.styles = styles;
 
-  // Add style preprocessor include path
   const includePaths = buildOpts.stylePreprocessorOptions?.includePaths || [];
   const fwkSassPaths = [
     'node_modules/@avacosistemas/core/assets/styles',
@@ -111,10 +109,8 @@ function updateAngularJson(host: Tree, sourceRoot: string): Tree {
   }
   buildOpts.stylePreprocessorOptions = { includePaths };
 
-  // Add asset configuration for @avacosistemas/core assets folder (copied directly to assets/)
   const assets = buildOpts.assets || [];
   
-  // Clean up any stale segmented asset references
   const staleAssetsInputPrefixes = [
     'node_modules/@avacosistemas/core/assets/icons',
     'node_modules/@avacosistemas/core/assets/fonts',
@@ -247,7 +243,6 @@ function updatePackageJson(host: Tree): Tree {
 
   const pkg = JSON.parse(buf.toString());
 
-  // Merge scripts
   if (!pkg.scripts) pkg.scripts = {};
   const scriptsToAdd = {
     "ng": "ng",
@@ -259,17 +254,16 @@ function updatePackageJson(host: Tree): Tree {
   };
   pkg.scripts = { ...pkg.scripts, ...scriptsToAdd };
 
-  // Add required dependencies
   if (!pkg.dependencies) pkg.dependencies = {};
   const depsToAdd = {
     "date-fns": "^2.30.0",
     "lodash-es": "^4.17.21",
     "luxon": "^3.4.0",
-    "perfect-scrollbar": "^1.5.5"
+    "perfect-scrollbar": "^1.5.5",
+    "ngx-image-cropper": "^7.1.0"
   };
   pkg.dependencies = { ...depsToAdd, ...pkg.dependencies };
 
-  // Add required devDependencies
   if (!pkg.devDependencies) pkg.devDependencies = {};
   const devDepsToAdd = {
     "@angular/material": "^17.0.3",
@@ -291,7 +285,6 @@ function updatePackageJson(host: Tree): Tree {
 }
 
 function removeTemplateMarkers(host: Tree, sourceRoot: string): Tree {
-  // Remove .template extension from generated files
   const dir = host.getDir('/');
   dir.visit((filePath) => {
     if (filePath.endsWith('.template')) {

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, OnDestroy, OnInit, ViewEncapsulation, ChangeDetectorRef } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, ViewEncapsulation, ChangeDetectorRef, Type } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink, RouterOutlet, NavigationEnd } from '@angular/router';
 import { Observable, Subject, takeUntil, of, tap } from 'rxjs';
 import { filter } from 'rxjs/operators';
@@ -17,7 +17,8 @@ import { FwkLoadingBarComponent } from '../../../infrastructure/components/loadi
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { SearchButtonComponent } from '../../common/search-button/search-button.component';
 import { LogoComponent } from '../../../../components/logo/logo.component';
-import { FWK_CONFIG, FwkConfig } from '../../../../model/fwk-config';
+import { TranslatePipe } from '../../../../pipe/translate.pipe';
+import { FWK_CONFIG, FwkConfig, FWK_SIDEBAR_CUSTOM_TOP_COMPONENT, FWK_SIDEBAR_CUSTOM_FOOTER_COMPONENT, FWK_TOPBAR_CUSTOM_COMPONENT, FWK_MAIN_FOOTER_CUSTOM_COMPONENT } from '../../../../model/fwk-config';
 
 import { GenericHttpService } from '../../../../services/generic-http-service/generic-http.service';
 import { ActionDefService } from '../../../../services/action-def-service/action-def.service';
@@ -48,12 +49,22 @@ import { NotificationService } from '../../../../services/notification/notificat
         UserComponent,
         MatTooltipModule,
         SearchButtonComponent,
-        LogoComponent
+        LogoComponent,
+        TranslatePipe
     ],
 })
 export class DenseLayoutComponent implements OnInit, OnDestroy {
     private _fwkConfig = inject<FwkConfig>(FWK_CONFIG);
     private _loadCrudByPath = inject(FWK_LOAD_CRUD_BY_PATH, { optional: true });
+    private _injectedCustomTopComponent = inject(FWK_SIDEBAR_CUSTOM_TOP_COMPONENT, { optional: true });
+    private _injectedCustomFooterComponent = inject(FWK_SIDEBAR_CUSTOM_FOOTER_COMPONENT, { optional: true });
+    private _injectedCustomTopbarComponent = inject(FWK_TOPBAR_CUSTOM_COMPONENT, { optional: true });
+    private _injectedCustomMainFooterComponent = inject(FWK_MAIN_FOOTER_CUSTOM_COMPONENT, { optional: true });
+
+    customTopComponent: Type<any> | null = this._injectedCustomTopComponent ?? this._fwkConfig.sidebar?.customTopComponent ?? null;
+    customFooterComponent: Type<any> | null = this._injectedCustomFooterComponent ?? this._fwkConfig.sidebar?.customFooterComponent ?? null;
+    customTopbarComponent: Type<any> | null = this._injectedCustomTopbarComponent ?? this._fwkConfig.customTopbarComponent ?? null;
+    customMainFooterComponent: Type<any> | null = this._injectedCustomMainFooterComponent ?? this._fwkConfig.customMainFooterComponent ?? null;
 
     isScreenSmall?: boolean;
     navigation?: Navigation;
@@ -159,8 +170,12 @@ export class DenseLayoutComponent implements OnInit, OnDestroy {
             this.activePath = '';
         }
 
-        if (newIdContact) {
-            (this._loadCrudByPath ? this._loadCrudByPath('perfilIdentificacion') : Promise.resolve(null)).then(parentDef => {
+        const isPerfilUserCluster = this.activePath === 'perfil' || (!newIdContact && this.activePath.startsWith('perfil') && this.activePath !== 'perfilIdentificacion');
+        const parentClusterPath = isPerfilUserCluster ? 'perfil' : 'perfilIdentificacion';
+        const isClusterRoute = !!newIdContact || isPerfilUserCluster;
+
+        if (isClusterRoute) {
+            (this._loadCrudByPath ? this._loadCrudByPath(parentClusterPath) : Promise.resolve(null)).then(parentDef => {
                 if (parentDef && parentDef.clusterConfig) {
                     this.clusterConfig = parentDef.clusterConfig;
                     const actionsItems = parentDef.clusterConfig.actionsItems || [];
@@ -174,15 +189,15 @@ export class DenseLayoutComponent implements OnInit, OnDestroy {
                     this.clusterActionsConditions = parentDef.clusterConfig.displayedActionsCondition || [];
 
                     const isClusterPath = this.clusterItems.some(item =>
-                        item.path === this.activePath || (!item.path && this.activePath === 'perfilIdentificacion')
+                        item.path === this.activePath || (!item.path && this.activePath === parentClusterPath)
                     );
-                    this.showClusterSidebar = !!isClusterPath;
+                    this.showClusterSidebar = !!isClusterPath || this.activePath === parentClusterPath;
                     this._clusterContextService.setClusterActive(this.showClusterSidebar);
 
                     if (this.showClusterSidebar) {
-                        if (this.currentIdContact !== newIdContact) {
+                        if (this.currentIdContact !== newIdContact || parentClusterPath === 'perfil') {
                             this.currentIdContact = newIdContact;
-                            this._loadContactData();
+                            this._loadContactData(parentDef);
                         }
                     } else {
                         this.currentIdContact = null;
@@ -202,19 +217,26 @@ export class DenseLayoutComponent implements OnInit, OnDestroy {
         }
     }
 
-    private _loadContactData(): void {
-        if (!this.currentIdContact) return;
-
-        const url = this._fwkConfig.apiBaseUrl! + 'admin/personas';
-        this._genericHttpService.basicGet(url, { idContact: this.currentIdContact }, null, { idContact: 'idContact' })
+    private _loadContactData(parentDef?: any): void {
+        const url = parentDef?.ws?.url || (this._fwkConfig.apiBaseUrl! + 'admin/personas');
+        const params = this.currentIdContact ? { idContact: this.currentIdContact } : {};
+        this._genericHttpService.basicGet(url, params, null, { idContact: 'idContact' })
             .subscribe({
                 next: (res) => {
-                    const array = Array.isArray(res) ? res : [res];
+                    const raw = res?.data !== undefined ? res.data : res;
+                    const array = Array.isArray(raw) ? raw : [raw];
                     if (array.length > 0) {
                         this.contactData = array[0];
-                        if (this.contactData.apellido) {
-                            this.currentParentTitle = this.contactData.apellido;
+                        if (!this.currentIdContact || this.activePath.startsWith('perfil')) {
+                            this.currentParentTitle = 'Menú';
+                        } else {
+                            const title = this.contactData.apellidos || this.contactData.apellido || this.contactData.nombres || this.contactData.nombre;
+                            if (title) {
+                                this.currentParentTitle = title;
+                            }
                         }
+                    } else if (!this.currentIdContact || this.activePath.startsWith('perfil')) {
+                        this.currentParentTitle = 'Menú';
                     }
                 },
                 error: (err) => console.error('[DenseLayout] Error loading contact data:', err)
@@ -222,14 +244,21 @@ export class DenseLayoutComponent implements OnInit, OnDestroy {
     }
 
     navigateTo(item: any): void {
-        const queryParams: any = {
-            idContact: this.currentIdContact,
-            parentTitle: this.currentParentTitle
-        };
+        if (this.isScreenSmall) {
+            this.clusterCollapsed = true;
+        }
+        const queryParams: any = {};
+        if (this.currentIdContact) {
+            queryParams.idContact = this.currentIdContact;
+        }
+        if (this.currentParentTitle) {
+            queryParams.parentTitle = this.currentParentTitle;
+        }
         if (item.actionNameKey !== 'cluster_details_title' && (item.form || item.actionType || item.ws)) {
             queryParams.action = item.actionNameKey;
         }
-        const targetPath = item.path || 'perfilIdentificacion';
+        const defaultClusterPath = this.activePath.startsWith('perfil') && this.activePath !== 'perfilIdentificacion' ? 'perfil' : 'perfilIdentificacion';
+        const targetPath = item.path || defaultClusterPath;
         this._router.navigate([targetPath], {
             queryParams: queryParams
         });
@@ -238,7 +267,8 @@ export class DenseLayoutComponent implements OnInit, OnDestroy {
     isItemActive(item: any): boolean {
         const urlTree = this._router.parseUrl(this._router.url);
         const queryAction = urlTree.queryParams['action'];
-        const targetPath = item.path || 'perfilIdentificacion';
+        const defaultClusterPath = this.activePath.startsWith('perfil') && this.activePath !== 'perfilIdentificacion' ? 'perfil' : 'perfilIdentificacion';
+        const targetPath = item.path || defaultClusterPath;
         
         const isActionItem = !!(item.form || item.actionType || item.ws);
 
@@ -249,7 +279,7 @@ export class DenseLayoutComponent implements OnInit, OnDestroy {
                 return false;
             }
             if (item.actionNameKey === 'cluster_details_title') {
-                return this.activePath === 'perfilIdentificacion';
+                return this.activePath === defaultClusterPath;
             }
             return this.activePath === targetPath;
         }
@@ -299,6 +329,54 @@ export class DenseLayoutComponent implements OnInit, OnDestroy {
         }
         
         return cloned;
+    }
+
+    get clusterTitlePrefix(): string {
+        if (this.clusterConfig?.titlePrefixKey) {
+            const translated = this.translate(this.clusterConfig.titlePrefixKey);
+            return (translated && translated !== this.clusterConfig.titlePrefixKey) ? translated : this.clusterConfig.titlePrefixKey;
+        }
+        return 'Navegación';
+    }
+
+    get clusterTitle(): string {
+        if (this.clusterConfig) {
+            if (this.clusterConfig.titleKey) {
+                const translated = this.translate(this.clusterConfig.titleKey);
+                if (translated && translated !== this.clusterConfig.titleKey) {
+                    return translated;
+                }
+            }
+            if (this.clusterConfig.title) {
+                let titleStr = this.clusterConfig.title;
+                if (titleStr.includes('{')) {
+                    const data = { ...(this._userService.userValue || {}), ...(this.contactData || {}) };
+                    titleStr = titleStr.replace(/\{(\w+)\}/g, (_: string, key: string) => data[key] || '');
+                }
+                if (titleStr.trim()) {
+                    return titleStr.trim();
+                }
+            }
+        }
+
+        if (this.currentParentTitle && this.currentParentTitle !== 'Menú') {
+            return this.currentParentTitle;
+        }
+
+        if (this.contactData) {
+            const title = this.contactData.apellidos || this.contactData.apellido || this.contactData.nombres || this.contactData.nombre;
+            if (title) return title;
+        }
+
+        return this._userService.userValue?.name || this._userService.userValue?.username || 'Mi Perfil';
+    }
+
+    get activeItemLabel(): string {
+        const item = (this.activeSidebarItems || []).find(i => this.isItemActive(i));
+        if (item) {
+            return this.translate(item.actionNameKey) || item.label || '';
+        }
+        return '';
     }
 
     get activeSidebarItems(): any[] {

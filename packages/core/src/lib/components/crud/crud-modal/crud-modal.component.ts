@@ -23,6 +23,7 @@ import { ActionDefService } from '../../../services/action-def-service/action-de
 import { DialogService } from '../../../services/dialog-service/dialog.service';
 import { FwkLoadingService } from '../../../layout/infrastructure/services/loading/loading.service';
 import { of, finalize, Observable } from 'rxjs';
+import { extractApiErrorMessage } from '../../../utils/error-utils';
 
 import { A11yModule } from '@angular/cdk/a11y';
 import { TranslatePipe } from '../../../pipe/translate.pipe';
@@ -226,7 +227,8 @@ export class CrudModalComponent extends AbstractComponent implements OnInit, Aft
           next: (response: any) => {
 
             if (response && response.ok === false && response.error) {
-              this.notificationService.notifyError(response.error.message || this.translate('server_error_message'));
+              const errorMsg = extractApiErrorMessage(response) || this.translate('server_error_message');
+              this.notificationService.notifyError(errorMsg);
               this.submitting = false;
               this._cdr.markForCheck();
               return;
@@ -235,10 +237,12 @@ export class CrudModalComponent extends AbstractComponent implements OnInit, Aft
             const isSuccess = !response ||
               response === true ||
               response.success === true ||
-              (typeof response.success === 'undefined' && (response.id || response.ok === true));
+              response.ok === true ||
+              (response.error === undefined && response.ok !== false && response.success !== false && typeof response === 'object');
 
             if (isSuccess) {
               this.notificationService.notifySuccess(this.translate('success_message'));
+              this.notificationService.checkAndNotifyExtraMessages(response);
 
               if (andContinue) {
                 if (this.isAdd) {
@@ -287,7 +291,8 @@ export class CrudModalComponent extends AbstractComponent implements OnInit, Aft
                 this.dialogRef.close({ response: response || true, entity: this.entity });
               }
             } else {
-              this.notificationService.notifyError(response?.message || this.translate('unknown_error_message'));
+              const errorMsg = extractApiErrorMessage(response) || response?.message || this.translate('unknown_error_message');
+              this.notificationService.notifyError(errorMsg);
               this.submitting = false;
               this._cdr.markForCheck();
             }
@@ -324,17 +329,14 @@ export class CrudModalComponent extends AbstractComponent implements OnInit, Aft
   }
 
   handlerError(error: any): void {
-    if (error?.error?.status === VALIDATIONS_ERRORS) {
-      const subForm = this.form.get('subForm');
-      if (subForm instanceof FormGroup) {
-        this.formService.addErrorToFields(subForm, error.error.errors);
-      }
-      if (error.error.message) {
-        this.notificationService.notifyError(error.error.message);
-      }
-    } else {
-      this.notificationService.notifyError(this.translate('generic_error_try_again'));
+    const errorsList = error?.error?.errors || error?.error?.error?.errors || error?.errors;
+    const subForm = this.form.get('subForm');
+    if (subForm instanceof FormGroup && errorsList && Array.isArray(errorsList)) {
+      this.formService.addErrorToFields(subForm, errorsList);
     }
+    const extractedMsg = extractApiErrorMessage(error);
+    const finalMsg = extractedMsg || this.translate('generic_error_try_again');
+    this.notificationService.notifyError(finalMsg);
   }
 
   get titleLabel(): string {

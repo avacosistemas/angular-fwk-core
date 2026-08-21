@@ -25,7 +25,8 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { TranslatePipe } from '../../pipe/translate.pipe';
 import { FormGridModalComponent } from '../form-grid-dialog/form-grid.dialog.component';
-import { BackButtonComponent } from '../back-button/back-button.component'; 
+import { BackButtonComponent } from '../back-button/back-button.component';
+import { HelpButtonComponent } from '../help-button/help-button.component';
 import { BreadcrumbComponent } from '../../navigation/breadcrumb/breadcrumb.component';
 import { FwkAlertComponent } from '../../layout/infrastructure/components/alert/alert.component';
 
@@ -47,10 +48,12 @@ import { FwkAlertComponent } from '../../layout/infrastructure/components/alert/
     CrudTableComponent,
     TranslatePipe,
     BackButtonComponent,
+    HelpButtonComponent,
     BreadcrumbComponent,
     FwkAlertComponent
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: { 'class': 'flex flex-auto h-full' }
 })
 export class CrudComponent extends AbstractCrudComponent<any, any> implements OnInit, OnDestroy {
   @ViewChild(SearchComponent) searchComponent!: SearchComponent;
@@ -214,7 +217,7 @@ export class CrudComponent extends AbstractCrudComponent<any, any> implements On
     }
   }
 
-  private openEditOrReadDialog(entity: any): void {
+  public openEditOrReadDialog(entity: any, forceEdit: boolean = false): void {
     const formUpdate = this.getFormUpdate(this.crudDef);
     const formRead = this.getFormRead(this.crudDef);
     const nameFunc = this.crudDef.name || '';
@@ -226,19 +229,26 @@ export class CrudComponent extends AbstractCrudComponent<any, any> implements On
       ? this.expressionService.evaluate(this.crudDef.readCondition, entity)
       : false;
 
-    if (formUpdate && canUpdate && !forceRead) {
+    if (forceEdit && formUpdate && canUpdate && !forceRead) {
       data = {
         isEdit: true, entity: entity, formDef: formUpdate, formName: 'formUpdate',
         funcName: nameFunc, fields: this.localStorageService.clone(formUpdate.fields),
         handlerFieldSourceData: this.handlerFieldSourceData, crud: this
       };
       this.displayCrudModal(data, '-modal update-modal');
-    } else if (formRead) {
+    } else if (formRead && !forceEdit) {
       data = {
         isRead: true, entity: entity, formDef: formRead, formName: 'formRead',
         funcName: nameFunc, fields: this.localStorageService.clone(formRead.fields)
       };
       this.displayCrudModal(data, '-modal read-modal');
+    } else if (formUpdate && canUpdate && !forceRead) {
+      data = {
+        isEdit: true, entity: entity, formDef: formUpdate, formName: 'formUpdate',
+        funcName: nameFunc, fields: this.localStorageService.clone(formUpdate.fields),
+        handlerFieldSourceData: this.handlerFieldSourceData, crud: this
+      };
+      this.displayCrudModal(data, '-modal update-modal');
     } else if (this.crudDef.dialogs?.read) {
       this.displayCustomDialog(entity, nameFunc);
     }
@@ -305,7 +315,7 @@ export class CrudComponent extends AbstractCrudComponent<any, any> implements On
   }
 
   showCrudActions(): boolean {
-    return this.display.selects;
+    return this.display.selects || (!!this.crudDef?.crudActions && this.crudDef.crudActions.length > 0);
   }
 
   executeCrudAction(action: ActionDef): void {
@@ -318,19 +328,29 @@ export class CrudComponent extends AbstractCrudComponent<any, any> implements On
     this._cdr.markForCheck();
 
     this.refreshTokenIfNeeded(false).pipe(
-      switchMap(() => action.ws ? this.genericHttpService.callWs(action.ws, this.selects) : of(undefined)),
+      switchMap(() => {
+        if (action.formDef) {
+          return action.ws ? this.genericHttpService.callWs(action.ws, this.selects) : of(undefined);
+        }
+        return this.actionDefService.submitAction(action, this.selects, this.i18nComponent!, this.crudDef?.dialogConfig);
+      }),
       finalize(() => {
         this.actionLoadingStates.set(actionKey, false);
         this._cdr.markForCheck();
       })
-    ).subscribe(entity => {
-      if (action.formDef) {
-        this.callCrudDialog(action, entity);
-      } else {
-        this.actionDefService.submitAction(action, this.selects, this.i18nComponent!, undefined).subscribe(() => {
+    ).subscribe({
+      next: (res) => {
+        if (action.formDef) {
+          this.callCrudDialog(action, res);
+        } else {
           this.findAll();
           this.notificationService.notifySuccess(this.translate('success_message'));
-        });
+        }
+      },
+      error: (err) => {
+        console.error('Error executing crud action:', err);
+        const msg = err?.message || this.translate('action_execution_generic_error');
+        this.notificationService.notifyError(msg);
       }
     });
   }
@@ -404,11 +424,11 @@ export class CrudComponent extends AbstractCrudComponent<any, any> implements On
   private lastRefreshTime = 0;
 
   private refreshTokenIfNeeded(force: boolean = false): Observable<any> {
-    const now = Date.now();
-    if (force || (now - this.lastRefreshTime > 50000)) {
-      this.lastRefreshTime = now;
-      return this.authService.refreshToken();
-    }
+    //   const now = Date.now();
+    //   if (force || (now - this.lastRefreshTime > 50000)) {
+    //     this.lastRefreshTime = now;
+    //     return this.authService.refreshToken();
+    //   }
     return of(null);
   }
 
@@ -439,14 +459,14 @@ export class CrudComponent extends AbstractCrudComponent<any, any> implements On
   private getActiveAlerts(alertDefs: any[]): { messageKey: string; params: any; type: 'info' | 'warning' | 'error' }[] {
     const user = this.authService.getUserFromLocalStorage();
     const active: any[] = [];
-    
+
     for (const alert of alertDefs) {
       if (!alert.conditionKey || (user && (user as any)[alert.conditionKey])) {
         const params = alert.paramKey && user ? { fecha: (user as any)[alert.paramKey] } : null;
-        active.push({ 
-          messageKey: alert.messageKey, 
-          params, 
-          type: alert.type || (alert.messageKey.includes('error') ? 'error' : 'info') 
+        active.push({
+          messageKey: alert.messageKey,
+          params,
+          type: alert.type || (alert.messageKey.includes('error') ? 'error' : 'info')
         });
       }
     }
@@ -492,14 +512,32 @@ export class CrudComponent extends AbstractCrudComponent<any, any> implements On
     });
   }
 
-  exportCsv(): void {
+  exportFile(): void {
+    if (this.crudDef.exportFile?.ws) {
+      const wsUrl = this.crudDef.exportFile.ws;
+      const params = this.service.getParametersToUrl(this.appliedFilterEntity);
+      this.service.downloadCsv(wsUrl, params).subscribe((res: any) => {
+        if (res) {
+          if (this.crudDef.exportFile?.fileName && res.file) {
+            res = { ...res, fileName: this.crudDef.exportFile.fileName };
+          }
+          this.fileService.downloadFileOctectStream(res);
+        }
+      });
+      return;
+    }
+
     const exportConfig = this.crudDef.exportCsv;
     if (!exportConfig) return;
 
     if (exportConfig.ws) {
       const params = this.service.getParametersToUrl(this.appliedFilterEntity);
       this.service.downloadCsv(exportConfig.ws, params)
-        .subscribe((res: any) => this.fileService.downloadFileOctectStream(res));
+        .subscribe((res: any) => {
+          if (res) {
+            this.fileService.downloadFileOctectStream(res);
+          }
+        });
     } else if (exportConfig.csvExportFileName) {
       const data = this.entities.map(e => {
         const reg: { [key: string]: any } = {};
@@ -512,6 +550,10 @@ export class CrudComponent extends AbstractCrudComponent<any, any> implements On
       });
       this.fileService.downloadCsv(data, exportConfig.csvExportFileName);
     }
+  }
+
+  exportCsv(): void {
+    this.exportFile();
   }
 
   override getI18nName(): string {

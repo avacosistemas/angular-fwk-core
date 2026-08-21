@@ -270,3 +270,11 @@ fwk-icon-picker .mat-mdc-text-field-wrapper.mdc-text-field--outlined .mat-mdc-fo
 .dark .mat-mdc-select-disabled {
     color: #f3f7ff !important;
 }
+
+.mat-form-field-disabled {
+    background-color: hsl(0deg 0% 88.66% / 9%) !important;
+}
+
+.mat-mdc-checkbox {
+  --mdc-checkbox-state-layer-size: 24px;
+}

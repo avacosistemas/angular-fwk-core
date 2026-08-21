@@ -35,6 +35,8 @@ export * from './i18n/fwk.i18n';
 // Utils
 export * from './utils/constants';
 export * from './utils/crud-route-generator';
+export * from './utils/error-utils';
+export * from './utils/image-utils';
 
 // Modules (only DevTools service, not the components)
 export * from './modules/spinner/service/spinner.service';

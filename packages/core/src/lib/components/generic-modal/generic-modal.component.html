@@ -1,33 +1,35 @@
-<div class="flex flex-col max-h-screen min-w-[320px] max-w-[600px]">
-    <div class="flex items-center justify-between pl-6 pr-4 h-16 border-b" [ngClass]="getHeaderClass()">
-
-        <div class="flex items-center gap-3">
-            <div class="flex items-center justify-center w-8 h-8 rounded-full" [ngClass]="getIconBackgroundClass()">
-                <mat-icon [svgIcon]="getIconName()" [class]="getIconColorClass()"></mat-icon>
-            </div>
-            <h2 class="text-xl font-semibold m-0">{{ data.title }}</h2>
-        </div>
-
-        <button *ngIf="data.showCloseButton !== false" mat-icon-button (click)="onClose()" [matTooltip]="'action_close' | translate">
-            <mat-icon [svgIcon]="'heroicons_outline:x-mark'"></mat-icon>
-        </button>
+<div class="p-6 sm:p-7 flex flex-col items-center text-center w-full max-w-[500px]">
+    
+    <div class="w-14 h-14 rounded-2xl flex items-center justify-center mb-4 shrink-0 border shadow-xs transition-transform duration-300 hover:scale-105"
+        [ngClass]="getIconBackgroundClass()">
+        <mat-icon [svgIcon]="getIconName()" class="!w-7 !h-7"></mat-icon>
     </div>
 
-    <div mat-dialog-content class="flex-auto overflow-y-auto p-6">
-        <div *ngIf="data.message" class="text-base text-secondary" [innerHTML]="data.message">
-        </div>
+    <h2 *ngIf="data.title" class="text-xl sm:text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100 m-0 text-center leading-tight">
+        {{ data.title }}
+    </h2>
 
-        <div #customComponentContainer class="mt-4"></div>
+    <div class="text-sm sm:text-base text-gray-500 dark:text-gray-400 text-center mt-2 leading-relaxed px-1 sm:px-4 w-full max-w-sm">
+        <div *ngIf="data.message" [innerHTML]="data.message"></div>
+        <div #customComponentContainer class="mt-4 text-left w-full"></div>
     </div>
 
-    <div mat-dialog-actions class="flex items-center justify-end p-6 pt-2 gap-2">
-        <button *ngIf="data.cancelButtonText" mat-stroked-button (click)="onCancel()">
+    <div class="flex flex-col-reverse sm:flex-row items-center justify-stretch gap-3 mt-7 w-full">
+        <button *ngIf="data.cancelButtonText"
+            mat-stroked-button
+            (click)="onCancel()"
+            class="w-full sm:w-1/2 flex-1 !rounded-full !h-11 text-sm font-semibold border-gray-300 dark:border-gray-700">
             {{ data.cancelButtonText }}
         </button>
 
-        <button *ngIf="data.showConfirmButton !== false" mat-flat-button [color]="getConfirmColor()"
-            (click)="onConfirm()" [disabled]="data.customComponent && !isCustomComponentValid">
+        <button *ngIf="data.showConfirmButton !== false"
+            mat-flat-button
+            [color]="getConfirmColor()"
+            (click)="onConfirm()"
+            [disabled]="data.customComponent && !isCustomComponentValid"
+            class="w-full sm:w-1/2 flex-1 !rounded-full !h-11 text-sm font-semibold shadow-xs">
             {{ data.confirmButtonText || ('modal_button_confirm' | translate) }}
         </button>
     </div>
+
 </div>

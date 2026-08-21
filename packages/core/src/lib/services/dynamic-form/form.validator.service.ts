@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { AbstractControl, FormControl, ValidatorFn, Validators, ValidationErrors } from '@angular/forms';
 import { I18nService } from '../i18n-service/i18n.service';
 import { I18n } from '../../model/i18n';
-import { DynamicField, EMAIL, HIDDEN, DATEPICKER } from '../../model/dynamic-form/dynamic-field';
+import { DynamicField, EMAIL, HIDDEN, DATEPICKER, CONTROL_TYPE } from '../../model/dynamic-form/dynamic-field';
 import { CONSTANTS } from '../../utils/constants';
 
 import { parse, isValid, differenceInYears } from 'date-fns';
@@ -120,7 +120,11 @@ export class FormValidatorService {
   public getValidators(field: DynamicField<any>): ValidatorFn[] {
     const validators: ValidatorFn[] = [];
     if (field.required && field.controlType !== HIDDEN) {
-      validators.push(Validators.required);
+      if (field.controlType === CONTROL_TYPE.Checkbox || field.controlType === 'checkbox') {
+        validators.push(Validators.requiredTrue);
+      } else {
+        validators.push(Validators.required);
+      }
     }
     if (field.controlType === EMAIL) {
       validators.push(Validators.email);

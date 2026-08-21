@@ -9,6 +9,7 @@ import { FilterService, FILTER_TYPE } from '../filter-service/filter.service';
 import { NotificationService } from '../notification/notification.service';
 import { I18nService } from '../i18n-service/i18n.service';
 import { FWK_CONFIG, FwkConfig } from '../../model/fwk-config';
+import { extractApiErrorMessage } from '../../utils/error-utils';
 
 @Injectable({
   providedIn: 'root'
@@ -177,15 +178,20 @@ export class HttpService extends BaseService {
 
   private handleResponse(response: any): any {
     if (response && response.ok === false) {
-      const errorMessage = response.error?.message ||
+      const errorMessage = extractApiErrorMessage(response) ||
         this.i18nService.getDictionary('fwk')?.translate?.('http_error_generic') ||
         this.i18nService.translate('http_operation_failed_no_cause');
       throw {
         error: {
-          status: response.error?.type || 'VALIDATIONS_ERRORS',
-          message: errorMessage
+          status: response.error?.type || response.status || 'VALIDATIONS_ERRORS',
+          message: errorMessage,
+          ...((response.error && typeof response.error === 'object') ? response.error : {})
         }
       };
+    }
+
+    if (response) {
+      this.notificationService.checkAndNotifyExtraMessages(response);
     }
 
     if (response && response.page) {
@@ -197,53 +203,45 @@ export class HttpService extends BaseService {
 
   private handleError(error: any): Observable<never> {
     console.error('Error técnico HTTP:', {
-      message: error.message,
-      status: error.status,
-      url: error.url,
-      errorBody: error.error,
+      message: error?.message,
+      status: error?.status,
+      url: error?.url,
+      errorBody: error?.error,
     });
 
     const translate = (key: string) => this.i18nService.getDictionary('fwk')?.translate?.(key) || key;
 
-    if (error?.error?.status === 'VALIDATIONS_ERRORS') {
+    const extractedMessage = extractApiErrorMessage(error);
+    let userFriendlyMessage = extractedMessage || translate('http_error_generic');
+
+    if (!extractedMessage && error instanceof HttpErrorResponse) {
+      switch (error.status) {
+        case 400:
+          userFriendlyMessage = translate('http_error_400');
+          break;
+        case 401:
+          return throwError(() => error);
+        case 403:
+          userFriendlyMessage = translate('http_error_403');
+          break;
+        case 404:
+          userFriendlyMessage = translate('http_error_404');
+          break;
+        case 500:
+        case 502:
+        case 503:
+        case 504:
+          userFriendlyMessage = translate('http_error_5xx');
+          break;
+        case 0:
+          userFriendlyMessage = translate('http_error_0');
+          break;
+        default:
+          userFriendlyMessage = translate('http_error_generic');
+          break;
+      }
+    } else if (error instanceof HttpErrorResponse && error.status === 401) {
       return throwError(() => error);
-    }
-
-    let userFriendlyMessage = translate('http_error_generic');
-
-    if (error instanceof HttpErrorResponse) {
-      if (error.error && typeof error.error.message === 'string' && error.error.message.trim() !== '') {
-        userFriendlyMessage = error.error.message;
-      }
-      else {
-        switch (error.status) {
-          case 400:
-            userFriendlyMessage = translate('http_error_400');
-            break;
-          case 401:
-            return throwError(() => error);
-          case 403:
-            userFriendlyMessage = translate('http_error_403');
-            break;
-          case 404:
-            userFriendlyMessage = translate('http_error_404');
-            break;
-          case 500:
-          case 502:
-          case 503:
-          case 504:
-            userFriendlyMessage = translate('http_error_5xx');
-            break;
-          case 0:
-            userFriendlyMessage = translate('http_error_0');
-            break;
-          default:
-            userFriendlyMessage = translate('http_error_generic');
-            break;
-        }
-      }
-    } else if (error?.error?.message) {
-      userFriendlyMessage = error.error.message;
     }
 
     this.notificationService.notifyError(userFriendlyMessage);

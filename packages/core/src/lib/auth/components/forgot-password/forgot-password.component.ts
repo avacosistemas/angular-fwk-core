@@ -1,4 +1,4 @@
-import { NgIf } from '@angular/common';
+import { NgIf, NgStyle } from '@angular/common';
 import { Component, OnInit, ViewChild, ViewEncapsulation, inject } from '@angular/core';
 import { FormsModule, NgForm, ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormControl } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -25,7 +25,7 @@ interface ForgotPasswordForm {
     encapsulation: ViewEncapsulation.None,
     animations: fwkAnimations,
     standalone: true,
-    imports: [NgIf, FwkAlertComponent, FormsModule, ReactiveFormsModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatProgressSpinnerModule, RouterLink, TranslatePipe, LogoComponent],
+    imports: [NgIf, NgStyle, FwkAlertComponent, FormsModule, ReactiveFormsModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatProgressSpinnerModule, RouterLink, TranslatePipe, LogoComponent],
 })
 export class AuthForgotPasswordComponent implements OnInit {
     @ViewChild('forgotPasswordNgForm') forgotPasswordNgForm!: NgForm;
@@ -80,9 +80,10 @@ export class AuthForgotPasswordComponent implements OnInit {
                     this.startCountdown();
                 },
                 (response) => {
+                    const fallback = this._i18nService.translate('forgot_password_error_message');
                     this.alert = {
                         type: 'error',
-                        message: this._i18nService.translate('forgot_password_error_message'),
+                        message: response?.userMessage || response?.message || fallback,
                     };
                 },
             );

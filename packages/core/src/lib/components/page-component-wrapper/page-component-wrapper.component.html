@@ -1,11 +1,12 @@
 <div class="flex flex-col flex-auto min-w-0" *ngIf="definition">
-    <div class="flex flex-col items-center justify-center border-b bg-card dark:bg-transparent ">
-        <div class="flex flex-col sm:flex-row flex-0 sm:items-center sm:justify-between p-4 sm:px-6 pt-0 w-full">
+    <div class="flex flex-col items-center justify-center border-b bg-card dark:bg-transparent">
+        <div class="flex flex-col sm:flex-row flex-0 sm:items-center sm:justify-between px-4 sm:px-6 pt-4 pb-3 w-full">
             <div class="flex-1 min-w-0">
                 <fwk-breadcrumb></fwk-breadcrumb>
                 <div class="flex items-center gap-2">
-                    <div class="text-3xl font-extrabold tracking-tight leading-7 sm:leading-10 truncate">
-                        {{ pageTitle || ('page_title_default' | translate) }}
+                    <div class="flex items-center text-2xl sm:text-3xl font-extrabold tracking-tight leading-7 sm:leading-10 truncate">
+                        <span>{{ pageTitle || ('page_title_default' | translate) }}</span>
+                        <help-button *ngIf="definition.urlHelp" [urlHelp]="definition.urlHelp"></help-button>
                     </div>
                     <back-button *ngIf="definition.backButton" color="accent"></back-button>
                 </div>

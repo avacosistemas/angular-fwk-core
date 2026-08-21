@@ -1,18 +1,30 @@
 <div *ngIf="user?.name">
     <button mat-button [matTooltip]="'user_menu_tooltip' | translate" class="h-10 rounded-full px-2"
         [matMenuTriggerFor]="userActions">
-        <div class="flex items-center justify-center gap-1">
-            <span class="relative items-center flex ">
-                <img class="w-7 h-7 rounded-full" *ngIf="showAvatar && user.avatar" [src]="user.avatar"
-                    alt="User avatar">
-                <mat-icon *ngIf="!showAvatar || !user.avatar"
-                    [svgIcon]="'heroicons_outline:user'"></mat-icon>
+        <div class="flex items-center justify-center gap-2">
+            <span class="relative items-center flex shrink-0">
+                <img *ngIf="showAvatar && avatarSrc" 
+                     class="w-8 h-8 rounded-full object-cover border border-gray-200 dark:border-gray-700 shadow-2xs" 
+                     [src]="avatarSrc"
+                     (error)="onAvatarError()"
+                     alt="User avatar">
+                <div *ngIf="!showAvatar || !avatarSrc" 
+                     class="w-8 h-8 rounded-full bg-blue-600 text-white font-extrabold text-xs flex items-center justify-center shadow-2xs select-none uppercase tracking-wider">
+                    {{ userInitials }}
+                </div>
             </span>
-            <span class="text-md font-medium">{{user.name}}</span>
+            <span class="text-md font-medium leading-none">{{user.name}}</span>
         </div>
     </button>
 
     <mat-menu [xPosition]="'before'" #userActions="matMenu" class="rounded-xl">
+        <ng-container *ngIf="customUserMenuComponent">
+            <div (click)="$event.stopPropagation();" class="p-2">
+                <ng-container *ngComponentOutlet="customUserMenuComponent"></ng-container>
+            </div>
+            <mat-divider class="my-2"></mat-divider>
+        </ng-container>
+
         <div mat-menu-item (click)="$event.stopPropagation();" class="focus:outline-none">
             <mat-button-toggle-group class="flex" [value]="config.scheme" (change)="setScheme($event.value)">
                 <mat-button-toggle [value]="'light'" [matTooltip]="'theme_light_tooltip' | translate" class="flex-1">

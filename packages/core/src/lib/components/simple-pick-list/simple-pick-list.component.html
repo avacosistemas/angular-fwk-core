@@ -1,38 +1,52 @@
-
-<mat-card class="flex flex-col w-full h-full min-w-0"
-        [class.border-red-500]="errorMessage"
-        [class.border-2]="errorMessage"
-        [class.border-solid]="errorMessage">
+<div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm p-6 px-2 space-y-4 w-full"
+     [class.border-red-500]="errorMessage"
+     [class.border-2]="errorMessage">
     
-    <mat-card-header class="flex items-center justify-end p-4 border-b flex-row-reverse">
+    <div class="flex items-center gap-3 border-b dark:border-gray-700 pb-3">
         <mat-checkbox
-            class="mr-2"
+            *ngIf="showSelectAll"
+            class="shrink-0 -mr-2 ml-3"
             [checked]="isAllSelected()"
             [disabled]="isDisabled"
             (change)="toggleSelectAll()"
             [matTooltip]="'table_select_all_tooltip' | translate">
         </mat-checkbox>
-        <mat-card-title class="text-lg font-extrabold m-0">{{ titleFrom }}</mat-card-title>
-    </mat-card-header>
 
-    <mat-card-content class="flex-auto overflow-y-auto px-2 max-h-[40vh]">
-        <mat-selection-list
-            #list
-            [compareWith]="compareFn"
-            [disabled]="isDisabled"
-            (selectionChange)="onSelectionChange()">
-            <mat-list-option
-                *ngFor="let item of allItems"
-                [value]="item"
-                [selected]="selectedItems | some:compareFn:item"
-                checkboxPosition="before"
-                class="h-auto">
-                {{ getNameElementList(item) }}
-            </mat-list-option>
-        </mat-selection-list>
-    </mat-card-content>
+        <div *ngIf="icon" class="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center border border-blue-100 dark:border-blue-900/60 shrink-0">
+            <mat-icon class="icon-size-5 text-blue-600 dark:text-blue-400" [svgIcon]="icon"></mat-icon>
+        </div>
 
-    <div *ngIf="errorMessage" class="px-4 pb-2 pt-0">
+        <h3 class="text-lg font-bold text-gray-900 dark:text-gray-100 m-0 leading-snug">
+            {{ titleFrom }}
+        </h3>
+    </div>
+
+    <div *ngIf="showSkeleton" class="space-y-2 pt-1 max-h-[360px] overflow-hidden pr-1 animate-pulse px-2">
+        <div *ngFor="let item of [1, 2, 3, 4, 5]" class="flex items-center px-3 py-2.5 rounded-xl border border-gray-100 dark:border-gray-700/60 gap-3">
+            <div class="w-5 h-5 rounded bg-gray-200 dark:bg-gray-700 shrink-0"></div>
+            <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
+        </div>
+    </div>
+
+    <div *ngIf="!showSkeleton" class="space-y-0.5 pt-1 max-h-[360px] overflow-y-auto pr-1">
+        <div *ngFor="let item of allItems"
+             class="flex items-center px-3 py-1 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700/50 border border-transparent hover:border-gray-200 dark:hover:border-gray-700 transition-all cursor-pointer"
+             (click)="toggleItem(item)">
+            <mat-checkbox
+                [checked]="isSelected(item)"
+                [disabled]="isDisabled"
+                (change)="toggleItem(item)"
+                (click)="$event.stopPropagation()">
+            </mat-checkbox>
+            <span class="text-base text-gray-800 dark:text-gray-200 select-none ml-1">{{ getNameElementList(item) }}</span>
+        </div>
+
+        <div *ngIf="!allItems || allItems.length === 0" class="py-4 text-center text-xs text-gray-400">
+            No hay elementos disponibles
+        </div>
+    </div>
+
+    <div *ngIf="errorMessage" class="px-2 pt-1">
         <span class="text-xs text-red-500 font-medium">{{ errorMessage }}</span>
     </div>
-</mat-card>
+</div>

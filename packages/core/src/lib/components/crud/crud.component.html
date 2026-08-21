@@ -1,25 +1,26 @@
 <div class="flex flex-col flex-auto min-w-0" *ngIf="crudDef && name">
-    <div class="flex flex-col items-center justify-center border-b bg-card dark:bg-transparent ">
-        <div class="flex flex-col sm:flex-row flex-0 sm:items-center sm:justify-between p-4 sm:px-6 pt-0 w-full">
+    <div class="flex flex-col items-center justify-center border-b bg-card dark:bg-transparent">
+        <div class="flex flex-col sm:flex-row flex-0 sm:items-center sm:justify-between px-4 sm:px-6 pt-4 pb-3 w-full">
             <div class="flex-1 min-w-0">
                 <fwk-breadcrumb></fwk-breadcrumb>
-                <div class="flex items-center gap-2">
-                    <div class="text-3xl font-extrabold tracking-tight leading-7 sm:leading-10 truncate">
-                        {{ crudDef.i18n?.words?.['page_title'] || ('page_title_default' | translate) }}
+                <div class="flex items-center">
+                    <div class="flex items-center text-2xl sm:text-3xl font-extrabold tracking-tight leading-7 sm:leading-10 truncate">
+                        <span>{{ crudDef.i18n?.words?.['page_title'] || ('page_title_default' | translate) }}</span>
+                        <help-button *ngIf="crudDef.urlHelp" [urlHelp]="crudDef.urlHelp"></help-button>
                     </div>
                     <back-button *ngIf="crudDef.backButton" color="accent"></back-button>
                 </div>
 
-                <div class="text-lg text-secondary" *ngIf="parentTitle && !isInCluster">
+                <div class="text-sm sm:text-lg text-secondary" *ngIf="parentTitle && !isInCluster">
                     {{ parentTitle }}
                 </div>
 
-                <div class="mt-2 text-lg text-secondary" *ngIf="!parentTitle && crudDef.subtitleKey">
+                <div class="mt-1 text-sm sm:text-lg text-secondary" *ngIf="!parentTitle && crudDef.subtitleKey">
                     {{ crudDef.subtitleKey | translate:crudDef.i18n?.name }}
                 </div>
             </div>
 
-            <div class="flex shrink-0 items-center mt-6 sm:mt-0 sm:ml-4 space-x-2 print:hidden">
+            <div class="flex shrink-0 items-center mt-1 sm:mt-0 sm:ml-4 space-x-2 print:hidden">
                 <ng-container *ngIf="showCrudActions()">
                     <button *ngFor="let action of getCrudActions()" mat-stroked-button color="accent"
                         [matTooltip]="action.actionName"
@@ -27,8 +28,10 @@
                         (click)="executeCrudAction(action)">
                         <ng-container
                             *ngIf="!actionLoadingStates.get(action.actionNameKey || action.actionName || 'default')">
-                            <mat-icon *ngIf="action.icon" [svgIcon]="action.icon"></mat-icon>
-                            <span class="ml-2 hidden sm:inline">{{ action.actionName }}</span>
+                            <div class="inline-flex items-center">
+                                <mat-icon *ngIf="action.icon" [svgIcon]="action.icon"></mat-icon>
+                                <span class="ml-2">{{ action.actionName || (action.actionNameKey ? (action.actionNameKey | translate:crudDef.i18n?.name) : '') }}</span>
+                            </div>
                         </ng-container>
                         <mat-progress-spinner
                             *ngIf="actionLoadingStates.get(action.actionNameKey || action.actionName || 'default')"
@@ -43,7 +46,7 @@
                     <span class="ml-2 hidden sm:inline">{{ 'crud_delete_button' | translate }} ({{ selects.length }})</span>
                 </button>
 
-                <button *ngIf="crudDef.exportCsv" mat-icon-button color="accent" (click)="exportCsv()"
+                <button *ngIf="crudDef.exportCsv || crudDef.exportFile" mat-icon-button color="accent" (click)="exportFile()"
                     [matTooltip]="'export_csv_tooltip' | translate" [disabled]="isTableLoading">
                     <mat-icon [svgIcon]="'heroicons_outline:printer'"></mat-icon>
                 </button>
@@ -89,11 +92,14 @@
     </div>
 
     <div class="flex-auto">
-        <div class="relative overflow-hidden">
-            <fwk-crud-table *ngIf="crudDef.grid" [containerClass]="isTableLoading ? 'h-[67vh]' : ''"
+        <div class="flex flex-auto flex-col h-full relative">
+            <fwk-crud-table *ngIf="crudDef.grid" class="flex flex-auto flex-col h-full" [containerClass]="isTableLoading ? 'h-[67vh]' : 'flex flex-auto flex-col h-full'"
                 [onClickRow]="onClickRow" [datasource]="dataSource" [canDelete]="showDeleteButton()"
                 [searchPerformed]="searchPerformed" [grid]="crudDef.grid" [crud]="this" [isLoading]="isTableLoading"
-                [hasActiveFilters]="hasActiveFilters" [canAdd]="showAddButton()" (status)="statusChanged($event)"
+                [updatingRowId]="updatingRowId"
+                [hasActiveFilters]="hasActiveFilters" [canAdd]="showAddButton()"
+                [hasLoadError]="hasLoadError" [errorType]="errorType"
+                (status)="statusChanged($event)"
                 (onChangePagination)="handlePageChange()" (onAddClicked)="openAddDialog()"
                 (onClearFiltersClicked)="clearFilters()" (onRowClicked)="handleRowClick($event)">
             </fwk-crud-table>

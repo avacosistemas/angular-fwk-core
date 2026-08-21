@@ -44,6 +44,8 @@ export * from './modal-preview/modal-preview.component';
 export * from './form-grid-dialog/form-grid.dialog.component';
 export * from './custom-notification/custom-notification.component';
 export * from './back-button/back-button.component';
+export * from './help-button/help-button.component';
 export * from './logo/logo.component';
 export * from './abstract-component.component';
 export * from './abstract-form.component';
+export * from './network-status-banner/network-status-banner.component';

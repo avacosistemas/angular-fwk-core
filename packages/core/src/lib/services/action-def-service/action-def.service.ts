@@ -15,6 +15,7 @@ import { NotificationService } from '../notification/notification.service';
 import { ActionDef, ACTION_TYPES } from '../../model/component-def/action-def';
 import { DisplayActionsCondition } from '../../model/display-actions-condition';
 import { I18n } from '../../model/i18n';
+import { extractApiErrorMessage } from '../../utils/error-utils';
 
 @Injectable({
   providedIn: 'root'
@@ -67,7 +68,7 @@ export class ActionDefService {
       case ACTION_TYPES.file_preview:
         return this.handleFilePreviewAction(action, entity);
       default:
-        return this.handleDefaultAction(action, entity);
+        return this.handleDefaultAction(action, entity, i18n);
     }
   }
 
@@ -118,7 +119,7 @@ export class ActionDefService {
   private handleGridModalAction(action: ActionDef, entity: any): Observable<any> {
     if (action.gridModal) {
       this.dialogService.showGridModal({
-      title: action.actionName ?? '',
+        title: action.actionName ?? '',
         entities: entity[action.gridModal.fromArrayField],
         gridDef: action.gridModal.gridDef
       });
@@ -142,9 +143,9 @@ export class ActionDefService {
     );
   }
 
-  private handleDefaultAction(action: ActionDef, entity: any): Observable<any> {
+  private handleDefaultAction(action: ActionDef, entity: any, i18n?: I18n): Observable<any> {
     if (action.confirm) {
-      return this.handleConfirmAction(action, entity);
+      return this.handleConfirmAction(action, entity, i18n);
     }
 
     if (!action.ws) return of({ error: 'No WS defined' });
@@ -156,25 +157,54 @@ export class ActionDefService {
     );
   }
 
-  private handleConfirmAction(action: ActionDef, entity: any): Observable<any> {
-    let message = typeof action.confirm === 'object' ? action.confirm.message : undefined;
+  private handleConfirmAction(action: ActionDef, entity: any, i18n?: I18n): Observable<any> {
+    let message = action.confirmMessage;
+    
+    if (!message && action.confirmMessageKey && i18n && typeof i18n.translate === 'function') {
+        const translated = i18n.translate(action.confirmMessageKey);
+        if (translated !== action.confirmMessageKey) {
+            message = translated;
+        } else {
+            message = this.notificationService.i18nService.translate(action.confirmMessageKey);
+        }
+    }
+    
+    if (!message && typeof action.confirm === 'object' && action.confirm.message) {
+        message = action.confirm.message;
+    }
+    
+    if (!message) {
+        message = this.notificationService.i18nService.translate('confirm_operation_default_message');
+    }
 
     if (message && entity) {
         Object.keys(entity).forEach(key => {
             const value = entity[key] !== undefined && entity[key] !== null ? entity[key] : '';
-            const regex = new RegExp(`{{${key}}}|{${key}}`, 'g');
-            message = message.replace(regex, String(value));
+            const regex = new RegExp(`\\{\\{${key}\\}\\}|\\{${key}\\}`, 'g');
+            message = message!.replace(regex, String(value));
         });
     }
 
-    const actionType = (action as any).type || (action.color === 'warn' ? 'warn' : undefined);
+    const isDeleteKeyword = !!(
+      action.actionNameKey?.toLowerCase().includes('delete') ||
+      action.actionNameKey?.toLowerCase().includes('eliminar') ||
+      action.icon?.toLowerCase().includes('delete') ||
+      action.icon?.toLowerCase().includes('trash') ||
+      action.actionName?.toLowerCase().includes('eliminar') ||
+      action.actionName?.toLowerCase().includes('delete')
+    );
+
+    const actionType = (action as any).type ||
+                       (action.actionType === 'delete' ? 'warn' : undefined) ||
+                       (action.color === 'warn' ? 'warn' : undefined) ||
+                       (isDeleteKeyword ? 'warn' : undefined);
     
-    let modalIconName = 'heroicons_outline:question-mark-circle';
+    let modalIconName = isDeleteKeyword ? 'heroicons_outline:trash' : 'heroicons_outline:question-mark-circle';
     let modalIconColor: 'primary' | 'accent' | 'warn' | 'basic' | 'info' | 'success' = 'primary';
     let confirmBtnColor: 'primary' | 'accent' | 'warn' = 'primary';
 
     if (actionType === 'warn' || actionType === 'error') {
-        modalIconName = 'heroicons_outline:exclamation-triangle';
+        modalIconName = isDeleteKeyword ? 'heroicons_outline:trash' : 'heroicons_outline:exclamation-triangle';
         modalIconColor = 'warn';
         confirmBtnColor = 'warn';
     } else if (actionType === 'info') {
@@ -185,6 +215,16 @@ export class ActionDefService {
         modalIconName = 'heroicons_outline:check-circle';
         modalIconColor = 'success';
         confirmBtnColor = 'accent';
+    }
+
+    if (action.icon) {
+        if (action.icon === 'delete' || action.icon === 'trash') {
+            modalIconName = 'heroicons_outline:trash';
+        } else if (action.icon.includes(':')) {
+            modalIconName = action.icon;
+        } else {
+            modalIconName = `heroicons_outline:${action.icon}`;
+        }
     }
 
     return this.dialogService.showQuestionModal({
@@ -228,7 +268,8 @@ export class ActionDefService {
   }
 
   private handleActionError(e: any, action?: ActionDef): Observable<never> {
-    const message = action?.ws?.messageError ?? e?.error?.message ?? this.notificationService.i18nService.translate('action_execution_generic_error');
+    const extracted = extractApiErrorMessage(e);
+    const message = action?.ws?.messageError ?? extracted ?? this.notificationService.i18nService.translate('action_execution_generic_error');
     this.notificationService.notifyError(message);
     return throwError(() => new Error(message));
   }

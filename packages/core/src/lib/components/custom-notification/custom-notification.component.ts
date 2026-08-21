@@ -6,7 +6,7 @@ import { MatIconModule } from '@angular/material/icon';
 
 export interface NotificationData {
     message: string;
-    type: 'success' | 'error' | 'info';
+    type: 'success' | 'error' | 'info' | 'warning';
 }
 
 @Component({
@@ -32,6 +32,8 @@ export class CustomNotificationComponent {
                 return 'heroicons_solid:check-circle';
             case 'error':
                 return 'heroicons_solid:x-circle';
+            case 'warning':
+                return 'heroicons_solid:exclamation-triangle';
             case 'info':
             default:
                 return 'heroicons_solid:information-circle';

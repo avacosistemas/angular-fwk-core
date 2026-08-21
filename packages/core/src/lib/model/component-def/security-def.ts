@@ -1,6 +1,6 @@
 export class SecurityDef {
-    readAccess?: string;
-    updateAccess?: string;
-    createAccess?: string;
-    deleteAccess?: string;
+    readAccess?: string | null;
+    updateAccess?: string | null;
+    createAccess?: string | null;
+    deleteAccess?: string | null;
 }

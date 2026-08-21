@@ -276,7 +276,7 @@ export class NavigationService {
     }
 
     public getCrudDefByUrl(url: string): CrudDef | undefined {
-        const normalize = (u: string) => u.split('?')[0].split('#')[0].toLowerCase().replace(/^\/+|\/+$/g, '');
+        const normalize = (u: string) => (u || '').split('?')[0].split('#')[0].toLowerCase().replace(/^\/+|\/+$/g, '');
         const urlClean = normalize(url);
         
         const matches = this._allCrudDefs.filter(d => {
@@ -296,11 +296,11 @@ export class NavigationService {
 
     public getNavigationItemByUrl(url: string, items?: FwkNavigationItem[]): FwkNavigationItem | undefined {
         const navigationItems = items || this._currentNavigation?.default || [];
-        const urlWithoutParams = url.split('?')[0].toLowerCase();
+        const urlWithoutParams = (url || '').split('?')[0].toLowerCase();
 
         for (const item of navigationItems) {
             if (item.link) {
-                const itemLink = item.link.split('?')[0].toLowerCase();
+                const itemLink = (item.link || '').split('?')[0].toLowerCase();
                 if (itemLink === urlWithoutParams) {
                     return item;
                 }

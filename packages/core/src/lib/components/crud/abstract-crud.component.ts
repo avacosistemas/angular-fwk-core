@@ -41,6 +41,16 @@ export abstract class AbstractCrudComponent<E extends Entity, S extends CRUD<E>>
     i18nComponent?: I18n;
     public parentTitle: string | null = null;
     public searchPerformed = false;
+    public hasLoadError: boolean = false;
+    public errorType: 'network' | 'server' = 'server';
+    public updatingRowId: any = null;
+
+    getRowId(entity: any): any {
+        if (!entity) return null;
+        const idDef = this.crudDef?.grid?.columnsDef?.find(c => c.id);
+        const idKey = idDef ? idDef.columnDef : 'id';
+        return entity[idKey] ?? entity.id;
+    }
 
     get isInCluster(): boolean {
         return this._clusterContextService?.isActive ?? false;
@@ -88,6 +98,7 @@ export abstract class AbstractCrudComponent<E extends Entity, S extends CRUD<E>>
 
     private _isSubscribedToQueryParams = false;
     protected _isNavigatingFromSearch = false;
+    protected _initialSearchDone = false;
 
     override ngOnInit(): void {
         super.ngOnInit();
@@ -149,6 +160,7 @@ export abstract class AbstractCrudComponent<E extends Entity, S extends CRUD<E>>
             const shouldSearch = hasUrlFilters || !this.crudDef.cancelInitSearch;
 
             if (shouldSearch) {
+                this._initialSearchDone = true;
                 this.findAll();
             }
         }
@@ -219,6 +231,21 @@ export abstract class AbstractCrudComponent<E extends Entity, S extends CRUD<E>>
         if (this.crudDef.formsDef?.update?.fields) { this.crudDef.forms.update = this.crudDef.formsDef.update.fields; }
 
         const processFormsAndFinish = (i18n: I18n | null) => {
+            if (this.crudDef.forms?.update && this.crudDef.grid && this.crudDef.grid.showActionUpdate !== false) {
+                if (!this.crudDef.grid.actions) {
+                    this.crudDef.grid.actions = [];
+                }
+                const hasEditAction = this.crudDef.grid.actions.some(a => a.actionType === 'fwk_edit' || a.actionNameKey === 'grid_action_button_edit' || a.actionNameKey === 'fwk_action_edit');
+                if (!hasEditAction) {
+                    this.crudDef.grid.actions.push({
+                        actionNameKey: 'grid_action_button_edit',
+                        icon: 'edit',
+                        actionType: 'fwk_edit',
+                        displayType: 'menu'
+                    });
+                }
+            }
+
             if (i18n && this.crudDef.forms) {
                 this.setUpI18nForms(this.crudDef.forms, i18n);
             }
@@ -268,18 +295,36 @@ export abstract class AbstractCrudComponent<E extends Entity, S extends CRUD<E>>
 
     private setUpI18nGrid(grid: GridDef, i18n: I18n): void {
         grid.columnsDef?.forEach((column) => {
-            if (column.columnNameKey) { column.columnName = i18n?.translate?.(column.columnNameKey); }
+            if (column.columnNameKey) {
+                const translated = i18n?.translate?.(column.columnNameKey);
+                column.columnName = (translated && translated !== column.columnNameKey)
+                    ? translated
+                    : this.i18nService.translate(column.columnNameKey);
+            }
             if ((column as any).columnActions) {
                 (column as any).columnActions.forEach((action: any) => {
-                    if (action.actionNameKey) { action.actionName = i18n?.translate?.(action.actionNameKey); }
+                    if (action.actionNameKey) {
+                        const translated = i18n?.translate?.(action.actionNameKey);
+                        action.actionName = (translated && translated !== action.actionNameKey)
+                            ? translated
+                            : this.i18nService.translate(action.actionNameKey);
+                    }
                 });
             }
         });
         grid.actions?.forEach(action => {
-            if (action.actionNameKey) { action.actionName = i18n?.translate?.(action.actionNameKey); }
+            if (action.actionNameKey) {
+                const translated = i18n?.translate?.(action.actionNameKey);
+                action.actionName = (translated && translated !== action.actionNameKey)
+                    ? translated
+                    : this.i18nService.translate(action.actionNameKey);
+            }
 
             if (action.confirm && action.confirm.messageKey) {
-                action.confirm.message = i18n?.translate?.(action.confirm.messageKey);
+                const translated = i18n?.translate?.(action.confirm.messageKey);
+                action.confirm.message = (translated && translated !== action.confirm.messageKey)
+                    ? translated
+                    : this.i18nService.translate(action.confirm.messageKey);
             }
 
             if (action.form && this.i18nComponent) {
@@ -294,6 +339,7 @@ export abstract class AbstractCrudComponent<E extends Entity, S extends CRUD<E>>
             return;
         }
 
+        this.hasLoadError = false;
         this.searchPerformed = true;
         this.isTableLoading = true;
 
@@ -320,6 +366,7 @@ export abstract class AbstractCrudComponent<E extends Entity, S extends CRUD<E>>
         this.service.findAll(this.filterEntity, filterFields, filterInMemory, page).pipe(
             finalize(() => {
                 this.isTableLoading = false;
+                this.updatingRowId = null;
                 this._cdr.markForCheck();
             })
         ).subscribe({
@@ -327,9 +374,18 @@ export abstract class AbstractCrudComponent<E extends Entity, S extends CRUD<E>>
                 this.entities = entities;
                 this.dataSource = this.entities;
                 this.appliedFilterEntity = { ...this.filterEntity };
+                this.hasLoadError = false;
                 this.postFindAll();
             },
-            error: (error) => console.error(`[FWK] Error en findAll para ${this.name}:`, error)
+            error: (error) => {
+                console.error(`[FWK] Error en findAll para ${this.name}:`, error);
+                this.hasLoadError = true;
+                if (!navigator.onLine || error?.status === 0 || error?.name === 'TimeoutError' || error?.message?.includes('Unknown Error')) {
+                    this.errorType = 'network';
+                } else {
+                    this.errorType = 'server';
+                }
+            }
         });
     }
 
@@ -342,17 +398,18 @@ export abstract class AbstractCrudComponent<E extends Entity, S extends CRUD<E>>
             this.crudDef.mockData = [...(this.crudDef.mockData || []), entity];
             return of(entity).pipe(tap(() => this.findAll()));
         }
-        return this.service.add(entity).pipe(tap(() => this.findAll()));
+        return this.service.add(entity);
     }
 
     edit(entity: E): Observable<any> {
         if (!entity) { return of(null); }
+        this.updatingRowId = this.getRowId(entity);
         if (this.crudDef?.mock) {
             const index = this.crudDef.mockData.findIndex((e: any) => e.id === (entity as any).id);
             if (index > -1) { this.crudDef.mockData[index] = entity; }
             return of(entity).pipe(tap(() => this.findAll()));
         }
-        return this.service.update(entity).pipe(tap(() => this.findAll()));
+        return this.service.update(entity);
     }
 
     delete(entity: E): void {
@@ -424,6 +481,10 @@ export abstract class AbstractCrudComponent<E extends Entity, S extends CRUD<E>>
         }
 
         if (isIdentical) {
+            if (this._initialSearchDone) {
+                this._initialSearchDone = false;
+                return;
+            }
             this.findAll();
         } else {
             this._isNavigatingFromSearch = true;

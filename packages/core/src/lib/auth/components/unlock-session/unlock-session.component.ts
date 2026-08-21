@@ -1,4 +1,4 @@
-import { NgIf } from '@angular/common';
+import { NgIf, NgStyle } from '@angular/common';
 import { Component, OnInit, ViewChild, ViewEncapsulation, inject } from '@angular/core';
 import { FormsModule, NgForm, ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormControl } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -14,6 +14,7 @@ import { UserService } from '../../user.service';
 import { I18nService } from '../../../services/i18n-service/i18n.service';
 import { TranslatePipe } from '../../../pipe/translate.pipe';
 import { LogoComponent } from '../../../components/logo/logo.component';
+import { FWK_CONFIG, FwkConfig } from '../../../model/fwk-config';
 
 interface UnlockSessionForm {
     name: FormControl<string | null>;
@@ -26,11 +27,13 @@ interface UnlockSessionForm {
     encapsulation: ViewEncapsulation.None,
     animations   : fwkAnimations,
     standalone   : true,
-    imports      : [NgIf, FwkAlertComponent, FormsModule, ReactiveFormsModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule, MatProgressSpinnerModule, RouterLink, TranslatePipe, LogoComponent],
+    imports      : [NgIf, NgStyle, FwkAlertComponent, FormsModule, ReactiveFormsModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule, MatProgressSpinnerModule, RouterLink, TranslatePipe, LogoComponent],
 })
 export class AuthUnlockSessionComponent implements OnInit
 {
     @ViewChild('unlockSessionNgForm') unlockSessionNgForm!: NgForm;
+
+    public fwkConfig = inject<FwkConfig>(FWK_CONFIG);
 
     alert: { type: FwkAlertType; message: string } = {
         type   : 'success',
@@ -100,9 +103,10 @@ export class AuthUnlockSessionComponent implements OnInit
                     },
                 });
 
+                const fallback = this._i18nService.translate('unlock_session_invalid_password');
                 this.alert = {
                     type   : 'error',
-                    message: this._i18nService.translate('unlock_session_invalid_password'),
+                    message: response?.userMessage || response?.message || fallback,
                 };
 
                 this.showAlert = true;

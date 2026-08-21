@@ -1,43 +1,7 @@
 import { Route } from '@angular/router';
-import { FwkConfig } from '@avacosistemas/core';
+import { FwkConfig, AppColors } from '@avacosistemas/core';
 
-export interface AppColors {
-    primary: string;
-    accent: string;
-    warn: string;
-    bg: {
-        default: string;
-        card: string;
-        dialog: string;
-        hover: string;
-    };
-    text: {
-        default: string;
-        secondary: string;
-        hint: string;
-        disabled: string;
-    };
-    border: string;
-    divider: string;
-    icon: string;
-    dark?: {
-        bg: {
-            default: string;
-            card: string;
-            dialog: string;
-            hover: string;
-        };
-        text: {
-            default: string;
-            secondary: string;
-            hint: string;
-            disabled: string;
-        };
-        border: string;
-        divider: string;
-        icon: string;
-    };
-}
+export { AppColors };
 
 export const APP_CONFIG: {
     brand: NonNullable<FwkConfig['brand']>;

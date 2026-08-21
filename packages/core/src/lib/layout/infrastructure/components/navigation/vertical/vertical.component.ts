@@ -93,9 +93,6 @@ export class FwkVerticalNavigationComponent implements OnChanges, OnInit, AfterV
         };
     }
 
-    // -----------------------------------------------------------------------------------------------------
-    // @ Accessors
-    // -----------------------------------------------------------------------------------------------------
 
     /**
      * Host binding for component classes
@@ -133,22 +130,18 @@ export class FwkVerticalNavigationComponent implements OnChanges, OnInit, AfterV
     @ViewChildren(FwkScrollbarDirective)
     set FwkScrollbarDirectives(FwkScrollbarDirectives: QueryList<FwkScrollbarDirective>)
     {
-        // Store the directives
         this._FwkScrollbarDirectives = FwkScrollbarDirectives;
 
-        // Return if there are no directives
         if ( FwkScrollbarDirectives.length === 0 )
         {
             return;
         }
 
-        // Unsubscribe the previous subscriptions
         if ( this._FwkScrollbarDirectivesSubscription )
         {
             this._FwkScrollbarDirectivesSubscription.unsubscribe();
         }
 
-        // Update the scrollbars on collapsable items' collapse/expand
         this._FwkScrollbarDirectivesSubscription =
             merge(
                 this.onCollapsableItemCollapsed,
@@ -160,7 +153,6 @@ export class FwkVerticalNavigationComponent implements OnChanges, OnInit, AfterV
                 )
                 .subscribe(() =>
                 {
-                    // Loop through the scrollbars and update them
                     FwkScrollbarDirectives.forEach((FwkScrollbarDirective) =>
                     {
                         FwkScrollbarDirective.update();
@@ -168,9 +160,6 @@ export class FwkVerticalNavigationComponent implements OnChanges, OnInit, AfterV
                 });
     }
 
-    // -----------------------------------------------------------------------------------------------------
-    // @ Decorated methods
-    // -----------------------------------------------------------------------------------------------------
 
     /**
      * On mouseenter
@@ -180,10 +169,8 @@ export class FwkVerticalNavigationComponent implements OnChanges, OnInit, AfterV
     @HostListener('mouseenter')
     private _onMouseenter(): void
     {
-        // Enable the animations
         this._enableAnimations();
 
-        // Set the hovered
         this._hovered = true;
     }
 
@@ -195,16 +182,11 @@ export class FwkVerticalNavigationComponent implements OnChanges, OnInit, AfterV
     @HostListener('mouseleave')
     private _onMouseleave(): void
     {
-        // Enable the animations
         this._enableAnimations();
 
-        // Set the hovered
         this._hovered = false;
     }
 
-    // -----------------------------------------------------------------------------------------------------
-    // @ Lifecycle hooks
-    // -----------------------------------------------------------------------------------------------------
 
     /**
      * On changes
@@ -213,91 +195,65 @@ export class FwkVerticalNavigationComponent implements OnChanges, OnInit, AfterV
      */
     ngOnChanges(changes: SimpleChanges): void
     {
-        // Appearance
         if ( 'appearance' in changes )
         {
-            // Execute the observable
             this.appearanceChanged.next(changes.appearance.currentValue);
         }
 
-        // Inner
         if ( 'inner' in changes )
         {
-            // Coerce the value to a boolean
             this.inner = coerceBooleanProperty(changes.inner.currentValue);
         }
 
-        // Mode
         if ( 'mode' in changes )
         {
-            // Get the previous and current values
             const currentMode = changes.mode.currentValue;
             const previousMode = changes.mode.previousValue;
 
-            // Disable the animations
             this._disableAnimations();
 
-            // If the mode changes: 'over -> side'
             if ( previousMode === 'over' && currentMode === 'side' )
             {
-                // Hide the overlay
                 this._hideOverlay();
             }
 
-            // If the mode changes: 'side -> over'
             if ( previousMode === 'side' && currentMode === 'over' )
             {
-                // Close the aside
                 this.closeAside();
 
-                // If the navigation is opened
                 if ( this.opened )
                 {
-                    // Show the overlay
                     this._showOverlay();
                 }
             }
 
-            // Execute the observable
             this.modeChanged.next(currentMode);
 
-            // Enable the animations after a delay
-            // The delay must be bigger than the current transition-duration
-            // to make sure nothing will be animated while the mode changing
             setTimeout(() =>
             {
                 this._enableAnimations();
             }, 500);
         }
 
-        // Navigation
         if ( 'navigation' in changes )
         {
-            // Mark for check
             this._changeDetectorRef.markForCheck();
         }
 
-        // Opened
         if ( 'opened' in changes )
         {
-            // Coerce the value to a boolean
             this.opened = coerceBooleanProperty(changes.opened.currentValue);
 
-            // Open/close the navigation
             this._toggleOpened(this.opened);
         }
 
-        // Position
         if ( 'position' in changes )
         {
-            // Execute the observable
             this.positionChanged.next(changes.position.currentValue);
         }
 
-        // Transparent overlay
         if ( 'transparentOverlay' in changes )
         {
-            // Coerce the value to a boolean
             this.transparentOverlay = coerceBooleanProperty(changes.transparentOverlay.currentValue);
         }
     }
@@ -307,16 +263,13 @@ export class FwkVerticalNavigationComponent implements OnChanges, OnInit, AfterV
      */
     ngOnInit(): void
     {
-        // Make sure the name input is not an empty string
         if ( this.name === '' )
         {
             this.name = this._fwkUtilsService.randomId();
         }
 
-        // Register the navigation component
         this._fwkNavigationService.registerComponent(this.name, this);
 
-        // Subscribe to the 'NavigationEnd' event
         this._router.events
             .pipe(
                 filter(event => event instanceof NavigationEnd),
@@ -324,17 +277,13 @@ export class FwkVerticalNavigationComponent implements OnChanges, OnInit, AfterV
             )
             .subscribe(() =>
             {
-                // If the mode is 'over' and the navigation is opened...
                 if ( this.mode === 'over' && this.opened )
                 {
-                    // Close the navigation
                     this.close();
                 }
 
-                // If the mode is 'side' and the aside is active...
                 if ( this.mode === 'side' && this.activeAsideItemId )
                 {
-                    // Close the aside
                     this.closeAside();
                 }
             });
@@ -345,12 +294,6 @@ export class FwkVerticalNavigationComponent implements OnChanges, OnInit, AfterV
      */
     ngAfterViewInit(): void
     {
-        // Fix for Firefox.
-        //
-        // Because 'position: sticky' doesn't work correctly inside a 'position: fixed' parent,
-        // adding the '.cdk-global-scrollblock' to the html element breaks the navigation's position.
-        // This fixes the problem by reading the 'top' value from the html element and adding it as a
-        // 'marginTop' to the navigation itself.
         this._mutationObserver = new MutationObserver((mutations) =>
         {
             mutations.forEach((mutation) =>
@@ -377,38 +320,29 @@ export class FwkVerticalNavigationComponent implements OnChanges, OnInit, AfterV
 
         setTimeout(() =>
         {
-            // Return if 'navigation content' element does not exist
             if ( !this._navigationContentEl )
             {
                 return;
             }
 
-            // If 'navigation content' element doesn't have
-            // perfect scrollbar activated on it...
             if ( !this._navigationContentEl.nativeElement.classList.contains('ps') )
             {
-                // Find the active item
                 const activeItem = this._navigationContentEl.nativeElement.querySelector('.fwk-vertical-navigation-item-active');
 
-                // If the active item exists, scroll it into view
                 if ( activeItem )
                 {
                     activeItem.scrollIntoView();
                 }
             }
-            // Otherwise
             else
             {
-                // Go through all the scrollbar directives
                 this._FwkScrollbarDirectives.forEach((FwkScrollbarDirective) =>
                 {
-                    // Skip if not enabled
                     if ( !FwkScrollbarDirective.isEnabled() )
                     {
                         return;
                     }
 
-                    // Scroll to the active element
                     FwkScrollbarDirective.scrollToElement('.fwk-vertical-navigation-item-active', -120, true);
                 });
             }
@@ -420,34 +354,25 @@ export class FwkVerticalNavigationComponent implements OnChanges, OnInit, AfterV
      */
     ngOnDestroy(): void
     {
-        // Disconnect the mutation observer
         this._mutationObserver.disconnect();
 
-        // Forcefully close the navigation and aside in case they are opened
         this.close();
         this.closeAside();
 
-        // Deregister the navigation component from the registry
         this._fwkNavigationService.deregisterComponent(this.name);
 
-        // Unsubscribe from all subscriptions
         this._unsubscribeAll.next(null);
         this._unsubscribeAll.complete();
     }
 
-    // -----------------------------------------------------------------------------------------------------
-    // @ Public methods
-    // -----------------------------------------------------------------------------------------------------
 
     /**
      * Refresh the component to apply the changes
      */
     refresh(): void
     {
-        // Mark for check
         this._changeDetectorRef.markForCheck();
 
-        // Execute the observable
         this.onRefreshed.next(true);
     }
 
@@ -456,13 +381,11 @@ export class FwkVerticalNavigationComponent implements OnChanges, OnInit, AfterV
      */
     open(): void
     {
-        // Return if the navigation is already open
         if ( this.opened )
         {
             return;
         }
 
-        // Set the opened
         this._toggleOpened(true);
     }
 
@@ -471,16 +394,13 @@ export class FwkVerticalNavigationComponent implements OnChanges, OnInit, AfterV
      */
     close(): void
     {
-        // Return if the navigation is already closed
         if ( !this.opened )
         {
             return;
         }
 
-        // Close the aside
         this.closeAside();
 
-        // Set the opened
         this._toggleOpened(false);
     }
 
@@ -489,7 +409,6 @@ export class FwkVerticalNavigationComponent implements OnChanges, OnInit, AfterV
      */
     toggle(): void
     {
-        // Toggle
         if ( this.opened )
         {
             this.close();
@@ -507,19 +426,15 @@ export class FwkVerticalNavigationComponent implements OnChanges, OnInit, AfterV
      */
     openAside(item: FwkNavigationItem): void
     {
-        // Return if the item is disabled
         if ( item.disabled || !item.id )
         {
             return;
         }
 
-        // Open
         this.activeAsideItemId = item.id;
 
-        // Show the aside overlay
         this._showAsideOverlay();
 
-        // Mark for check
         this._changeDetectorRef.markForCheck();
     }
 
@@ -528,13 +443,10 @@ export class FwkVerticalNavigationComponent implements OnChanges, OnInit, AfterV
      */
     closeAside(): void
     {
-        // Close
         this.activeAsideItemId = null;
 
-        // Hide the aside overlay
         this._hideAsideOverlay();
 
-        // Mark for check
         this._changeDetectorRef.markForCheck();
     }
 
@@ -545,7 +457,6 @@ export class FwkVerticalNavigationComponent implements OnChanges, OnInit, AfterV
      */
     toggleAside(item: FwkNavigationItem): void
     {
-        // Toggle
         if ( this.activeAsideItemId === item.id )
         {
             this.closeAside();
@@ -567,9 +478,6 @@ export class FwkVerticalNavigationComponent implements OnChanges, OnInit, AfterV
         return item.id || index;
     }
 
-    // -----------------------------------------------------------------------------------------------------
-    // @ Private methods
-    // -----------------------------------------------------------------------------------------------------
 
     /**
      * Enable the animations
@@ -578,13 +486,11 @@ export class FwkVerticalNavigationComponent implements OnChanges, OnInit, AfterV
      */
     private _enableAnimations(): void
     {
-        // Return if the animations are already enabled
         if ( this._animationsEnabled )
         {
             return;
         }
 
-        // Enable the animations
         this._animationsEnabled = true;
     }
 
@@ -595,13 +501,11 @@ export class FwkVerticalNavigationComponent implements OnChanges, OnInit, AfterV
      */
     private _disableAnimations(): void
     {
-        // Return if the animations are already disabled
         if ( !this._animationsEnabled )
         {
             return;
         }
 
-        // Disable the animations
         this._animationsEnabled = false;
     }
 
@@ -612,39 +516,30 @@ export class FwkVerticalNavigationComponent implements OnChanges, OnInit, AfterV
      */
     private _showOverlay(): void
     {
-        // Return if there is already an overlay
         if ( this._asideOverlay )
         {
             return;
         }
 
-        // Create the overlay element
         this._overlay = this._renderer2.createElement('div');
 
-        // Add a class to the overlay element
-        this._overlay.classList.add('fwk-vertical-navigation-overlay');
+        this._overlay.classList.add('fwk-vertical-navigation-overlay backdrop-blur-sm');
 
-        // Add a class depending on the transparentOverlay option
         if ( this.transparentOverlay )
         {
             this._overlay.classList.add('fwk-vertical-navigation-overlay-transparent');
         }
 
-        // Append the overlay to the parent of the navigation
         this._renderer2.appendChild(this._elementRef.nativeElement.parentElement, this._overlay);
 
-        // Enable block scroll strategy
         this._scrollStrategy.enable();
 
-        // Create the enter animation and attach it to the player
         this._player = this._animationBuilder.build([
             animate('300ms cubic-bezier(0.25, 0.8, 0.25, 1)', style({opacity: 1})),
         ]).create(this._overlay);
 
-        // Play the animation
         this._player.play();
 
-        // Add an event listener to the overlay
         this._overlay.addEventListener('click', this._handleOverlayClick);
     }
 
@@ -660,29 +555,22 @@ export class FwkVerticalNavigationComponent implements OnChanges, OnInit, AfterV
             return;
         }
 
-        // Create the leave animation and attach it to the player
         this._player = this._animationBuilder.build([
             animate('300ms cubic-bezier(0.25, 0.8, 0.25, 1)', style({opacity: 0})),
         ]).create(this._overlay);
 
-        // Play the animation
         this._player.play();
 
-        // Once the animation is done...
         this._player.onDone(() =>
         {
-            // If the overlay still exists...
             if ( this._overlay )
             {
-                // Remove the event listener
                 this._overlay.removeEventListener('click', this._handleOverlayClick);
 
-                // Remove the overlay
                 this._overlay.parentNode.removeChild(this._overlay);
                 this._overlay = null;
             }
 
-            // Disable block scroll strategy
             this._scrollStrategy.disable();
         });
     }
@@ -694,32 +582,25 @@ export class FwkVerticalNavigationComponent implements OnChanges, OnInit, AfterV
      */
     private _showAsideOverlay(): void
     {
-        // Return if there is already an overlay
         if ( this._asideOverlay )
         {
             return;
         }
 
-        // Create the aside overlay element
         this._asideOverlay = this._renderer2.createElement('div');
 
-        // Add a class to the aside overlay element
         this._asideOverlay.classList.add('fwk-vertical-navigation-aside-overlay');
 
-        // Append the aside overlay to the parent of the navigation
         this._renderer2.appendChild(this._elementRef.nativeElement.parentElement, this._asideOverlay);
 
-        // Create the enter animation and attach it to the player
         this._player =
             this._animationBuilder
                 .build([
                     animate('300ms cubic-bezier(0.25, 0.8, 0.25, 1)', style({opacity: 1})),
                 ]).create(this._asideOverlay);
 
-        // Play the animation
         this._player.play();
 
-        // Add an event listener to the aside overlay
         this._asideOverlay.addEventListener('click', this._handleAsideOverlayClick);
     }
 
@@ -735,26 +616,20 @@ export class FwkVerticalNavigationComponent implements OnChanges, OnInit, AfterV
             return;
         }
 
-        // Create the leave animation and attach it to the player
         this._player =
             this._animationBuilder
                 .build([
                     animate('300ms cubic-bezier(0.25, 0.8, 0.25, 1)', style({opacity: 0})),
                 ]).create(this._asideOverlay);
 
-        // Play the animation
         this._player.play();
 
-        // Once the animation is done...
         this._player.onDone(() =>
         {
-            // If the aside overlay still exists...
             if ( this._asideOverlay )
             {
-                // Remove the event listener
                 this._asideOverlay.removeEventListener('click', this._handleAsideOverlayClick);
 
-                // Remove the aside overlay
                 this._asideOverlay.parentNode.removeChild(this._asideOverlay);
                 this._asideOverlay = null;
             }
@@ -769,14 +644,10 @@ export class FwkVerticalNavigationComponent implements OnChanges, OnInit, AfterV
      */
     private _toggleOpened(open: boolean): void
     {
-        // Set the opened
         this.opened = open;
 
-        // Enable the animations
         this._enableAnimations();
 
-        // If the navigation opened, and the mode
-        // is 'over', show the overlay
         if ( this.mode === 'over' )
         {
             if ( this.opened )
@@ -789,7 +660,6 @@ export class FwkVerticalNavigationComponent implements OnChanges, OnInit, AfterV
             }
         }
 
-        // Execute the observable
         this.openedChanged.next(open);
     }
 }

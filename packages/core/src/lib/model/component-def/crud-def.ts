@@ -12,6 +12,7 @@ export class CrudDef extends ComponentDef {
     Estructura deprecada usar formsDef -> forms esta solo disponible para el componente visual crud
   */
   backButton?: boolean;
+  urlHelp?: string;
   forms?: FormsCrudDef;
   forceGetDetail?: boolean;
   crudActions?: ActionDef[];
@@ -33,6 +34,10 @@ export class CrudDef extends ComponentDef {
     csvExportFileName: string,
     ws?: string
   };
+  exportFile?: {
+    ws: string;
+    fileName?: string;
+  };
   // Deprecado
   searchFields?: any;
   initSearch?: boolean;
@@ -51,6 +56,13 @@ export class CrudDef extends ComponentDef {
   }[];
 
   alerts?: {
+    messageKey: string;
+    conditionKey?: string;
+    paramKey?: string;
+    type?: 'info' | 'warning' | 'error';
+  }[];
+
+  generalAlerts?: {
     messageKey: string;
     conditionKey?: string;
     paramKey?: string;

@@ -122,16 +122,21 @@ export class FormService {
 
   setUpActionsFromI18n(i18n: I18n, actions?: ActionDef[]): void {
     actions?.forEach(action => {
-      if (action.actionNameKey) action.actionName = this.translate(action.actionNameKey);
+      if (action.actionNameKey) {
+        const translated = i18n?.translate?.(action.actionNameKey);
+        action.actionName = (translated && translated !== action.actionNameKey)
+          ? translated
+          : this.i18nService.translate(action.actionNameKey);
+      }
       if (action.titleKey) {
-        const translatedTitle = this.translate(action.titleKey);
+        const translatedTitle = i18n?.translate?.(action.titleKey) || this.i18nService.translate(action.titleKey);
         if (action.formDef) {
           action.formDef.title = translatedTitle;
         }
       }
       if (action.actionType === 'notification') {
-        if (action.input.messageKey) action.input.message = this.translate(action.input.messageKey);
-        if (action.input.modalNameKey) action.input.modalName = this.translate(action.input.modalNameKey);
+        if (action.input?.messageKey) action.input.message = i18n?.translate?.(action.input.messageKey) || this.i18nService.translate(action.input.messageKey);
+        if (action.input?.modalNameKey) action.input.modalName = i18n?.translate?.(action.input.modalNameKey) || this.i18nService.translate(action.input.modalNameKey);
       }
       if (action.form) this.setUpFieldTextFromI18n(i18n, action.form);
 
@@ -139,7 +144,7 @@ export class FormService {
 
       if (action.gridModal) this.setUpGridFromI18n(i18n, action.gridModal.gridDef);
       if (action.confirm && typeof action.confirm === 'object' && action.confirm.messageKey) {
-        action.confirm.message = this.translate(action.confirm.messageKey);
+        action.confirm.message = i18n?.translate?.(action.confirm.messageKey) || this.i18nService.translate(action.confirm.messageKey);
       }
     });
   }
@@ -167,10 +172,10 @@ export class FormService {
 
   setUpFieldTextFromI18n(i18n: I18n, fields: DynamicField<any>[]): void {
     if (!fields) return;
-    fields.forEach(element => {
+    this.flattenFields(fields).forEach(element => {
 
       if (element.labelKey) {
-        element.label = i18n.translate?.(element.labelKey) ?? element.labelKey;
+        element.label = i18n?.words?.[element.labelKey] || (i18n?.translate ? i18n.translate(element.labelKey) : this.translate(element.labelKey)) || element.labelKey;
       }
 
       if (element.validation) {
@@ -215,8 +220,22 @@ export class FormService {
     return this.formValidatorService.getMessageErrorValidation(form, field);
   }
 
+  flattenFields(fields: DynamicField<any>[]): DynamicField<any>[] {
+    const flat: DynamicField<any>[] = [];
+    if (!fields) return flat;
+    fields.forEach(f => {
+      if ((f.controlType === CONTROL_TYPE.Container || f.controlType === CONTROL_TYPE.Group || f.controlType === 'container' || f.controlType === 'group') && f.fields) {
+        flat.push(...this.flattenFields(f.fields));
+      } else if (f.controlType !== CONTROL_TYPE.Container && f.controlType !== CONTROL_TYPE.Group && f.controlType !== 'container' && f.controlType !== 'group') {
+        flat.push(f);
+      }
+    });
+    return flat;
+  }
+
   toFormGroupEntity(entity: any, fields: DynamicField<any>[], options: any, onFieldsChanges: any): FormGroup {
-    fields.forEach(field => {
+    const leafFields = this.flattenFields(fields);
+    leafFields.forEach(field => {
       if (entity) {
         if (entity[field.key] !== undefined) {
           field.value = entity[field.key];
@@ -235,7 +254,7 @@ export class FormService {
   getGroupControls(fields: DynamicField<any>[], options: any, onFieldsChanges: any): FormGroup {
     const params = this.activatedRoute.snapshot.queryParams;
     const form = new FormGroup({});
-    const validFields = fields.filter(field => this.filterAndPrepareField(field, params));
+    const validFields = this.flattenFields(fields).filter(field => this.filterAndPrepareField(field, params));
     validFields.forEach(field => {
       const control = this.createFormControlForField(field, options);
       form.addControl(field.key, control);
@@ -312,16 +331,19 @@ export class FormService {
     const fromWs: WsDef | undefined = field.options?.fromWs;
     if (!fromWs || ![CONTROL_TYPE.Select, CONTROL_TYPE.Autocomplete, CONTROL_TYPE.AutocompleteDesplegable, CONTROL_TYPE.Picklist, CONTROL_TYPE.SimplePicklist].includes(field.controlType as CONTROL_TYPE)) return;
 
-    const url = new URL(fromWs.url.startsWith('http') ? fromWs.url : `${this._fwkConfig.apiBaseUrl!}${fromWs.url}`);
+    let targetUrl = fromWs.url;
+    if (!targetUrl.startsWith('http') && !targetUrl.startsWith('/assets/') && !targetUrl.startsWith('assets/')) {
+        targetUrl = `${this._fwkConfig.apiBaseUrl!}${targetUrl}`;
+    }
+    const url = new URL(targetUrl.startsWith('http') ? targetUrl : `${window.location.origin}${targetUrl.startsWith('/') ? '' : '/'}${targetUrl}`);
     const qs = fromWs.querystring;
     if (qs) {
-      Object.keys(qs).forEach(key => {
-        const formKey = qs[key];
-        const control = form.get(formKey);
-        if (control?.value) {
-          url.searchParams.append(key, control.value);
-        }
-      });
+        Object.keys(qs).forEach((key) => {
+            const val = form.get(key)?.value;
+            if (val !== undefined && val !== null) {
+                url.searchParams.set(key, val);
+            }
+        });
     }
     const wsToCall: WsDef = { ...fromWs, url: url.toString(), method: HTTP_METHODS.get };
     this.genericHttpService.callWs(wsToCall).subscribe(r => {
@@ -337,8 +359,10 @@ export class FormService {
   }
 
   public implementedField(field: DynamicField<any>): boolean {
+    if (!field || !field.controlType) return false;
     const controlTypes = Object.values(CONTROL_TYPE) as string[];
-    return controlTypes.includes(field.controlType.toLowerCase());
+    const typeStr = typeof field.controlType === 'string' ? field.controlType.toLowerCase() : String(field.controlType).toLowerCase();
+    return controlTypes.some(ct => String(ct).toLowerCase() === typeStr) || typeStr === 'container' || typeStr === 'group';
   }
 
   resetFormWithFields(form: FormGroup, fields: DynamicField<any>[], options: any, onFieldsChanges: any): void {
@@ -375,7 +399,7 @@ export class FormService {
   }
 
   getFieldControl(keyField: string, form: FormGroup, fields: DynamicField<any>[]): FieldControlApi | null {
-    const field = fields.find(f => f.key === keyField);
+    const field = this.flattenFields(fields).find(f => f.key === keyField);
     if (!field) return null;
     return {
       field: field,
@@ -402,7 +426,7 @@ export class FormService {
 
   getEntityFromFields(fields: DynamicField<any>[]): any {
     const entity: any = {};
-    fields.forEach(element => {
+    this.flattenFields(fields).forEach(element => {
       if (this.implementedField(element)) {
         entity[element.key] = element.value;
         if (element.controlType === CONTROL_TYPE.Checkbox && (entity[element.key] == null)) {
@@ -423,7 +447,7 @@ export class FormService {
 
     const cleanedEntity: any = {};
 
-    fields.forEach(element => {
+    this.flattenFields(fields).forEach(element => {
       const control = form.controls[element.key];
       if (this.implementedField(element) && control) {
         const value = control.value;
@@ -465,7 +489,8 @@ export class FormService {
   fieldsChangesBehavior(fields: DynamicField<any>[], fieldsBehavior: DynamicFieldBehavior[], data: any, form: FormGroup): void {
     if (!fields || !fieldsBehavior || !form || !data) return;
     const entity = data.entity;
-    const fieldsToChange = data.fieldKey ? [data.fieldKey] : fields.map(f => f.key);
+    const leafFields = this.flattenFields(fields);
+    const fieldsToChange = data.fieldKey ? [data.fieldKey] : leafFields.map(f => f.key);
     fieldsToChange.forEach((fieldKey: string) => this.fieldChangeBehavior(fieldKey, fieldsBehavior, entity, fields, form));
   }
 
@@ -566,7 +591,7 @@ export class FormService {
   private evalCondition(condition: DynamicFieldConditionIf, fields: DynamicField<any>[], entity: any): boolean {
     if (condition.key === undefined) return true;
     const compare = (condition.compare ?? FILTER_TYPE.EQUALS) as FILTER_TYPE;
-    const field = fields.find(f => f.key === condition.key);
+    const field = this.flattenFields(fields).find(f => f.key === condition.key);
     if (condition.toField) {
       const entityValue = entity[condition.toField];
       const conditionValue = condition.value ?? entity[condition.key];
@@ -740,7 +765,7 @@ export class FormService {
   }
 
   getField(fieldKey: string, fields: DynamicField<any>[]): DynamicField<any> | undefined {
-    return fields.find(f => f.key === fieldKey);
+    return this.flattenFields(fields).find(f => f.key === fieldKey);
   }
 
   private disable(form: FormGroup, field: DynamicField<any>): void {

@@ -17,4 +17,5 @@ export * from './components/forgot-password/forgot-password.component';
 export * from './components/reset-password/reset-password.component';
 export * from './components/change-password/change-password.component';
 export * from './components/unlock-session/unlock-session.component';
+export * from './components/reauth-modal/reauth-modal.component';
 export * from './components/confirmation-required/confirmation-required.component';

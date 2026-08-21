@@ -1,4 +1,4 @@
-import { NgIf } from '@angular/common';
+import { NgIf, NgStyle } from '@angular/common';
 import { Component, OnInit, ViewChild, ViewEncapsulation, inject } from '@angular/core';
 import { FormsModule, NgForm, ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormControl } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -15,6 +15,7 @@ import { finalize } from 'rxjs';
 import { TranslatePipe } from '../../../pipe/translate.pipe';
 import { I18nService } from '../../../services/i18n-service/i18n.service';
 import { LogoComponent } from '../../../components/logo/logo.component';
+import { FWK_CONFIG, FwkConfig } from '../../../model/fwk-config';
 
 interface ResetPasswordForm {
     password: FormControl<string | null>;
@@ -27,10 +28,12 @@ interface ResetPasswordForm {
     encapsulation: ViewEncapsulation.None,
     animations: fwkAnimations,
     standalone: true,
-    imports: [NgIf, FwkAlertComponent, FormsModule, ReactiveFormsModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule, MatProgressSpinnerModule, RouterLink, TranslatePipe, LogoComponent],
+    imports: [NgIf, NgStyle, FwkAlertComponent, FormsModule, ReactiveFormsModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule, MatProgressSpinnerModule, RouterLink, TranslatePipe, LogoComponent],
 })
 export class AuthResetPasswordComponent implements OnInit {
     @ViewChild('resetPasswordNgForm') resetPasswordNgForm!: NgForm;
+
+    public fwkConfig = inject<FwkConfig>(FWK_CONFIG);
 
     alert: { type: FwkAlertType; message: string } = {
         type: 'success',
@@ -81,9 +84,10 @@ export class AuthResetPasswordComponent implements OnInit {
                     };
                 },
                 (response) => {
+                    const fallback = this._i18nService.translate('reset_password_error_message');
                     this.alert = {
                         type: 'error',
-                        message: this._i18nService.translate('reset_password_error_message'),
+                        message: response?.userMessage || response?.message || fallback,
                     };
                 },
             );

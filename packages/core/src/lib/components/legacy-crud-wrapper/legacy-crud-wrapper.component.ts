@@ -1,6 +1,6 @@
 import { Component, OnInit, ChangeDetectorRef, inject, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { CommonModule } from '@angular/common';
+import { CommonModule, Location } from '@angular/common';
 import { DomSanitizer } from '@angular/platform-browser';
 import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -11,6 +11,7 @@ import { Observable, Subject, takeUntil, map, finalize } from 'rxjs';
 import { CrudComponent } from '../crud/crud.component';
 import { DynamicFormComponent } from '../dynamic-form/dynamic-form.component';
 import { BackButtonComponent } from '../back-button/back-button.component';
+import { HelpButtonComponent } from '../help-button/help-button.component';
 import { BreadcrumbComponent } from '../../navigation/breadcrumb/breadcrumb.component';
 import { CrudDef } from '../../model/component-def/crud-def';
 import { BaseCrudService } from '../../services/base-crud-service/base.crud.service';
@@ -18,33 +19,43 @@ import { GenericHttpService } from '../../services/generic-http-service/generic-
 import { AuthService } from '../../auth/auth.service';
 import { NotificationService } from '../../services/notification/notification.service';
 import { I18nService } from '../../services/i18n-service/i18n.service';
-import { ActionDefService } from '../../services/action-def-service/action-def.service';
+import { FwkConfig, FWK_CONFIG } from '../../model/fwk-config';
+import { DynamicField } from '../../model/dynamic-form/dynamic-field';
+import { DynamicFieldBehavior } from '../../model/dynamic-form/dynamic-field-behavior';
 import { I18n } from '../../model/i18n';
-import { FWK_CONFIG, FwkConfig } from '../../model/fwk-config';
+import { ActionDefService } from '../../services/action-def-service/action-def.service';
+import { TranslatePipe } from '../../pipe/translate.pipe';
+import { FwkAlertComponent } from '../../layout/infrastructure/components/alert/alert.component';
 
 @Component({
   selector: 'fwk-legacy-crud-wrapper',
   templateUrl: './legacy-crud-wrapper.component.html',
+  styleUrls: ['./legacy-crud-wrapper.component.scss'],
   standalone: true,
   imports: [
     CommonModule,
-    CrudComponent,
-    DynamicFormComponent,
-    BackButtonComponent,
-    BreadcrumbComponent,
+    ReactiveFormsModule,
     MatButtonModule,
     MatIconModule,
     MatProgressSpinnerModule,
-    ReactiveFormsModule
+    CrudComponent,
+    DynamicFormComponent,
+    BackButtonComponent,
+    HelpButtonComponent,
+    BreadcrumbComponent,
+    TranslatePipe,
+    FwkAlertComponent
   ],
-  providers: [GenericHttpService, BaseCrudService]
+  providers: [GenericHttpService, BaseCrudService],
+  host: { 'class': 'flex flex-auto h-full' }
 })
 export class LegacyCrudWrapperComponent implements OnInit, OnDestroy {
 
-  crudDef: CrudDef | null = null;
+  crudDef!: CrudDef;
   
   contactEntity: any = null;
-  formFields: any[] = [];
+  formFields: DynamicField<any>[] = [];
+  fieldsBehavior: DynamicFieldBehavior[] = [];
   isEditing: boolean = false;
   isEditingInit: boolean = false;
   parentForm = new FormGroup({});
@@ -57,9 +68,12 @@ export class LegacyCrudWrapperComponent implements OnInit, OnDestroy {
   activeActionKey: string | null = null;
   inlineFileUrl: any = null;
   isInlineFileLoading: boolean = false;
+  hasLoadError: boolean = false;
+  errorType: 'network' | 'server' = 'server';
 
   private route = inject(ActivatedRoute);
   private _router = inject(Router);
+  private _location = inject(Location);
   private cdr = inject(ChangeDetectorRef);
   private _sanitizer = inject(DomSanitizer);
   private _genericHttpService = inject(GenericHttpService);
@@ -78,7 +92,16 @@ export class LegacyCrudWrapperComponent implements OnInit, OnDestroy {
       return;
     }
 
-    if (this.crudDef.clusterConfig?.showDetailsFormInline === true) {
+    if (this.crudDef.i18n) {
+      this._i18nService.addI18n(this.crudDef.i18n);
+    }
+
+    const isStandaloneForm = !this.crudDef.grid && (
+      !!this.crudDef.formsDef?.read || !!this.crudDef.formsDef?.update ||
+      !!this.crudDef.forms?.read || !!this.crudDef.forms?.update
+    );
+
+    if (this.crudDef.clusterConfig?.showDetailsFormInline === true || isStandaloneForm) {
       this.route.queryParams.pipe(takeUntil(this.destroy$)).subscribe(params => {
         const newId = params['idContact'];
         const newAction = params['action'] || null;
@@ -86,8 +109,8 @@ export class LegacyCrudWrapperComponent implements OnInit, OnDestroy {
         const actionChanged = this.activeActionKey !== newAction;
         this.activeActionKey = newAction;
 
-        if (newId) {
-          this.idContact = newId;
+        if (newId || this.crudDef.clusterConfig?.showDetailsFormInline === true || isStandaloneForm) {
+          this.idContact = newId || null;
           
           this._evaluateInlineView();
           
@@ -131,11 +154,17 @@ export class LegacyCrudWrapperComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const hasCreate = !!def.forms?.create && (def.forms.create?.length ?? 0) > 0;
-    const hasRead = !!def.forms?.read && (def.forms.read?.length ?? 0) > 0;
-    const hasUpdate = !!def.forms?.update && (def.forms.update?.length ?? 0) > 0;
+    const readFields = def.formsDef?.read?.fields || def.forms?.read;
+    const updateFields = def.formsDef?.update?.fields || def.forms?.update;
+    const createFields = def.formsDef?.create?.fields || def.forms?.create;
 
-    if (def.clusterConfig?.showDetailsFormInline === true && !hasCreate && (hasRead || hasUpdate)) {
+    const hasCreate = !!createFields && (createFields.length ?? 0) > 0;
+    const hasRead = !!readFields && (readFields.length ?? 0) > 0;
+    const hasUpdate = !!updateFields && (updateFields.length ?? 0) > 0;
+
+    const isStandaloneForm = !def.grid && (hasRead || hasUpdate);
+
+    if ((def.clusterConfig?.showDetailsFormInline === true || isStandaloneForm) && !hasCreate && (hasRead || hasUpdate)) {
       this.isInlineViewActive = true;
       
       if (!this.isEditingInit) {
@@ -153,33 +182,80 @@ export class LegacyCrudWrapperComponent implements OnInit, OnDestroy {
     }
   }
 
+  goBack(): void {
+    this._location.back();
+  }
+
+  retryLoad(): void {
+    this._loadContactData();
+  }
+
   private _loadContactData(): void {
     const def = this.crudDef;
-    if (!this.idContact || !def) return;
+    if (!def) return;
+
+    if (def.cancelInitSearch) {
+      this.contactEntity = {};
+      this.isLoading = false;
+      this.hasLoadError = false;
+      this._evaluateInlineView();
+      this._setupFormFields();
+      setTimeout(() => {
+        this.renderForm = true;
+        this.cdr.markForCheck();
+      });
+      return;
+    }
 
     this.isLoading = true;
+    this.hasLoadError = false;
+    this.errorType = 'server';
     this.cdr.markForCheck();
 
-    const url = def.ws?.url || (this._fwkConfig.apiBaseUrl! + 'admin/personas');
-    this._genericHttpService.basicGet(url, { idContact: this.idContact }, null, { idContact: 'idContact' })
+    let url = def.ws?.url || (this._fwkConfig.apiBaseUrl! + 'admin/personas');
+    if (def.ws?.url && !def.ws.url.startsWith('http') && !def.ws.url.startsWith('/assets/') && !def.ws.url.startsWith('assets/')) {
+      url = this._fwkConfig.apiBaseUrl! + def.ws.url;
+    }
+    const params = this.idContact ? { idContact: this.idContact } : {};
+    this._genericHttpService.basicGet(url, params, null, { idContact: 'idContact' })
       .subscribe({
         next: (res) => {
-          const array = Array.isArray(res) ? res : [res];
-          if (array.length > 0) {
-            this.contactEntity = array[0];
+          if (res && res.ok === false) {
+            this.hasLoadError = true;
+            this.errorType = 'server';
+            this.isLoading = false;
+            setTimeout(() => {
+              this.renderForm = true;
+              this.cdr.markForCheck();
+            });
+            return;
+          }
+          const raw = res?.data !== undefined ? res.data : res;
+          const array = Array.isArray(raw) ? raw : [raw];
+          if (array.length > 0 && array[0] !== null && array[0] !== undefined) {
+            if (typeof array[0] !== 'object') {
+              const updateFields = def.formsDef?.update?.fields || def.forms?.update;
+              const firstKey = (updateFields && updateFields.length > 0) ? updateFields[0].key : 'value';
+              this.contactEntity = { [firstKey]: array[0] };
+            } else {
+              this.contactEntity = array[0];
+            }
             
             this._evaluateInlineView();
 
             if (this.isInlineViewActive) {
-              const hasUpdate = !!def.forms?.update && (def.forms.update?.length ?? 0) > 0;
-              const hasRead = !!def.forms?.read && (def.forms.read?.length ?? 0) > 0;
-              const hasUpdatePerm = this._authService.hasPermission(def.security?.updateAccess || 'PERFIL_IDENTIFICACION_UPDATE');
-              const hasNoMatriculadoPerm = this._authService.hasPermission('PERFIL_IDENTIFICACION_UPDATE_DATOS_NO_MATRICULADO');
+              const hasUpdate = !!def.forms?.update || !!def.formsDef?.update;
+              const hasRead = !!def.forms?.read || !!def.formsDef?.read;
+              const hasUpdatePerm = !def.security?.updateAccess || this._authService.hasPermission(def.security.updateAccess);
               
-              this.showEditButton = hasRead && hasUpdate && (hasUpdatePerm || hasNoMatriculadoPerm);
+              this.showEditButton = hasRead && hasUpdate && hasUpdatePerm;
 
               this._setupFormFields();
             }
+            this.hasLoadError = false;
+          } else {
+            this.hasLoadError = true;
+            this.errorType = 'server';
           }
           this.isLoading = false;
           setTimeout(() => {
@@ -189,6 +265,25 @@ export class LegacyCrudWrapperComponent implements OnInit, OnDestroy {
         },
         error: (err) => {
           console.error('[LegacyCrudWrapper] Error loading contact data:', err);
+          const hasUpdateOnly = (!!def.formsDef?.update || !!def.forms?.update) && !def.formsDef?.read && !def.forms?.read;
+          if (hasUpdateOnly) {
+            this.contactEntity = {};
+            this.hasLoadError = false;
+            this.isLoading = false;
+            this._evaluateInlineView();
+            this._setupFormFields();
+            setTimeout(() => {
+              this.renderForm = true;
+              this.cdr.markForCheck();
+            });
+            return;
+          }
+          this.hasLoadError = true;
+          if (!navigator.onLine || err?.status === 0 || err?.name === 'TimeoutError' || err?.message?.includes('Unknown Error')) {
+            this.errorType = 'network';
+          } else {
+            this.errorType = 'server';
+          }
           this.isLoading = false;
           setTimeout(() => {
             this.renderForm = true;
@@ -228,19 +323,23 @@ export class LegacyCrudWrapperComponent implements OnInit, OnDestroy {
         this.formFields = [];
       }
     } else {
-      const hasRead = !!def.forms?.read && (def.forms.read?.length ?? 0) > 0;
-      const hasUpdate = !!def.forms?.update && (def.forms.update?.length ?? 0) > 0;
+      const readFields = def.formsDef?.read?.fields || def.forms?.read;
+      const updateFields = def.formsDef?.update?.fields || def.forms?.update;
+      const hasRead = !!readFields && (readFields.length ?? 0) > 0;
+      const hasUpdate = !!updateFields && (updateFields.length ?? 0) > 0;
 
-      if (this.isEditing && hasUpdate && def.forms?.update) {
-        this.formFields = JSON.parse(JSON.stringify(def.forms.update));
+      if (this.isEditing && hasUpdate && updateFields) {
+        this.formFields = JSON.parse(JSON.stringify(updateFields));
         this.formFields.forEach(field => {
           if (field.key !== 'idContact') {
             field.readonly = false;
-            field.disabled = false;
+            if (field.disabled === undefined) {
+              field.disabled = false;
+            }
           }
         });
-      } else if (hasRead && def.forms?.read) {
-        this.formFields = JSON.parse(JSON.stringify(def.forms.read));
+      } else if (hasRead && readFields) {
+        this.formFields = JSON.parse(JSON.stringify(readFields));
         this.formFields.forEach(field => {
           field.readonly = true;
           field.disabled = true;
@@ -250,7 +349,8 @@ export class LegacyCrudWrapperComponent implements OnInit, OnDestroy {
       }
     }
 
-    const dictionary = this._i18nService.getDictionary('perfil_identificacion_i18n_def') || 
+    const dictName = this.crudDef?.i18n?.name || 'perfil_identificacion_i18n_def';
+    const dictionary = this._i18nService.getDictionary(dictName) || 
                        this._i18nService.getDictionary('fwk');
     if (dictionary) {
       this.formFields.forEach(field => {
@@ -259,6 +359,8 @@ export class LegacyCrudWrapperComponent implements OnInit, OnDestroy {
         }
       });
     }
+
+    this.fieldsBehavior = def.formsDef?.update?.fieldsBehavior || def.formsDef?.read?.fieldsBehavior || [];
 
     this.cdr.markForCheck();
   }
@@ -275,7 +377,10 @@ export class LegacyCrudWrapperComponent implements OnInit, OnDestroy {
   }
 
   cancelEditing(): void {
-    if (!this.activeActionKey) {
+    const def = this.crudDef;
+    const readFields = def?.formsDef?.read?.fields || def?.forms?.read;
+    const hasRead = !!readFields && (readFields.length ?? 0) > 0;
+    if (!this.activeActionKey && hasRead) {
       this.isEditing = false;
     }
     this.parentForm = new FormGroup({});
@@ -290,6 +395,41 @@ export class LegacyCrudWrapperComponent implements OnInit, OnDestroy {
       this.renderForm = true;
       this.cdr.markForCheck();
     });
+  }
+
+  get pageTitle(): string {
+    const def = this.crudDef;
+    if (!def) return '';
+    if (this.activeActionKey) {
+      return this.translate(this.activeActionKey);
+    }
+    const dictName = def.i18n?.name;
+    const dictionary = dictName ? this._i18nService.getDictionary(dictName) : null;
+    const nameLower = def.name ? def.name.toLowerCase() : '';
+
+    const possibleKeys = [
+      'page_title',
+      `${nameLower}_title`,
+      `${def.name}_title`,
+      (def as any).titleKey
+    ].filter(Boolean) as string[];
+
+    for (const key of possibleKeys) {
+      const translated = dictionary?.translate?.(key) || this._i18nService.translate(key) || def.i18n?.words?.[key];
+      if (translated && translated !== key) {
+        return translated;
+      }
+    }
+
+    if ((def as any).title) {
+      return (def as any).title;
+    }
+
+    return this.isEditing ? this.translate('cluster_edit_details_title') : this.translate('cluster_details_title');
+  }
+
+  get isSaveDisabled(): boolean {
+    return this.parentForm.invalid || this.isSaving || this.parentForm.disabled;
   }
 
   saveChanges(): void {
@@ -340,16 +480,20 @@ export class LegacyCrudWrapperComponent implements OnInit, OnDestroy {
     this.cdr.markForCheck();
 
     request$.subscribe({
-      next: () => {
+      next: (res) => {
         this.isSaving = false;
-        this._notificationService.notifySuccess(this.translate('success_message') || this.translate('data_update_success_message'));
+        const successMsg = def.ws?.messageSuccess || res?.messageSuccess || res?.successMessage || res?.data?.successMessage || this.translate('success_message') || this.translate('data_update_success_message');
+        this._notificationService.notifySuccess(successMsg);
+        this._notificationService.checkAndNotifyExtraMessages(res);
         
         if (this.activeActionKey) {
           this.parentForm = new FormGroup({});
           this.renderForm = false;
           this._loadContactData();
         } else {
-          this.isEditing = false;
+          const readFields = def.formsDef?.read?.fields || def.forms?.read;
+          const hasRead = !!readFields && (readFields.length ?? 0) > 0;
+          this.isEditing = !hasRead;
           this.parentForm = new FormGroup({});
           this.renderForm = false;
           this._evaluateInlineView();
@@ -360,8 +504,6 @@ export class LegacyCrudWrapperComponent implements OnInit, OnDestroy {
       error: (err) => {
         this.isSaving = false;
         console.error('[LegacyCrudWrapper] Error saving data:', err);
-        const msg = err?.error?.message || this.translate('data_update_error_message');
-        this._notificationService.notifyError(msg);
         this.cdr.markForCheck();
       }
     });
@@ -434,7 +576,8 @@ export class LegacyCrudWrapperComponent implements OnInit, OnDestroy {
     const row = { ...this.contactEntity };
     row.id = row.idContact;
 
-    const i18nObj = this._i18nService.getDictionary('perfil_identificacion_i18n_def') || 
+    const dictName = this.crudDef?.i18n?.name || 'perfil_identificacion_i18n_def';
+    const i18nObj = this._i18nService.getDictionary(dictName) || 
                     this._i18nService.getDictionary('fwk') || 
                     new I18n();
 
@@ -479,7 +622,8 @@ export class LegacyCrudWrapperComponent implements OnInit, OnDestroy {
 
   translate(key: string): string {
     if (!key) return '';
-    return this._i18nService.translate(key);
+    const dictName = this.crudDef?.i18n?.name || 'app';
+    return this._i18nService.translate(key, dictName);
   }
 
   private _loadInlineFilePreview(action: any): void {

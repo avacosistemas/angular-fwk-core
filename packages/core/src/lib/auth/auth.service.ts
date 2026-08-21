@@ -1,13 +1,18 @@
-import { Injectable, Inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { Injectable, Inject, Injector } from '@angular/core';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
+import { MatDialog } from '@angular/material/dialog';
 import { Observable, of, BehaviorSubject, throwError, catchError, tap, finalize, filter, take, map, shareReplay } from 'rxjs';
 import { User } from './user.types';
 import { UserService } from './user.service';
 import { AbstractAuthService, SignInData } from './abstract-auth.service';
 import { I18nService } from '../services/i18n-service/i18n.service';
+import { NotificationService } from '../services/notification/notification.service';
 import { FWK_CONFIG, FwkConfig } from '../model/fwk-config';
 import { AuthUtils } from './auth.utils';
+import { extractApiErrorMessage } from '../utils/error-utils';
+import { formatImageSrc } from '../utils/image-utils';
+import { ReauthModalComponent } from './components/reauth-modal/reauth-modal.component';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService implements AbstractAuthService {
@@ -16,6 +21,7 @@ export class AuthService implements AbstractAuthService {
     private _checkRequest$: Observable<boolean> | null = null;
 
     private isRefreshing = false;
+    private isReauthModalOpen = false;
     private refreshTokenSubject: BehaviorSubject<any> = new BehaviorSubject<any>(null);
     private _refreshTimeout: any;
 
@@ -27,6 +33,8 @@ export class AuthService implements AbstractAuthService {
         private _router: Router,
         private _userService: UserService,
         private _i18nService: I18nService,
+        private _notificationService: NotificationService,
+        private _injector: Injector,
         @Inject(FWK_CONFIG) private _fwkConfig: FwkConfig
     ) {
         this.TOKEN_KEY = (this._fwkConfig.appId || 'app') + '_accessToken';
@@ -34,18 +42,39 @@ export class AuthService implements AbstractAuthService {
     }
 
     get authenticated$(): Observable<boolean> { return this._authenticated.asObservable(); }
-  
+    get user(): User | null { return this._userService.userValue; }
+
     signIn(credentials: SignInData): Observable<any> {
-        return this._httpClient.post(this._fwkConfig.auth!.signIn!, credentials, { responseType: 'json' }).pipe(
+        const signInUrl = this._fwkConfig.auth?.signIn;
+        if (!signInUrl) {
+            const errorMsg = 'No se ha configurado la URL de autenticación (auth.signIn).';
+            console.error(errorMsg, this._fwkConfig);
+            return throwError(() => ({ message: errorMsg, userMessage: errorMsg }));
+        }
+
+        return this._httpClient.post(signInUrl, credentials, { responseType: 'json' }).pipe(
             tap((responseFromApi: any) => {
-                this.handleAuthenticationSuccess(responseFromApi);
+                if (responseFromApi && responseFromApi.ok === false) {
+                    const errorMsg = this.extractErrorMessage(responseFromApi);
+                    const fallbackMsg = this._i18nService.getDictionary('fwk')?.translate?.('sign_in_error_message') ?? 'sign_in_error_message';
+                    const finalMsg = errorMsg || fallbackMsg;
+                    this._notificationService.notifyError(finalMsg);
+                    throw {
+                        error: responseFromApi,
+                        userMessage: finalMsg,
+                        message: finalMsg
+                    };
+                }
+                this.handleAuthenticationSuccess(responseFromApi, credentials.username);
             }),
             catchError((error) => {
-                if (error.status === 409 && error.error && error.error.token && error.error.passwordExpired) {
-                    this.handleAuthenticationSuccess(error.error);
-                    return of(error.error);
+                const errPayload = error?.error?.data || error?.error;
+                const tokenCandidate = errPayload?.token || errPayload?.data?.token;
+                if (error.status === 409 && errPayload && tokenCandidate && errPayload.passwordExpired) {
+                    this.handleAuthenticationSuccess(errPayload, credentials.username);
+                    return of(errPayload);
                 }
-                return throwError(() => error);
+                return this.handleGenericAuthError(error, 'sign_in_error_message');
             })
         );
     }
@@ -114,20 +143,63 @@ export class AuthService implements AbstractAuthService {
             this.isRefreshing = true;
             this.refreshTokenSubject.next(null);
 
-            // return this._httpClient.get<any>(`/mock-refresh.txt?cb=${Date.now()}`).pipe(
-            return this._httpClient.post<any>(this._fwkConfig.auth!.refreshToken!, {}).pipe(
+            const refreshUrl = this._fwkConfig.auth!.refreshToken!;
+            const token = this.getToken();
+            let headers = new HttpHeaders();
+            if (token) {
+                headers = headers.set('Authorization', `Bearer ${token}`);
+            }
+
+            return this._httpClient.post<any>(refreshUrl, null, { headers }).pipe(
                 tap((response: any) => {
+                    if (response && response.ok === false) {
+                        throw response;
+                    }
+                    const data = (response && response.data !== undefined && response.data !== null && typeof response.data === 'object' && !Array.isArray(response.data))
+                        ? response.data
+                        : response;
                     this.handleAuthenticationSuccess(response);
-                    this.refreshTokenSubject.next(response.token);
+                    this.refreshTokenSubject.next(data.token || token);
                 }),
                 catchError((error) => {
-                    this.signOut();
+                    this.triggerReauthModalOrLogout(error);
                     return throwError(() => error);
                 }),
                 finalize(() => {
                     this.isRefreshing = false;
                 })
             );
+        }
+    }
+
+    private triggerReauthModalOrLogout(error: any): void {
+        if (this.isReauthModalOpen) return;
+        this.isReauthModalOpen = true;
+
+        try {
+            const dialog = this._injector.get(MatDialog);
+            const dialogRef = dialog.open(ReauthModalComponent, {
+                width: '440px',
+                maxWidth: '95vw',
+                disableClose: false,
+                panelClass: 'control-mat-dialog'
+            });
+
+            dialogRef.afterClosed().subscribe((result: any) => {
+                this.isReauthModalOpen = false;
+                if (result && result.success) {
+                    window.location.reload();
+                } else {
+                    this.signOut().subscribe(() => {
+                        this._router.navigate(['/sign-in']);
+                    });
+                }
+            });
+        } catch (e) {
+            this.isReauthModalOpen = false;
+            this.signOut().subscribe(() => {
+                this._router.navigate(['/sign-in']);
+            });
         }
     }
 
@@ -142,15 +214,21 @@ export class AuthService implements AbstractAuthService {
     }
 
     forgotPassword(email: string): Observable<any> {
-        return this._httpClient.post(this._fwkConfig.auth!.forgotPassword!, { email });
+        return this._httpClient.post(this._fwkConfig.auth!.forgotPassword!, { email }).pipe(
+            catchError((error) => this.handleGenericAuthError(error, 'forgot_password_error_message'))
+        );
     }
 
     resetPassword(data: any): Observable<any> {
-        return this._httpClient.post(this._fwkConfig.auth!.resetPassword!, data);
+        return this._httpClient.post(this._fwkConfig.auth!.resetPassword!, data).pipe(
+            catchError((error) => this.handleGenericAuthError(error, 'reset_password_error_message'))
+        );
     }
 
     signUp(data: any): Observable<any> {
-        return this._httpClient.post(this._fwkConfig.auth!.signUp!, data);
+        return this._httpClient.post(this._fwkConfig.auth!.signUp!, data).pipe(
+            catchError((error) => this.handleGenericAuthError(error, 'generic_error_try_again'))
+        );
     }
 
     unlockSession(data: { email: string; password: string }): Observable<any> {
@@ -158,12 +236,41 @@ export class AuthService implements AbstractAuthService {
     }
 
     changePassword(data: any): Observable<any> {
-        return this._httpClient.post(this._fwkConfig.auth!.changePassword!, data);
+        return this._httpClient.post(this._fwkConfig.auth!.changePassword!, data).pipe(
+            catchError((error) => this.handleGenericAuthError(error, 'change_password_error_message'))
+        );
     }
 
-    private handleAuthenticationSuccess(responseFromApi: any): void {
-        const accessToken = responseFromApi.token;
-        const refreshTokenValue = responseFromApi.refreshToken;
+    private handleGenericAuthError(error: any, fallbackKey: string): Observable<never> {
+        if (error && error.userMessage) {
+            return throwError(() => error);
+        }
+        const extractedMsg = this.extractErrorMessage(error);
+        const fallbackMsg = this._i18nService.getDictionary('fwk')?.translate?.(fallbackKey)
+            || this._i18nService.translate(fallbackKey);
+        const finalMsg = extractedMsg || fallbackMsg;
+
+        this._notificationService.notifyError(finalMsg);
+
+        if (typeof error === 'object' && error !== null) {
+            error.userMessage = finalMsg;
+        } else {
+            error = { error, userMessage: finalMsg, message: finalMsg };
+        }
+        return throwError(() => error);
+    }
+
+    private extractErrorMessage(error: any): string | null {
+        return extractApiErrorMessage(error);
+    }
+
+    private handleAuthenticationSuccess(responseFromApi: any, submittedUsername?: string): void {
+        const data = (responseFromApi && responseFromApi.data !== undefined && responseFromApi.data !== null && typeof responseFromApi.data === 'object' && !Array.isArray(responseFromApi.data))
+            ? responseFromApi.data
+            : responseFromApi;
+
+        const accessToken = data.token || data.accessToken || data.jwt;
+        const refreshTokenValue = data.refreshToken || data.refresh_token;
 
         if (!accessToken || typeof accessToken !== 'string') {
             console.error('La respuesta de la API no contiene un "token" válido.', responseFromApi);
@@ -178,13 +285,13 @@ export class AuthService implements AbstractAuthService {
 
         let permisosProcesados: string[] = [];
 
-        if (responseFromApi.permissions && Array.isArray(responseFromApi.permissions)) {
-            permisosProcesados = responseFromApi.permissions.map((p: any) => p.code || p);
-        } else if (responseFromApi.permisos) {
-            if (Array.isArray(responseFromApi.permisos)) {
-                permisosProcesados = responseFromApi.permisos;
-            } else if (typeof responseFromApi.permisos === 'string') {
-                permisosProcesados = responseFromApi.permisos.split(';');
+        if (data.permissions && Array.isArray(data.permissions)) {
+            permisosProcesados = data.permissions.map((p: any) => p.code || p);
+        } else if (data.permisos) {
+            if (Array.isArray(data.permisos)) {
+                permisosProcesados = data.permisos.map((p: any) => typeof p === 'string' ? p : (p.code || p.name || p));
+            } else if (typeof data.permisos === 'string') {
+                permisosProcesados = data.permisos.split(';').map((p: string) => p.trim());
             }
         }
 
@@ -192,32 +299,50 @@ export class AuthService implements AbstractAuthService {
             permisosProcesados = storedUser.permisos;
         }
 
-        const hasExplicitName = responseFromApi.name != null && responseFromApi.name !== '';
-        const hasUsername = responseFromApi.username != null && responseFromApi.username !== '';
+        const hasExplicitName = data.name != null && data.name !== '';
+        const hasUsername = data.username != null && data.username !== '';
+
+        const resolvedUsername = (hasUsername ? data.username : null)
+            || (submittedUsername && !submittedUsername.includes('no especificado') ? submittedUsername : null)
+            || (accessToken ? this.extractUsernameFromToken(accessToken) : null)
+            || storedUser?.username
+            || '';
+
+        const resolvedUser = (submittedUsername && !submittedUsername.includes('no especificado'))
+            ? submittedUsername
+            : (data.user || data.username || storedUser?.user || storedUser?.username || '');
 
         const displayName = hasExplicitName
-            ? responseFromApi.name
-            : hasUsername
-                ? responseFromApi.username
+            ? data.name
+            : resolvedUsername !== ''
+                ? resolvedUsername
                 : storedUser?.name ?? '';
 
-        const loginUsername = hasExplicitName
-            ? responseFromApi.username
-            : hasUsername
-                ? (this.extractUsernameFromToken(accessToken) ?? responseFromApi.username)
-                : storedUser?.username ?? '';
+        const rawPhoto = data.foto ?? data.imagen ?? data.avatar;
+        const processedPhoto = formatImageSrc(rawPhoto)
+            || (typeof data.avatar === 'string' ? formatImageSrc(data.avatar) : null)
+            || (typeof storedUser?.avatar === 'string' ? storedUser.avatar : null)
+            || undefined;
 
         const userForFwk: User = {
-            id: responseFromApi.guid ?? storedUser?.id ?? '',
+            ...(storedUser || {}),
+            ...data,
+            id: data.guid ?? data.id ?? storedUser?.id ?? '',
+            guid: data.guid ?? storedUser?.guid ?? (data.id ? String(data.id) : undefined),
             name: displayName,
-            email: responseFromApi.email || storedUser?.email || emailNotSpecified,
-            avatar: storedUser?.avatar ?? undefined,
+            email: data.email || storedUser?.email || emailNotSpecified,
+            avatar: processedPhoto,
+            foto: processedPhoto,
+            imagen: processedPhoto,
             status: 'online',
             permisos: permisosProcesados,
-            refreshToken: refreshTokenValue || storedUser?.refreshToken || accessToken,
-            username: loginUsername,
-            passwordExpired: responseFromApi.passwordExpired !== undefined ? (responseFromApi.passwordExpired ?? undefined) : storedUser?.passwordExpired,
-            fechaVencimiento: responseFromApi.fechaVencimiento !== undefined ? (responseFromApi.fechaVencimiento ?? undefined) : storedUser?.fechaVencimiento
+            username: resolvedUsername,
+            user: resolvedUser,
+            passwordExpired: data.passwordExpired !== undefined ? (data.passwordExpired ?? undefined) : storedUser?.passwordExpired,
+            fechaVencimiento: data.fechaVencimiento !== undefined ? (data.fechaVencimiento ?? undefined) : storedUser?.fechaVencimiento,
+            matricula: data.matricula !== undefined ? data.matricula : storedUser?.matricula,
+            idMatricula: data.idMatricula !== undefined ? data.idMatricula : storedUser?.idMatricula,
+            tipoMatricula: data.tipoMatricula !== undefined ? data.tipoMatricula : storedUser?.tipoMatricula
         };
 
         this.setToken(accessToken);

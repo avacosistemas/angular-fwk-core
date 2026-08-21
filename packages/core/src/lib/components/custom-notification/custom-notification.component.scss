@@ -44,4 +44,13 @@
             color: white;
         }
     }
+
+    &.notification-warning {
+        background-color: #e67e22;
+
+        .mat-icon,
+        button {
+            color: white;
+        }
+    }
 }

@@ -1,0 +1,167 @@
+import { Component, Input, forwardRef, ViewChild, ElementRef, ChangeDetectorRef, HostListener, TemplateRef } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { ControlValueAccessor, NG_VALUE_ACCESSOR, FormsModule } from '@angular/forms';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { ImageCropperModule, ImageCroppedEvent, ImageTransform } from 'ngx-image-cropper';
+import { DynamicFieldFormComponent } from '../dynamic-field-form/dynamic-field-form.component';
+import { TranslatePipe } from '../../../pipe/translate.pipe';
+import { formatImageSrc } from '../../../utils/image-utils';
+
+@Component({
+    selector: 'fwk-image-cropper',
+    templateUrl: './image-cropper.component.html',
+    styleUrls: ['./image-cropper.component.scss'],
+    standalone: true,
+    imports: [
+        CommonModule,
+        FormsModule,
+        MatButtonModule,
+        MatIconModule,
+        MatTooltipModule,
+        MatDialogModule,
+        MatProgressSpinnerModule,
+        ImageCropperModule,
+        TranslatePipe
+    ],
+    providers: [
+        {
+            provide: NG_VALUE_ACCESSOR,
+            useExisting: forwardRef(() => ImageCropperComponent),
+            multi: true
+        }
+    ]
+})
+export class ImageCropperComponent extends DynamicFieldFormComponent<string> {
+    @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
+    @ViewChild('cropModal') cropModal!: TemplateRef<any>;
+
+    imageChangedEvent: any = '';
+    croppedImage: string | null | undefined = '';
+    tempCroppedImage: string | null | undefined = '';
+    transform: ImageTransform = {};
+    rotation = 0;
+    isImageLoading = false;
+    
+    private dialogRef: MatDialogRef<any> | null = null;
+    
+    constructor(private cdr: ChangeDetectorRef, private dialog: MatDialog) {
+        super();
+    }
+
+    override writeValue(value: any): void {
+        super.writeValue(value);
+        this.croppedImage = formatImageSrc(value) || '';
+        this.cdr.markForCheck();
+    }
+
+    fileChangeEvent(event: any): void {
+        if (event.target.files && event.target.files.length > 0) {
+            this.imageChangedEvent = event;
+            this.rotation = 0;
+            this.transform = {};
+            this.tempCroppedImage = '';
+            this.isImageLoading = true;
+            this.openDialog();
+            this.cdr.markForCheck();
+        }
+    }
+
+    openDialog() {
+        this.isImageLoading = true;
+        this.dialogRef = this.dialog.open(this.cropModal, {
+            width: '450px',
+            disableClose: true,
+            panelClass: 'control-mat-dialog'
+        });
+    }
+
+    editCrop() {
+        if (this.imageChangedEvent) {
+            this.openDialog();
+        }
+    }
+
+    imageCropped(event: ImageCroppedEvent) {
+        this.tempCroppedImage = event.base64 || event.objectUrl || '';
+        this.cdr.markForCheck();
+    }
+
+    imageLoaded() {
+        this.isImageLoading = false;
+        this.cdr.markForCheck();
+    }
+
+    cropperReady() {
+        this.isImageLoading = false;
+        this.cdr.markForCheck();
+    }
+
+    loadImageFailed() {
+        console.error('Load image failed');
+        this.isImageLoading = false;
+        this.cdr.markForCheck();
+    }
+
+    rotateImage() {
+        this.rotation = (this.rotation + 90) % 360;
+        this.transform = {
+            ...this.transform,
+            rotate: this.rotation
+        };
+        this.cdr.markForCheck();
+    }
+
+    confirmCrop() {
+        if (this.dialogRef) {
+            this.dialogRef.close();
+        }
+        
+        if (this.tempCroppedImage) {
+            this.croppedImage = this.tempCroppedImage;
+            
+            let valueToEmit = this.croppedImage;
+            if (this.croppedImage && this.croppedImage.startsWith('data:image')) {
+                valueToEmit = this.croppedImage.split(',')[1];
+            }
+            
+            this.onChange(valueToEmit as string);
+            this.onTouch();
+        }
+        
+        this.cdr.markForCheck();
+    }
+
+    cancelCrop() {
+        if (this.dialogRef) {
+            this.dialogRef.close();
+        }
+        if (!this.croppedImage) {
+            this.imageChangedEvent = '';
+            if (this.fileInput && this.fileInput.nativeElement) {
+                this.fileInput.nativeElement.value = '';
+            }
+        }
+        this.cdr.markForCheck();
+    }
+
+    openFileInput() {
+        if (!this.isDisabled && this.fileInput) {
+            this.fileInput.nativeElement.click();
+        }
+    }
+    
+    removeImage() {
+        this.croppedImage = '';
+        this.imageChangedEvent = '';
+        this.onChange('');
+        this.onTouch();
+        if (this.fileInput && this.fileInput.nativeElement) {
+            this.fileInput.nativeElement.value = '';
+        }
+        this.cdr.markForCheck();
+    }
+}

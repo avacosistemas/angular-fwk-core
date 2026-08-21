@@ -74,7 +74,7 @@ export class DialogService {
 
     showQuestionModal(data: QuestionModalData): MatDialogRef<QuestionModalComponent> {
         return this.dialog.open(QuestionModalComponent, {
-            width: '450px',
+            width: '400px',
             maxWidth: '90vw',
             data: data,
             panelClass: 'alert-modal-panel',

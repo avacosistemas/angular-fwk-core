@@ -1,4 +1,4 @@
-import { NgIf } from '@angular/common';
+import { NgIf, NgStyle } from '@angular/common';
 import { Component, OnInit, ViewChild, ViewEncapsulation, inject } from '@angular/core';
 import { FormsModule, NgForm, ReactiveFormsModule, FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -15,6 +15,7 @@ import { I18nService } from '../../../services/i18n-service/i18n.service';
 import { LogoComponent } from '../../../components/logo/logo.component';
 import { switchMap } from 'rxjs/operators';
 import { UserService } from '../../user.service';
+import { FWK_CONFIG, FwkConfig } from '../../../model/fwk-config';
 
 @Component({
     selector: 'auth-change-password',
@@ -22,10 +23,12 @@ import { UserService } from '../../user.service';
     encapsulation: ViewEncapsulation.None,
     animations: fwkAnimations,
     standalone: true,
-    imports: [NgIf, FwkAlertComponent, FormsModule, ReactiveFormsModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule, MatProgressSpinnerModule, RouterLink, TranslatePipe, LogoComponent],
+    imports: [NgIf, NgStyle, FwkAlertComponent, FormsModule, ReactiveFormsModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule, MatProgressSpinnerModule, RouterLink, TranslatePipe, LogoComponent],
 })
 export class AuthChangePasswordComponent implements OnInit {
     @ViewChild('changePasswordNgForm') changePasswordNgForm!: NgForm;
+
+    public fwkConfig = inject<FwkConfig>(FWK_CONFIG);
 
     alert: { type: FwkAlertType; message: string } = {
         type: 'success',
@@ -109,9 +112,10 @@ export class AuthChangePasswordComponent implements OnInit {
                         return;
                     }
 
+                    const fallback = this._i18nService.translate(errorMsg);
                     this.alert = {
                         type: 'error',
-                        message: this._i18nService.translate(errorMsg),
+                        message: error?.userMessage || error?.message || fallback,
                     };
                     this.showAlert = true;
                 }

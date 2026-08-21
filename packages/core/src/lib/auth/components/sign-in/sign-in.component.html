@@ -14,34 +14,36 @@
                 {{alert.message}}
             </fwk-alert>
 
-            <form class="mt-8 flex flex-col gap-3" [formGroup]="signInForm" #signInNgForm="ngForm">
+            <form class="mt-6 flex flex-col gap-1" [formGroup]="signInForm" #signInNgForm="ngForm">
 
-                <mat-form-field class="w-full" appearance="outline">
-                    <mat-label>{{ 'username_label' | translate }}</mat-label>
-                    <input id="username" matInput autocomplete="username" [formControlName]="'username'">
-                    <mat-error *ngIf="signInForm.get('username').hasError('required')">
-                        {{ 'username_required_error' | translate }}
-                    </mat-error>
-                </mat-form-field>
+                <div class="flex flex-col gap-5">
+                    <mat-form-field class="w-full" appearance="outline">
+                        <mat-label>{{ 'username_label' | translate }}</mat-label>
+                        <input id="username" matInput autocomplete="username" [formControlName]="'username'">
+                        <mat-error *ngIf="signInForm.get('username').hasError('required')">
+                            {{ 'username_required_error' | translate }}
+                        </mat-error>
+                    </mat-form-field>
 
-                <mat-form-field class="w-full" appearance="outline">
-                    <mat-label>{{ 'password_label' | translate }}</mat-label>
-                    <input id="password" matInput type="password" autocomplete="current-password"
-                        [formControlName]="'password'" #passwordField>
-                    <button mat-icon-button type="button"
-                        (click)="passwordField.type === 'password' ? passwordField.type = 'text' : passwordField.type = 'password'"
-                        matSuffix>
-                        <mat-icon class="icon-size-5" *ngIf="passwordField.type === 'password'"
-                            [svgIcon]="'heroicons_solid:eye'"></mat-icon>
-                        <mat-icon class="icon-size-5" *ngIf="passwordField.type === 'text'"
-                            [svgIcon]="'heroicons_solid:eye-slash'"></mat-icon>
-                    </button>
-                    <mat-error>
-                        {{ 'password_required_error' | translate }}
-                    </mat-error>
-                </mat-form-field>
+                    <mat-form-field class="w-full" appearance="outline">
+                        <mat-label>{{ 'password_label' | translate }}</mat-label>
+                        <input id="password" matInput type="password" autocomplete="current-password"
+                            [formControlName]="'password'" #passwordField>
+                        <button mat-icon-button type="button"
+                            (click)="passwordField.type === 'password' ? passwordField.type = 'text' : passwordField.type = 'password'"
+                            matSuffix>
+                            <mat-icon class="icon-size-5" *ngIf="passwordField.type === 'password'"
+                                [svgIcon]="'heroicons_solid:eye'"></mat-icon>
+                            <mat-icon class="icon-size-5" *ngIf="passwordField.type === 'text'"
+                                [svgIcon]="'heroicons_solid:eye-slash'"></mat-icon>
+                        </button>
+                        <mat-error>
+                            {{ 'password_required_error' | translate }}
+                        </mat-error>
+                    </mat-form-field>
+                </div>
 
-                <div class="flex items-center justify-between -ml-2">
+                <div class="flex items-center justify-between my-3">
                     <mat-checkbox [color]="'primary'" [formControlName]="'rememberMe'">
                         {{ 'remember_me_label' | translate }}
                     </mat-checkbox>
@@ -55,27 +57,67 @@
                     <mat-progress-spinner *ngIf="signInForm.disabled" [diameter]="24" [mode]="'indeterminate'">
                     </mat-progress-spinner>
                 </button>
-
-                <a *ngIf="showForgotPassword"
-                    class="text-md font-medium w-full text-center mt-4 text-primary-500 hover:underline cursor-pointer"
-                    [routerLink]="['/forgot-password']">
-                    {{ 'forgot_password_title' | translate }}
-                </a>
             </form>
+
+            <div class="flex flex-col gap-3 mt-3">
+                <div *ngIf="showForgotPassword || showSignUp" class="flex justify-between items-center w-full">
+                    <ng-container *ngIf="showForgotPassword">
+                        <a *ngIf="!isForgotPasswordExternal"
+                            class="text-md font-medium w-full text-center text-primary-500 hover:underline cursor-pointer"
+                            [routerLink]="[forgotPasswordUrl]">
+                            {{ 'forgot_password_title' | translate }}
+                        </a>
+                        <a *ngIf="isForgotPasswordExternal"
+                            class="text-md font-medium w-full text-center text-primary-500 hover:underline cursor-pointer"
+                            [href]="forgotPasswordUrl" [target]="forgotPasswordTarget">
+                            {{ 'forgot_password_title' | translate }}
+                        </a>
+                    </ng-container>
+                    <span *ngIf="showForgotPassword && showSignUp" class="h-4 w-1 border-l border-gray-300"></span>
+                    <ng-container *ngIf="showSignUp">
+                        <div class="w-1/2 text-md font-medium text-secondary text-center">
+                            <a *ngIf="!isSignUpExternal" class="ml-1 text-primary-500 hover:underline cursor-pointer"
+                                [routerLink]="[signUpUrl]">{{ 'sign_up_link' | translate }}
+                            </a>
+                            <a *ngIf="isSignUpExternal" class="ml-1 text-primary-500 hover:underline cursor-pointer"
+                                [href]="signUpUrl" [target]="signUpTarget">{{ 'sign_up_link' | translate }}
+                            </a>
+                        </div>
+                    </ng-container>
+                </div>
+
+                <div *ngIf="customAuthFormFooterComponent" class="w-full">
+                    <ng-container *ngComponentOutlet="customAuthFormFooterComponent"></ng-container>
+                </div>
+            </div>
         </div>
     </div>
 
     <div
         class="relative hidden md:flex flex-auto items-center justify-center w-1/2 h-full p-16 lg:px-28 overflow-hidden bg-gray-900 dark:border-l">
-        <svg class="absolute inset-0 pointer-events-none" viewBox="0 0 960 540" width="100%" height="100%"
-            preserveAspectRatio="xMidYMax slice" xmlns="http://www.w3.org/2000/svg">
+        <div *ngIf="fwkConfig.auth?.sideBackground?.imageUrl"
+            class="absolute inset-0 bg-no-repeat pointer-events-none z-0" [ngStyle]="{
+                'background-image': 'url(' + fwkConfig.auth.sideBackground.imageUrl + ')',
+                'background-size': fwkConfig.auth.sideBackground.backgroundSize || 'cover',
+                'background-position': fwkConfig.auth.sideBackground.backgroundPosition || 'center',
+                'background-repeat': fwkConfig.auth.sideBackground.backgroundRepeat || 'no-repeat'
+            }">
+            <div *ngIf="fwkConfig.auth?.sideBackground?.overlayOpacity !== undefined"
+                class="absolute inset-0 bg-black pointer-events-none"
+                [style.opacity]="fwkConfig.auth.sideBackground.overlayOpacity">
+            </div>
+        </div>
+
+        <svg *ngIf="!fwkConfig.auth?.sideBackground?.imageUrl" class="absolute inset-0 pointer-events-none"
+            viewBox="0 0 960 540" width="100%" height="100%" preserveAspectRatio="xMidYMax slice"
+            xmlns="http://www.w3.org/2000/svg">
             <g class="text-gray-700 opacity-25" fill="none" stroke="currentColor" stroke-width="100">
                 <circle r="234" cx="196" cy="23"></circle>
                 <circle r="234" cx="790" cy="491"></circle>
             </g>
         </svg>
-        <svg class="absolute -top-16 -right-16 text-gray-700" viewBox="0 0 220 192" width="220" height="192"
-            fill="none">
+        <svg *ngIf="!fwkConfig.auth?.sideBackground?.imageUrl" class="absolute -top-16 -right-16 text-gray-700"
+            viewBox="0 0 220 192" width="220" height="192" fill="none">
             <defs>
                 <pattern id="837c3e70-6c3a-44e6-8854-cc48c737b659" x="0" y="0" width="20" height="20"
                     patternUnits="userSpaceOnUse">
@@ -86,11 +128,15 @@
         </svg>
 
         <div class="z-10 relative w-full max-w-2xl">
-            <div class="text-7xl font-bold leading-none text-gray-100">
+            <div class="text-7xl font-bold leading-none text-gray-100"
+                [style.color]="fwkConfig.auth?.sideBackground?.titleColor || null">
                 <div>{{ fwkConfig.welcome.titleLine1 }}</div>
                 <div>{{ fwkConfig.welcome.titleLine2 }}</div>
             </div>
-            <div class="mt-6 text-lg tracking-tight leading-6 text-gray-400">
+            <div *ngIf="fwkConfig.welcome?.signInSubtitle !== null"
+                class="mt-6 text-lg tracking-tight leading-6 text-gray-400"
+                [style.color]="fwkConfig.auth?.sideBackground?.subtitleColor || null"
+                [class.text-gray-200]="fwkConfig.auth?.sideBackground?.imageUrl && !fwkConfig.auth?.sideBackground?.subtitleColor">
                 {{ fwkConfig.welcome.signInSubtitle || ('sign_in_welcome_subtitle' | translate) }}
             </div>
         </div>

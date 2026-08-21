@@ -1,0 +1,9 @@
+<button
+    *ngIf="targetUrl"
+    mat-icon-button
+    (click)="openHelp()"
+    [matTooltip]="('help_button_tooltip' | translate) !== 'help_button_tooltip' ? ('help_button_tooltip' | translate) : 'Ayuda'"
+    class="text-gray-600 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 icon-size-7">
+    <mat-icon [svgIcon]="'heroicons_outline:question-mark-circle'" 
+    class="text-gray-600 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 icon-size-5"></mat-icon>
+</button>

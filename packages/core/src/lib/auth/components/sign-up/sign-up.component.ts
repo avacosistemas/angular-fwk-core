@@ -1,4 +1,4 @@
-import { NgIf } from '@angular/common';
+import { NgIf, NgStyle } from '@angular/common';
 import { Component, OnInit, ViewChild, ViewEncapsulation, inject } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, FormsModule, NgForm, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -14,6 +14,7 @@ import { AuthService } from '../../auth.service';
 import { I18nService } from '../../../services/i18n-service/i18n.service';
 import { TranslatePipe } from '../../../pipe/translate.pipe';
 import { LogoComponent } from '../../../components/logo/logo.component';
+import { FWK_CONFIG, FwkConfig } from '../../../model/fwk-config';
 
 interface SignUpForm {
     name: FormControl<string | null>;
@@ -29,11 +30,13 @@ interface SignUpForm {
     encapsulation: ViewEncapsulation.None,
     animations   : fwkAnimations,
     standalone   : true,
-    imports      : [RouterLink, NgIf, FwkAlertComponent, FormsModule, ReactiveFormsModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule, MatCheckboxModule, MatProgressSpinnerModule, TranslatePipe, LogoComponent],
+    imports      : [RouterLink, NgIf, NgStyle, FwkAlertComponent, FormsModule, ReactiveFormsModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule, MatCheckboxModule, MatProgressSpinnerModule, TranslatePipe, LogoComponent],
 })
 export class AuthSignUpComponent implements OnInit
 {
     @ViewChild('signUpNgForm') signUpNgForm!: NgForm;
+
+    public fwkConfig = inject<FwkConfig>(FWK_CONFIG);
 
     private _authService = inject(AuthService);
     private _formBuilder = inject(FormBuilder);

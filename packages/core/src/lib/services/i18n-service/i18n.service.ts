@@ -43,7 +43,7 @@ export class I18nService extends BaseService {
     }
 
     getDictionary(name: string): I18n | undefined {
-        if (!name) return undefined;
+        if (!name || typeof name !== 'string') return undefined;
         return this.dictionaries.get(name.toLowerCase());
     }
 
@@ -53,7 +53,7 @@ export class I18nService extends BaseService {
     }
 
     addI18n(i18n: I18n): void {
-        if (!i18n || !i18n.name) return;
+        if (!i18n || !i18n.name || typeof i18n.name !== 'string') return;
         const key = i18n.name.toLowerCase();
         if (!this.dictionaries.has(key)) {
             const i18nInstance = new I18n();

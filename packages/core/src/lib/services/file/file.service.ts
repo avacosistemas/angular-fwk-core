@@ -82,7 +82,9 @@ export class FileService {
       this.FwkLoadingService.show();
 
       const xhr = new XMLHttpRequest();
-      xhr.open('GET', url, true);
+      const method = (ws.method || 'GET').toUpperCase();
+      xhr.open(method, url, true);
+      xhr.responseType = 'arraybuffer';
 
       const token = this.authService.getToken();
       if (token && (!url.startsWith('http') || url.startsWith(this._fwkConfig.apiBaseUrl!))) {
@@ -91,54 +93,80 @@ export class FileService {
 
       xhr.onload = () => {
         this.FwkLoadingService.hide();
-        if (xhr.status === 200) {
-          const raw = xhr.responseText;
-          let base64 = '';
-          let name = filename || this.i18nService.translate('file_download_default_name');
-
-          try {
-            const json = JSON.parse(raw);
-            const extracted = json[ws.key] !== undefined && json[ws.key] !== null ? json[ws.key] : json['data'];
-            if (extracted && typeof extracted === 'object') {
-              base64 = extracted.file || '';
-              if (extracted.fileName) {
-                name = extracted.fileName;
-              }
-            } else if (typeof extracted === 'string') {
-              base64 = extracted;
-            } else {
-              base64 = raw;
-            }
-          } catch (_) {
-            base64 = raw;
-          }
-
-          if (!base64) {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          const buffer = xhr.response as ArrayBuffer;
+          if (!buffer || buffer.byteLength === 0) {
             observer.error(new Error(this.i18nService.translate('file_download_no_content')));
             return;
           }
 
-          const decodedData = atob(base64);
-          const byteNumbers = new Array(decodedData.length);
-          for (let i = 0; i < decodedData.length; i++) {
-            byteNumbers[i] = decodedData.charCodeAt(i);
+          let name = filename || this.i18nService.translate('file_download_default_name');
+          let contentDisposition = '';
+          try {
+            contentDisposition = xhr.getResponseHeader('Content-Disposition') || '';
+          } catch (_) {}
+
+          const cdMatch = contentDisposition.match(/filename\*?=['"]?(?:UTF-8'')?([^;'\"]+)['"]?/i);
+          if (cdMatch && cdMatch[1]) {
+            try {
+              name = decodeURIComponent(cdMatch[1]);
+            } catch (_) {
+              name = cdMatch[1];
+            }
           }
-          const byteArray = new Uint8Array(byteNumbers);
-          const ext = name.split('.').pop()?.toLowerCase() || '';
-          const mimeTypes: { [key: string]: string } = {
-            jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png',
-            gif: 'image/gif', pdf: 'application/pdf',
-          };
-          const mime = mimeTypes[ext] || 'application/octet-stream';
-          const blob = new Blob([byteArray], { type: mime });
-          const blobUrl = URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = blobUrl;
-          a.download = name;
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-          URL.revokeObjectURL(blobUrl);
+
+          let contentTypeHeader = '';
+          try {
+            contentTypeHeader = xhr.getResponseHeader('Content-Type') || '';
+          } catch (_) {}
+          let blob: Blob | null = null;
+
+          let textResponse = '';
+          try {
+            textResponse = new TextDecoder('utf-8').decode(buffer);
+          } catch (_) {}
+
+          let processedAsText = false;
+          if (textResponse) {
+            const trimmed = textResponse.trim();
+            if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
+              try {
+                const json = JSON.parse(trimmed);
+                const extracted = json[ws.key] !== undefined && json[ws.key] !== null ? json[ws.key] : json['data'];
+                let base64Candidate = '';
+                if (extracted && typeof extracted === 'object') {
+                  base64Candidate = extracted.file || '';
+                  if (extracted.fileName) {
+                    name = extracted.fileName;
+                  }
+                } else if (typeof extracted === 'string') {
+                  base64Candidate = extracted;
+                }
+                if (base64Candidate) {
+                  blob = this.base64ToBlob(base64Candidate, name, contentTypeHeader);
+                  processedAsText = true;
+                }
+              } catch (_) {}
+            }
+
+            if (!processedAsText && !trimmed.startsWith('%PDF') && /^[A-Za-z0-9+/=\s]+$/.test(trimmed) && trimmed.length > 20) {
+              try {
+                blob = this.base64ToBlob(trimmed.replace(/\s+/g, ''), name, contentTypeHeader);
+                processedAsText = true;
+              } catch (_) {}
+            }
+          }
+
+          if (!blob) {
+            const ext = name.split('.').pop()?.toLowerCase() || '';
+            const mime = contentTypeHeader || this.getMimeType(ext) || 'application/octet-stream';
+            if (textResponse.startsWith('%PDF') && !name.toLowerCase().endsWith('.pdf')) {
+              name = (name && name !== 'download' ? name : 'certificado') + '.pdf';
+            }
+            blob = new Blob([buffer], { type: mime });
+          }
+
+          this._downloadBlob(blob, name);
           observer.next();
           observer.complete();
         } else {
@@ -158,6 +186,18 @@ export class FileService {
         xhr.abort();
       };
     });
+  }
+
+  private base64ToBlob(base64: string, filename: string, fallbackMime = ''): Blob {
+    const cleaned = base64.replace(/^data:[^;]+;base64,/, '');
+    const decodedData = atob(cleaned);
+    const byteNumbers = new Uint8Array(decodedData.length);
+    for (let i = 0; i < decodedData.length; i++) {
+      byteNumbers[i] = decodedData.charCodeAt(i);
+    }
+    const ext = filename.split('.').pop()?.toLowerCase() || '';
+    const mime = this.getMimeType(ext) || fallbackMime || 'application/octet-stream';
+    return new Blob([byteNumbers], { type: mime });
   }
 
   previewFileByAction(action: ActionDef, entity: Record<string, any>): Observable<void> {

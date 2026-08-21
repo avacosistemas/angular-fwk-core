@@ -34,6 +34,7 @@ export const IMAGE_PREVIEW_SRC = 'IMAGE_PREVIEW_SRC';
 export const DATE_READ = 'DATE_READ';
 export const DATE_TIME_READ = 'DATE_TIME_READ';
 export const ALERT = 'alert';
+export const IMAGE_CROPPER = 'image_cropper';
 
 export enum CONTROL_TYPE {
   DateRead = 'date_read',
@@ -68,7 +69,10 @@ export enum CONTROL_TYPE {
   ImagePreview = 'image_preview',
   ImagePreviewSrc = 'image_preview_src',
   Label = 'label',
-  Alert = 'alert'
+  Alert = 'alert',
+  ImageCropper = 'image_cropper',
+  Container = 'container',
+  Group = 'group'
 }
 
 
@@ -102,7 +106,8 @@ export enum ControlTypeEnum {
   image_preview = 'image_preview',
   image_preview_src = 'image_preview_src',
   label = "label",
-  alert = "ALERT"
+  alert = "ALERT",
+  image_cropper = "IMAGE_CROPPER"
 }
 
 export class DynamicField<T> {
@@ -133,6 +138,7 @@ export class DynamicField<T> {
   lengthMessage?: string;
   cssClass?: string;
   colSpan?: number; 
+  fields?: DynamicField<any>[]; 
 
   readonly?: boolean;
   showPreview?: boolean;

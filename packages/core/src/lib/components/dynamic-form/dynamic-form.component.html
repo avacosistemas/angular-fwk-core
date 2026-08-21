@@ -1,15 +1,39 @@
 <form *ngIf="form" #formDirective="ngForm" class="dynamicFormDiv grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
     [formGroup]="form" novalidate>
 
-    <div *ngFor="let field of fields; let i = index" class="dynamicFieldDiv" [class]="field.cssClass || ''" [ngClass]="{
+    <ng-container *ngFor="let field of fields; let i = index">
+        <ng-container *ngTemplateOutlet="renderField; context: { $implicit: field, i: i }"></ng-container>
+    </ng-container>
+
+    <ng-template #renderField let-field let-i="i">
+    <div class="dynamicFieldDiv" [class]="field.cssClass || ''" [ngClass]="{
                 'hidden': field.controlType === 'hidden' || field.options?.hidden,
                 'sm:col-span-1 lg:col-span-1': field.colSpan === 1,
                 'sm:col-span-2 lg:col-span-2': field.colSpan === 2,
                 'sm:col-span-2 lg:col-span-3': field.colSpan === 3,
-                'col-span-full': !field.colSpan || field.colSpan === 4
+                'col-span-full': (!field.colSpan || field.colSpan === 4) && field.controlType !== 'container' && field.controlType !== 'group'
             }">
 
         <ng-container [ngSwitch]="field.controlType">
+
+            <div *ngSwitchCase="'container'" [class]="field.cssClass || 'col-span-full flex flex-col gap-4'" [ngClass]="{ 'hidden': field.options?.hidden }">
+                <div *ngIf="field.label" class="text-base font-semibold text-secondary mb-2">{{ field.label }}</div>
+                <div [class]="field.options?.['containerClass'] || 'flex flex-col w-full'">
+                    <ng-container *ngFor="let childField of field.fields; let j = index">
+                        <ng-container *ngTemplateOutlet="renderField; context: { $implicit: childField, i: j }"></ng-container>
+                    </ng-container>
+                </div>
+            </div>
+
+            <div *ngSwitchCase="'group'" [class]="field.cssClass || 'col-span-full flex flex-col gap-4'" [ngClass]="{ 'hidden': field.options?.hidden }">
+                <div *ngIf="field.label" class="text-base font-semibold text-secondary mb-2">{{ field.label }}</div>
+                <div [class]="field.options?.['containerClass'] || 'flex flex-col w-full'">
+                    <ng-container *ngFor="let childField of field.fields; let j = index">
+                        <ng-container *ngTemplateOutlet="renderField; context: { $implicit: childField, i: j }"></ng-container>
+                    </ng-container>
+                </div>
+            </div>
+
             <fwk-url-input *ngSwitchCase="'url_input'" class="w-full" [config]="field" [formControlName]="field.key"
                 [errorMessage]="(form.get(field.key)?.invalid && form.get(field.key)?.touched) ? getMessageErrorValidation(field) : null"
                 [cdkFocusInitial]="i === firstFocusableFieldIndex">
@@ -50,11 +74,17 @@
             <fwk-pick-list *ngSwitchCase="'pick-list'" class="w-full" [formControlName]="field.key"
                 [elementLabel]="field.options?.elementLabel" [titleFrom]="field.options?.titleFrom"
                 [titleTo]="field.options?.titleTo" [allItems]="field.options?.fromData"
+                [icon]="field.options?.icon"
+                [fallback]="field.options?.['fallback']"
+                [showSelectAll]="field.options?.showSelectAll !== false && field.options?.hideSelectAll !== true"
                 [errorMessage]="(form.get(field.key)?.invalid && form.get(field.key)?.touched) ? getMessageErrorValidation(field) : null">
             </fwk-pick-list>
 
             <fwk-simple-pick-list *ngSwitchCase="'simple-pick-list'" class="w-full" [formControlName]="field.key"
                 [elementLabel]="field.options?.elementLabel" [titleFrom]="field.options?.titleFrom"
+                [icon]="field.options?.icon"
+                [fallback]="field.options?.['fallback']"
+                [showSelectAll]="field.options?.showSelectAll !== false && field.options?.hideSelectAll !== true"
                 [errorMessage]="(form.get(field.key)?.invalid && form.get(field.key)?.touched) ? getMessageErrorValidation(field) : null"
                 [allItems]="field.options?.fromData"></fwk-simple-pick-list>
 
@@ -166,13 +196,15 @@
             </mat-form-field>
 
             <mat-checkbox *ngSwitchCase="'checkbox'" [formControlName]="field.key" [id]="field.key"
-                [cdkFocusInitial]="i === firstFocusableFieldIndex">{{ field.label }}</mat-checkbox>
+                [cdkFocusInitial]="i === firstFocusableFieldIndex">{{ field.label || (field.labelKey | translate) }}</mat-checkbox>
 
             <div *ngSwitchCase="'label'" class="flex items-center h-full pt-2 pb-4">
-                <span class="text-gray-700 dark:text-gray-300 font-medium">
-                    {{ field.label || field.value }}
+                <span class="text-gray-700 dark:text-gray-300" [innerHTML]="field.label || (field.labelKey | translate) || field.value">
                 </span>
             </div>
+
+            <div *ngSwitchCase="'HTML'" class="w-full" [innerHTML]="field.label || (field.labelKey | translate) || field.value"></div>
+            <div *ngSwitchCase="'html'" class="w-full" [innerHTML]="field.label || (field.labelKey | translate) || field.value"></div>
 
             <div *ngSwitchCase="'header'"
                 class="col-span-full text-lg font-bold text-secondary border-b bg-gray-100 dark:bg-gray-700 text-center py-1 my-2 rounded-md">
@@ -233,6 +265,13 @@
                 </fwk-html-editor>
             </div>
 
+            <div *ngSwitchCase="'image_cropper'" class="w-full">
+                <fwk-image-cropper class="w-full" [formControlName]="field.key" [field]="field"
+                    [errorMessage]="(form.get(field.key)?.invalid && form.get(field.key)?.touched) ? getMessageErrorValidation(field) : null">
+                </fwk-image-cropper>
+            </div>
+
         </ng-container>
     </div>
+</ng-template>
 </form>

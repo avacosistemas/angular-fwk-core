@@ -24,6 +24,7 @@ export class GridDef {
     deleteColumn?: any;
     titleKey?: string;
     title?: string;
+    showActionUpdate?: boolean;
 }
 
 export interface ColumnDef {

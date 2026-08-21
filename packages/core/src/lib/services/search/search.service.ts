@@ -69,7 +69,7 @@ export class SearchService {
                 title: translatedTitle,
                 breadcrumb,
                 link: navDef.url,
-                keywords: `${translatedTitle} ${breadcrumb.join(' ')}`.toLowerCase()
+                keywords: `${translatedTitle || ''} ${breadcrumb.join(' ')}`.toLowerCase()
             });
         });
         
@@ -77,7 +77,7 @@ export class SearchService {
     }
 
     search(term: string): Observable<SearchResult[]> {
-        const lowerCaseTerm = term.toLowerCase().trim();
+        const lowerCaseTerm = (term || '').toLowerCase().trim();
         if (!lowerCaseTerm) {
             return of([]);
         }

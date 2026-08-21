@@ -1,9 +1,10 @@
-import { Component, Input, ViewChild, forwardRef, Injector, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, Input, forwardRef, Injector, OnInit, OnChanges, SimpleChanges, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR, FormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
-import { MatListModule, MatSelectionList } from '@angular/material/list';
+import { MatListModule } from '@angular/material/list';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslatePipe } from '../../pipe/translate.pipe';
 
@@ -21,6 +22,7 @@ import { SomePipe } from '../../pipe/some.pipe';
         MatCardModule,
         MatListModule,
         MatCheckboxModule,
+        MatIconModule,
         SomePipe,
         TranslatePipe,
         MatTooltipModule,
@@ -33,15 +35,23 @@ import { SomePipe } from '../../pipe/some.pipe';
         }
     ]
 })
-export class SimplePickListComponent extends AbstractComponent implements ControlValueAccessor, OnInit {
+export class SimplePickListComponent extends AbstractComponent implements ControlValueAccessor, OnInit, OnChanges {
 
     @Input() elementLabel: string = 'name';
     @Input() titleFrom!: string;
     @Input() allItems: any[] = [];
+    @Input() icon?: string;
+    @Input() showSelectAll: boolean = true;
+    @Input() loading: boolean = false;
+    @Input() fallback?: string;
     
     @Input() errorMessage: string | null = null; 
 
-    @ViewChild('list') list!: MatSelectionList;
+    private fallbackApplied: boolean = false;
+
+    get showSkeleton(): boolean {
+        return this.loading || !this.allItems;
+    } 
 
     selectedItems: any[] = [];
     isDisabled: boolean = false;
@@ -54,6 +64,12 @@ export class SimplePickListComponent extends AbstractComponent implements Contro
         private cdr: ChangeDetectorRef 
     ) {
         super(injector);
+    }
+
+    ngOnChanges(changes: SimpleChanges): void {
+        if (changes['allItems'] || changes['fallback']) {
+            this.applyFallbackIfNecessary();
+        }
     }
 
     override ngOnInit(): void {
@@ -69,7 +85,23 @@ export class SimplePickListComponent extends AbstractComponent implements Contro
 
     writeValue(value: any[] | null): void {
         this.selectedItems = Array.isArray(value) ? [...value] : [];
+        if (this.selectedItems.length > 0) {
+            this.fallbackApplied = true;
+        } else {
+            this.applyFallbackIfNecessary();
+        }
         this.cdr.markForCheck(); 
+    }
+
+    private applyFallbackIfNecessary(): void {
+        if (this.fallback && !this.fallbackApplied && Array.isArray(this.allItems) && this.allItems.length > 0 && (!this.selectedItems || this.selectedItems.length === 0)) {
+            const fallbackSelected = this.allItems.filter(item => item && Boolean(item[this.fallback!]) === true);
+            if (fallbackSelected.length > 0) {
+                this.selectedItems = [...fallbackSelected];
+                this.fallbackApplied = true;
+                this.notifyChange();
+            }
+        }
     }
 
     registerOnChange(fn: (value: any[] | null) => void): void {
@@ -85,23 +117,42 @@ export class SimplePickListComponent extends AbstractComponent implements Contro
         this.cdr.markForCheck(); 
     }
 
-    onSelectionChange(): void {
-        this.selectedItems = this.list.selectedOptions.selected.map(option => option.value);
-        this.onChange(this.selectedItems.length > 0 ? this.selectedItems : null);
-        this.onTouch();
+    isSelected(item: any): boolean {
+        if (!this.selectedItems || !item) return false;
+        return this.selectedItems.some(s => this.compareFn(s, item));
+    }
+
+    toggleItem(item: any): void {
+        if (this.isDisabled) return;
+        this.fallbackApplied = true;
+        if (this.isSelected(item)) {
+            this.selectedItems = this.selectedItems.filter(s => !this.compareFn(s, item));
+        } else {
+            this.selectedItems = [...this.selectedItems, item];
+        }
+        this.notifyChange();
     }
 
     toggleSelectAll(): void {
+        if (this.isDisabled) return;
+        this.fallbackApplied = true;
         if (this.isAllSelected()) {
-            this.list.deselectAll();
+            this.selectedItems = [];
         } else {
-            this.list.selectAll();
+            this.selectedItems = [...(this.allItems || [])];
         }
-        this.onSelectionChange();
+        this.notifyChange();
+    }
+
+    private notifyChange(): void {
+        const val = this.selectedItems.length > 0 ? this.selectedItems : null;
+        this.onChange(val);
+        this.onTouch();
+        this.cdr.markForCheck();
     }
 
     isAllSelected(): boolean {
-        return this.allItems?.length > 0 && this.selectedItems?.length === this.allItems.length;
+        return !!(this.allItems?.length > 0 && this.selectedItems?.length === this.allItems.length);
     }
 
     getNameElementList(element: any): string {
@@ -109,6 +160,18 @@ export class SimplePickListComponent extends AbstractComponent implements Contro
     }
 
     compareFn(c1: any, c2: any): boolean {
-        return c1 && c2 ? (c1.id === c2.id) : (c1 === c2);
+        if (!c1 || !c2) return c1 === c2;
+        if (typeof c1 === 'object' && typeof c2 === 'object') {
+            if (c1.itemId !== undefined && c2.itemId !== undefined && c1.itemId !== null && c2.itemId !== null) {
+                return c1.itemId === c2.itemId;
+            }
+            if (c1.id !== undefined && c2.id !== undefined && c1.id !== null && c2.id !== null && c1.id !== 0 && c2.id !== 0) {
+                return c1.id === c2.id;
+            }
+            if (c1.nombre && c2.nombre) {
+                return c1.nombre === c2.nombre;
+            }
+        }
+        return c1 === c2;
     }
 }

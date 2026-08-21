@@ -33,7 +33,7 @@ export abstract class CrudService<E extends Entity> extends HttpService implemen
         const options = params ? { params } : {};
 
         if (!this.baseUrl) {
-            console.error('[CrudService] °LA URL BASE ES NULA O VACÕA! La llamada no se realizar·.');
+            console.error('[CrudService] ¬°LA URL BASE ES NULA O VAC√çA! La llamada no se realizar√°.');
             return of([]);
         }
 
@@ -85,6 +85,12 @@ export abstract class CrudService<E extends Entity> extends HttpService implemen
 
     update(entity: E): Observable<E> {
         return this.httpPut(this.baseUrl, entity);
+        // Put por ID en url
+        // const id = (entity as any)?.id;
+        // const url = (id !== undefined && id !== null && id !== '')
+        //     ? `${this.baseUrl.replace(/\/$/, '')}/${id}`
+        //     : this.baseUrl;
+        // return this.httpPut(url, entity);
     }
 
     add(entity: E): Observable<E> {

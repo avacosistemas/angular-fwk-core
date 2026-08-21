@@ -27,79 +27,80 @@
 
             <!-- Sign Up form -->
             <form
-                class="mt-8"
+                class="mt-6 flex flex-col gap-1"
                 [formGroup]="signUpForm"
                 #signUpNgForm="ngForm">
 
-                <!-- Name field -->
-                <mat-form-field class="w-full">
-                    <mat-label>{{ 'full_name_label' | translate }}</mat-label>
-                    <input
-                        id="name"
-                        matInput
-                        [formControlName]="'name'">
-                    <mat-error *ngIf="signUpForm.get('name').hasError('required')">
-                        {{ 'full_name_required_error' | translate }}
-                    </mat-error>
-                </mat-form-field>
+                <div class="flex flex-col gap-4">
+                    <!-- Name field -->
+                    <mat-form-field class="w-full" appearance="outline">
+                        <mat-label>{{ 'full_name_label' | translate }}</mat-label>
+                        <input
+                            id="name"
+                            matInput
+                            [formControlName]="'name'">
+                        <mat-error *ngIf="signUpForm.get('name').hasError('required')">
+                            {{ 'full_name_required_error' | translate }}
+                        </mat-error>
+                    </mat-form-field>
 
-                <!-- Email field -->
-                <mat-form-field class="w-full">
-                    <mat-label>{{ 'email_address_label' | translate }}</mat-label>
-                    <input
-                        id="email"
-                        matInput
-                        [formControlName]="'email'">
-                    <mat-error *ngIf="signUpForm.get('email').hasError('required')">
-                        {{ 'email_address_required_error' | translate }}
-                    </mat-error>
-                    <mat-error *ngIf="signUpForm.get('email').hasError('email')">
-                        {{ 'email_address_invalid_error' | translate }}
-                    </mat-error>
-                </mat-form-field>
+                    <!-- Email field -->
+                    <mat-form-field class="w-full" appearance="outline">
+                        <mat-label>{{ 'email_address_label' | translate }}</mat-label>
+                        <input
+                            id="email"
+                            matInput
+                            [formControlName]="'email'">
+                        <mat-error *ngIf="signUpForm.get('email').hasError('required')">
+                            {{ 'email_address_required_error' | translate }}
+                        </mat-error>
+                        <mat-error *ngIf="signUpForm.get('email').hasError('email')">
+                            {{ 'email_address_invalid_error' | translate }}
+                        </mat-error>
+                    </mat-form-field>
 
-                <!-- Password field -->
-                <mat-form-field class="w-full">
-                    <mat-label>{{ 'password_label' | translate }}</mat-label>
-                    <input
-                        id="password"
-                        matInput
-                        type="password"
-                        [formControlName]="'password'"
-                        #passwordField>
-                    <button
-                        mat-icon-button
-                        type="button"
-                        (click)="passwordField.type === 'password' ? passwordField.type = 'text' : passwordField.type = 'password'"
-                        matSuffix>
-                        <mat-icon
-                            class="icon-size-5"
-                            *ngIf="passwordField.type === 'password'"
-                            [svgIcon]="'heroicons_solid:eye'"></mat-icon>
-                        <mat-icon
-                            class="icon-size-5"
-                            *ngIf="passwordField.type === 'text'"
-                            [svgIcon]="'heroicons_solid:eye-slash'"></mat-icon>
-                    </button>
-                    <mat-error>
-                        {{ 'password_required_error' | translate }}
-                    </mat-error>
-                </mat-form-field>
+                    <!-- Password field -->
+                    <mat-form-field class="w-full" appearance="outline">
+                        <mat-label>{{ 'password_label' | translate }}</mat-label>
+                        <input
+                            id="password"
+                            matInput
+                            type="password"
+                            [formControlName]="'password'"
+                            #passwordField>
+                        <button
+                            mat-icon-button
+                            type="button"
+                            (click)="passwordField.type === 'password' ? passwordField.type = 'text' : passwordField.type = 'password'"
+                            matSuffix>
+                            <mat-icon
+                                class="icon-size-5"
+                                *ngIf="passwordField.type === 'password'"
+                                [svgIcon]="'heroicons_solid:eye'"></mat-icon>
+                            <mat-icon
+                                class="icon-size-5"
+                                *ngIf="passwordField.type === 'text'"
+                                [svgIcon]="'heroicons_solid:eye-slash'"></mat-icon>
+                        </button>
+                        <mat-error>
+                            {{ 'password_required_error' | translate }}
+                        </mat-error>
+                    </mat-form-field>
 
-                <!-- Company field -->
-                <mat-form-field class="w-full">
-                    <mat-label>{{ 'company_label' | translate }}</mat-label>
-                    <input
-                        id="company-confirm"
-                        matInput
-                        [formControlName]="'company'">
-                </mat-form-field>
+                    <!-- Company field -->
+                    <mat-form-field class="w-full" appearance="outline">
+                        <mat-label>{{ 'company_label' | translate }}</mat-label>
+                        <input
+                            id="company-confirm"
+                            matInput
+                            [formControlName]="'company'">
+                    </mat-form-field>
+                </div>
 
                 <!-- ToS and PP -->
-                <div class="inline-flex items-end w-full mt-1.5">
+                <div class="inline-flex items-center w-full mt-1.5 my-3">
                     <mat-checkbox
-                        class="-ml-2"
-                        color="accent"
+                        [color]="'primary'"
                         [formControlName]="'agreements'">
                         <span>{{ 'i_agree_with' | translate }}</span>
                         <a
@@ -116,10 +117,10 @@
 
                 <!-- Submit button -->
                 <button
-                    class="fwk-mat-button-large w-full mt-6"
+                    class="fwk-mat-button-large w-full mt-3"
                     mat-flat-button
                     color="accent"
-                    [disabled]="signUpForm.disabled"
+                    [disabled]="signUpForm.disabled || signUpForm.invalid"
                     (click)="signUp()">
                     <span *ngIf="!signUpForm.disabled">
                         {{ 'create_free_account_button' | translate }}
@@ -133,15 +134,30 @@
             </form>
         </div>
     </div>
-    <div class="relative hidden md:flex flex-auto items-center justify-center w-1/2 h-full p-16 lg:px-28 overflow-hidden bg-gray-800 dark:border-l">
-        <!-- Background -->
-        <svg class="absolute inset-0 pointer-events-none" viewBox="0 0 960 540" width="100%" height="100%" preserveAspectRatio="xMidYMax slice" xmlns="http://www.w3.org/2000/svg">
+    <div class="relative hidden md:flex flex-auto items-center justify-center w-1/2 h-full p-16 lg:px-28 overflow-hidden bg-gray-900 dark:border-l">
+        <!-- Imagen de Fondo Personalizada -->
+        <div *ngIf="fwkConfig.auth?.sideBackground?.imageUrl"
+            class="absolute inset-0 bg-no-repeat pointer-events-none z-0"
+            [ngStyle]="{
+                'background-image': 'url(' + fwkConfig.auth.sideBackground.imageUrl + ')',
+                'background-size': fwkConfig.auth.sideBackground.backgroundSize || 'cover',
+                'background-position': fwkConfig.auth.sideBackground.backgroundPosition || 'center',
+                'background-repeat': fwkConfig.auth.sideBackground.backgroundRepeat || 'no-repeat'
+            }">
+            <div *ngIf="fwkConfig.auth?.sideBackground?.overlayOpacity !== undefined"
+                class="absolute inset-0 bg-black pointer-events-none"
+                [style.opacity]="fwkConfig.auth.sideBackground.overlayOpacity">
+            </div>
+        </div>
+
+        <!-- SVG Fallback cuando NO se define imagen de fondo -->
+        <svg *ngIf="!fwkConfig.auth?.sideBackground?.imageUrl" class="absolute inset-0 pointer-events-none" viewBox="0 0 960 540" width="100%" height="100%" preserveAspectRatio="xMidYMax slice" xmlns="http://www.w3.org/2000/svg">
             <g class="text-gray-700 opacity-25" fill="none" stroke="currentColor" stroke-width="100">
                 <circle r="234" cx="196" cy="23"></circle>
                 <circle r="234" cx="790" cy="491"></circle>
             </g>
         </svg>
-        <svg class="absolute -top-16 -right-16 text-gray-700" viewBox="0 0 220 192" width="220" height="192" fill="none">
+        <svg *ngIf="!fwkConfig.auth?.sideBackground?.imageUrl" class="absolute -top-16 -right-16 text-gray-700" viewBox="0 0 220 192" width="220" height="192" fill="none">
             <defs>
                 <pattern id="837c3e70-6c3a-44e6-8854-cc48c737b659" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
                     <rect x="0" y="0" width="4" height="4" fill="currentColor"></rect>
@@ -151,29 +167,16 @@
         </svg>
         <!-- Content -->
         <div class="z-10 relative w-full max-w-2xl">
-            <div class="text-7xl font-bold leading-none text-gray-100">
+            <div class="text-7xl font-bold leading-none text-gray-100"
+                [style.color]="fwkConfig.auth?.sideBackground?.titleColor || null">
                 <div>{{ 'welcome_to' | translate }}</div>
                 <div>{{ 'our_community' | translate }}</div>
             </div>
-            <div class="mt-6 text-lg tracking-tight leading-6 text-gray-400">
+            <div *ngIf="fwkConfig.welcome?.signInSubtitle !== null"
+                class="mt-6 text-lg tracking-tight leading-6 text-gray-400"
+                [style.color]="fwkConfig.auth?.sideBackground?.subtitleColor || null"
+                [class.text-gray-200]="fwkConfig.auth?.sideBackground?.imageUrl && !fwkConfig.auth?.sideBackground?.subtitleColor">
                 {{ 'template_description' | translate }}
-            </div>
-            <div class="flex items-center mt-8">
-                <div class="flex flex-0 items-center -space-x-1.5">
-                    <img
-                        class="flex-0 w-10 h-10 rounded-full ring-4 ring-offset-1 ring-gray-800 ring-offset-gray-800 object-cover"
-                        src="assets/images/avatars/female-18.jpg">
-                    <img
-                        class="flex-0 w-10 h-10 rounded-full ring-4 ring-offset-1 ring-gray-800 ring-offset-gray-800 object-cover"
-                        src="assets/images/avatars/female-11.jpg">
-                    <img
-                        class="flex-0 w-10 h-10 rounded-full ring-4 ring-offset-1 ring-gray-800 ring-offset-gray-800 object-cover"
-                        src="assets/images/avatars/male-09.jpg">
-                    <img
-                        class="flex-0 w-10 h-10 rounded-full ring-4 ring-offset-1 ring-gray-800 ring-offset-gray-800 object-cover"
-                        src="assets/images/avatars/male-16.jpg">
-                </div>
-                <div class="ml-4 font-medium tracking-tight text-gray-400">{{ 'template_join_us' | translate }}</div>
             </div>
         </div>
     </div>

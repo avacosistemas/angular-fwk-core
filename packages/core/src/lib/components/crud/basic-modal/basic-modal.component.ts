@@ -23,6 +23,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { HTTP_METHODS } from '../../../model/ws-def';
 import { LocalStorageService } from '../../../services/local-storage/local-storage.service';
 import { AuthService } from '../../../auth/auth.service';
+import { extractApiErrorMessage } from '../../../utils/error-utils';
 import { ActionDefService } from '../../../services/action-def-service/action-def.service';
 
 @Component({
@@ -310,18 +311,19 @@ export class BasicModalComponent extends AbstractFormComponent implements OnInit
                         return;
                     }
                     if (res && res.hasOwnProperty('ok') && !res.ok) {
-                        const errorMsg = res.error?.message || this.translate('action_error_default_message');
+                        const errorMsg = extractApiErrorMessage(res) || this.translate('action_error_default_message');
                         this.notificationService.notifyError(errorMsg);
                         this._submitting = false;
                         this._cdr.markForCheck();
                         return;
                     }
                     this.notificationService.notifySuccess(this.translate('success_message') || this.translate('action_success_default_message'));
+                    this.notificationService.checkAndNotifyExtraMessages(res);
                     this.dialogRef.close(true);
                 },
                 error: (err) => {
                     console.error('[BasicModal] Error executing inner action:', err);
-                    const msg = err?.error?.message || this.translate('action_execution_error_message');
+                    const msg = extractApiErrorMessage(err) || this.translate('action_execution_error_message');
                     this.notificationService.notifyError(msg);
                     this._submitting = false;
                     this._cdr.markForCheck();

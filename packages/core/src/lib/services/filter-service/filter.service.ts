@@ -15,7 +15,7 @@ export class FilterService {
             return value;
         }
 
-        if (field.controlType === CONTROL_TYPE.Datepicker) {
+        if (field && field.controlType === CONTROL_TYPE.Datepicker) {
             const format = field.options?.format || MY_FORMATS.parse.dateInput;
             return parse(value, format, new Date());
         }
@@ -107,8 +107,8 @@ export class FilterService {
     }
 
     private filterIncludes(entityValue: any, filterValue: any): boolean {
-        const valA = String(entityValue).toLowerCase();
-        const valB = String(filterValue).toLowerCase();
+        const valA = String(entityValue ?? '').toLowerCase();
+        const valB = String(filterValue ?? '').toLowerCase();
         return valA.includes(valB);
     }
 }

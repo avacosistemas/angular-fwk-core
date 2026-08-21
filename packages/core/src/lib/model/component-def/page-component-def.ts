@@ -6,5 +6,6 @@ export interface PageComponentDef extends ComponentDef {
     component: Type<any>;
     actions?: ActionDef[];
     backButton?: boolean;
+    urlHelp?: string;
     subtitleKey?: string;
 }

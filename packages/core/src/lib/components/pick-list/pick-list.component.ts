@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR, FormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatListModule } from '@angular/material/list';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
@@ -17,7 +18,7 @@ import { AbstractComponent } from '../abstract-component.component';
     styleUrls: ['./pick-list.component.scss'],
     standalone: true,
     imports: [
-        CommonModule, FormsModule, MatCardModule, MatListModule, MatFormFieldModule,
+        CommonModule, FormsModule, MatCardModule, MatListModule, MatCheckboxModule, MatFormFieldModule,
         MatInputModule, MatButtonModule, MatIconModule, MatTooltipModule, TranslatePipe
     ],
     providers: [
@@ -30,8 +31,18 @@ export class PickListComponent extends AbstractComponent implements ControlValue
     @Input() titleFrom!: string;
     @Input() titleTo!: string;
     @Input() allItems: any[] = [];
+    @Input() icon?: string;
+    @Input() showSelectAll: boolean = true;
+    @Input() loading: boolean = false;
+    @Input() fallback?: string;
     
     @Input() errorMessage: string | null = null; 
+
+    private fallbackApplied: boolean = false;
+
+    get showSkeleton(): boolean {
+        return this.loading || !this.allItems;
+    } 
 
     private _masterAllItemsMap = new Map<any, any>();
 
@@ -54,6 +65,11 @@ export class PickListComponent extends AbstractComponent implements ControlValue
     ngOnChanges(changes: SimpleChanges): void {
         if (changes['allItems']) {
             this.mergeIntoMasterList(changes['allItems'].currentValue);
+            this.applyFallbackIfNecessary();
+            this.updateLists();
+        }
+        if (changes['fallback']) {
+            this.applyFallbackIfNecessary();
             this.updateLists();
         }
     }
@@ -68,9 +84,24 @@ export class PickListComponent extends AbstractComponent implements ControlValue
 
     writeValue(value: any[] | null): void {
         this.selectedItems = Array.isArray(value) ? [...value] : [];
+        if (this.selectedItems.length > 0) {
+            this.fallbackApplied = true;
+        }
         this.mergeIntoMasterList(this.selectedItems);
+        this.applyFallbackIfNecessary();
         this.updateLists();
         this.cdr.markForCheck();
+    }
+
+    private applyFallbackIfNecessary(): void {
+        if (this.fallback && !this.fallbackApplied && Array.isArray(this.allItems) && this.allItems.length > 0 && (!this.selectedItems || this.selectedItems.length === 0)) {
+            const fallbackSelected = this.allItems.filter(item => item && Boolean(item[this.fallback!]) === true);
+            if (fallbackSelected.length > 0) {
+                this.selectedItems = [...fallbackSelected];
+                this.fallbackApplied = true;
+                this.notifyChanges();
+            }
+        }
     }
 
     private mergeIntoMasterList(items: any[]): void {
@@ -88,6 +119,36 @@ export class PickListComponent extends AbstractComponent implements ControlValue
     registerOnTouched(fn: () => void): void { this.onTouch = fn; }
     setDisabledState(isDisabled: boolean): void {
         this.isDisabled = isDisabled;
+        this.cdr.markForCheck();
+    }
+
+    isFromSelected(item: any): boolean {
+        if (!this.fromDataSelected || !item) return false;
+        return this.fromDataSelected.some(s => this.compareFn(s, item));
+    }
+
+    toggleFromItem(item: any): void {
+        if (this.isDisabled) return;
+        if (this.isFromSelected(item)) {
+            this.fromDataSelected = this.fromDataSelected.filter(s => !this.compareFn(s, item));
+        } else {
+            this.fromDataSelected = [...this.fromDataSelected, item];
+        }
+        this.cdr.markForCheck();
+    }
+
+    isToSelected(item: any): boolean {
+        if (!this.toDataSelected || !item) return false;
+        return this.toDataSelected.some(s => this.compareFn(s, item));
+    }
+
+    toggleToItem(item: any): void {
+        if (this.isDisabled) return;
+        if (this.isToSelected(item)) {
+            this.toDataSelected = this.toDataSelected.filter(s => !this.compareFn(s, item));
+        } else {
+            this.toDataSelected = [...this.toDataSelected, item];
+        }
         this.cdr.markForCheck();
     }
 
@@ -156,6 +217,18 @@ export class PickListComponent extends AbstractComponent implements ControlValue
     }
 
     private getItemId(item: any): any {
-        return item?.id ?? JSON.stringify(item);
+        if (!item) return null;
+        if (typeof item === 'object') {
+            if (item.itemId !== undefined && item.itemId !== null) return item.itemId;
+            if (item.id !== undefined && item.id !== null && item.id !== 0) return item.id;
+            if (item.nombre) return item.nombre;
+        }
+        return item;
+    }
+
+    compareFn(c1: any, c2: any): boolean {
+        const id1 = this.getItemId(c1);
+        const id2 = this.getItemId(c2);
+        return id1 !== null && id2 !== null ? id1 === id2 : c1 === c2;
     }
 }

@@ -1,0 +1,83 @@
+<div class="flex flex-col items-center justify-center w-full py-4 relative group">
+    <label *ngIf="field.label" class="block text-sm font-medium text-secondary mb-3 w-full text-center">
+        {{ field.label }}
+    </label>
+
+    <div class="relative">
+        <ng-container *ngIf="croppedImage; else noImagePreview">
+            <img [src]="croppedImage"
+                 alt="Foto de perfil"
+                 class="border-2 dark:border-gray-700 transition-transform hover:scale-105 duration-300"
+                 [ngClass]="{
+                     'rounded-full aspect-square object-cover': field.options?.shape !== 'square',
+                     'rounded-xl aspect-square object-cover': field.options?.shape === 'square'
+                 }"
+                 [style.width]="field.options?.width || '150px'"
+                 [style.height]="field.options?.height || '150px'" />
+        </ng-container>
+
+        <ng-template #noImagePreview>
+            <div class="flex flex-col items-center justify-center bg-gray-100 dark:bg-gray-800 border-2 border-dashed border-gray-300 dark:border-gray-600 text-gray-400"
+                 [ngClass]="{
+                     'rounded-full aspect-square': field.options?.shape !== 'square',
+                     'rounded-xl aspect-square': field.options?.shape === 'square'
+                 }"
+                 [style.width]="field.options?.width || '150px'"
+                 [style.height]="field.options?.height || '150px'">
+                <mat-icon class="icon-size-8 mb-1" svgIcon="heroicons_outline:user-circle"></mat-icon>
+                <span class="text-[10px] font-medium uppercase tracking-wider text-center px-2">{{ 'image_no_image' | translate }}</span>
+            </div>
+        </ng-template>
+    </div>
+    
+    <div class="flex flex-col gap-2 w-full max-w-[200px] mt-4">
+        <button *ngIf="!croppedImage" mat-flat-button color="primary" type="button" (click)="openFileInput()" [disabled]="isDisabled">
+            {{ 'image_cropper_select_photo' | translate }}
+        </button>
+        <button *ngIf="croppedImage" mat-flat-button color="primary" type="button" (click)="openFileInput()" [disabled]="isDisabled">
+            {{ 'image_cropper_select_other' | translate }}
+        </button>
+        <button *ngIf="croppedImage && imageChangedEvent" mat-stroked-button color="accent" type="button" (click)="editCrop()" [disabled]="isDisabled">
+            {{ 'image_cropper_adjust' | translate }}
+        </button>
+        <button *ngIf="croppedImage" mat-stroked-button color="warn" type="button" (click)="removeImage()" [disabled]="isDisabled">
+            {{ 'image_cropper_remove_photo' | translate }}
+        </button>
+    </div>
+    
+    <input type="file" accept="image/*" #fileInput (change)="fileChangeEvent($event)" class="hidden" />
+
+    <ng-template #cropModal>
+        <div class="p-6 min-w-[320px]">
+            <h2 class="text-xl font-semibold mb-4">{{ 'image_cropper_modal_title' | translate }}</h2>
+            <div class="cropper-container relative w-full flex items-center justify-center min-h-[360px] overflow-hidden">
+                <div *ngIf="isImageLoading" class="absolute inset-0 z-20 flex flex-col items-center justify-center bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm transition-opacity duration-300">
+                    <mat-progress-spinner [diameter]="44" mode="indeterminate" color="primary"></mat-progress-spinner>
+                    <span class="text-sm font-medium text-gray-600 dark:text-gray-300 mt-3">{{ 'image_cropper_loading' | translate }}</span>
+                </div>
+                <image-cropper
+                    [imageChangedEvent]="imageChangedEvent"
+                    [maintainAspectRatio]="true"
+                    [aspectRatio]="1 / 1"
+                    [transform]="transform"
+                    [roundCropper]="field.options?.shape !== 'square'"
+                    [containWithinAspectRatio]="true"
+                    format="jpeg"
+                    output="base64"
+                    (imageCropped)="imageCropped($event)"
+                    (imageLoaded)="imageLoaded()"
+                    (cropperReady)="cropperReady()"
+                    (loadImageFailed)="loadImageFailed()"
+                    style="max-width: 400px; max-height: 400px; width: 100%; display: block; margin: 0 auto;">
+                </image-cropper>
+            </div>
+            <div class="flex justify-end gap-2 mt-6">
+                <button mat-stroked-button type="button" (click)="cancelCrop()">{{ 'modal_button_cancel' | translate }}</button>
+                <button mat-stroked-button type="button" (click)="rotateImage()"><mat-icon>rotate_right</mat-icon> {{ 'image_cropper_rotate' | translate }}</button>
+                <button mat-flat-button color="primary" type="button" (click)="confirmCrop()">{{ 'modal_button_confirm' | translate }}</button>
+            </div>
+        </div>
+    </ng-template>
+    
+    <mat-error *ngIf="errorMessage" class="text-xs mt-2 text-red-500 dark:text-red-400">{{ errorMessage }}</mat-error>
+</div>

@@ -92,7 +92,7 @@ export class GenericHttpService extends HttpService {
             case HTTP_METHODS.get:
                 return this.basicGet(ws.url, data, ws.filter, ws.querystring ?? {});
             default:
-                console.warn(`Método HTTP no reconocido: ${ws.method}`);
+                console.warn(`MÃ©todo HTTP no reconocido: ${ws.method}`);
                 return of();
         }
     }

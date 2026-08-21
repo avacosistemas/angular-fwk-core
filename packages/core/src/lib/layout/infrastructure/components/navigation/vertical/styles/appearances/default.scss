@@ -1,4 +1,3 @@
-/* Variables */
 :root {
     --fwk-vertical-navigation-width: 280px;
 }
@@ -17,17 +16,12 @@ fwk-vertical-navigation {
     max-height: 100vh;
     z-index: 200;
 
-    /* ----------------------------------------------------------------------------------------------------- */
-    /* @ Navigation Drawer
-    /* ----------------------------------------------------------------------------------------------------- */
 
-    /* Animations */
     &.fwk-vertical-navigation-animations-enabled {
         transition-duration: 400ms;
         transition-timing-function: cubic-bezier(0.25, 0.8, 0.25, 1);
         transition-property: visibility, margin-left, margin-right, transform, width, max-width, min-width;
 
-        /* Wrapper */
         .fwk-vertical-navigation-wrapper {
             transition-duration: 400ms;
             transition-timing-function: cubic-bezier(0.25, 0.8, 0.25, 1);
@@ -35,17 +29,14 @@ fwk-vertical-navigation {
         }
     }
 
-    /* Over mode */
     &.fwk-vertical-navigation-mode-over {
         position: fixed;
         top: 0;
         bottom: 0;
     }
 
-    /* Left position */
     &.fwk-vertical-navigation-position-left {
 
-        /* Side mode */
         &.fwk-vertical-navigation-mode-side {
             margin-left: calc(#{var(--fwk-vertical-navigation-width)} * -1);
 
@@ -54,7 +45,6 @@ fwk-vertical-navigation {
             }
         }
 
-        /* Over mode */
         &.fwk-vertical-navigation-mode-over {
             left: 0;
             transform: translate3d(-100%, 0, 0);
@@ -64,16 +54,13 @@ fwk-vertical-navigation {
             }
         }
 
-        /* Wrapper */
         .fwk-vertical-navigation-wrapper {
             left: 0;
         }
     }
 
-    /* Right position */
     &.fwk-vertical-navigation-position-right {
 
-        /* Side mode */
         &.fwk-vertical-navigation-mode-side {
             margin-right: calc(var(--fwk-vertical-navigation-width) * -1);
 
@@ -82,7 +69,6 @@ fwk-vertical-navigation {
             }
         }
 
-        /* Over mode */
         &.fwk-vertical-navigation-mode-over {
             right: 0;
             transform: translate3d(100%, 0, 0);
@@ -92,13 +78,11 @@ fwk-vertical-navigation {
             }
         }
 
-        /* Wrapper */
         .fwk-vertical-navigation-wrapper {
             right: 0;
         }
     }
 
-    /* Inner mode */
     &.fwk-vertical-navigation-inner {
         position: relative;
         width: auto;
@@ -120,7 +104,6 @@ fwk-vertical-navigation {
         }
     }
 
-    /* Wrapper */
     .fwk-vertical-navigation-wrapper {
         position: absolute;
         display: flex;
@@ -135,36 +118,30 @@ fwk-vertical-navigation {
         background: inherit;
         box-shadow: inset -1px 0 0 rgba(var(--fwk-border-rgb), var(--tw-border-opacity));
 
-        /* Header */
         .fwk-vertical-navigation-header {
 
         }
 
-        /* Content */
         .fwk-vertical-navigation-content {
             flex: 1 1 auto;
             overflow-x: hidden;
             overflow-y: auto;
             overscroll-behavior: contain;
 
-            /* Divider */
             > fwk-vertical-navigation-divider-item {
                 margin: 24px 0;
             }
 
-            /* Group */
             > fwk-vertical-navigation-group-item {
                 margin-top: 24px;
             }
         }
 
-        /* Footer */
         .fwk-vertical-navigation-footer {
 
         }
     }
 
-    /* Aside wrapper */
     .fwk-vertical-navigation-aside-wrapper {
         position: absolute;
         display: flex;
@@ -187,7 +164,6 @@ fwk-vertical-navigation {
         > fwk-vertical-navigation-aside-item {
             padding: 24px 0;
 
-            /* First item of the aside */
             > .fwk-vertical-navigation-item-wrapper {
                 display: none !important;
             }
@@ -202,11 +178,7 @@ fwk-vertical-navigation {
         }
     }
 
-    /* ----------------------------------------------------------------------------------------------------- */
-    /* @ Navigation Items
-    /* ----------------------------------------------------------------------------------------------------- */
 
-    /* Navigation items common */
     fwk-vertical-navigation-aside-item,
     fwk-vertical-navigation-basic-item,
     fwk-vertical-navigation-collapsable-item,
@@ -230,9 +202,8 @@ fwk-vertical-navigation {
                 font-weight: 500;
                 line-height: 20px;
                 text-decoration: none;
-                border-radius: 6px;
+                border-radius: 12px;
 
-                /* Disabled state */
                 &.fwk-vertical-navigation-item-disabled {
                     cursor: default;
                     opacity: 0.4;
@@ -267,7 +238,6 @@ fwk-vertical-navigation {
         }
     }
 
-    /* Aside, Basic, Collapsable, Group */
     fwk-vertical-navigation-aside-item,
     fwk-vertical-navigation-basic-item,
     fwk-vertical-navigation-collapsable-item,
@@ -278,7 +248,6 @@ fwk-vertical-navigation {
         }
     }
 
-    /* Aside, Basic, Collapsable */
     fwk-vertical-navigation-aside-item,
     fwk-vertical-navigation-basic-item,
     fwk-vertical-navigation-collapsable-item {
@@ -289,17 +258,14 @@ fwk-vertical-navigation {
         }
     }
 
-    /* Aside */
     fwk-vertical-navigation-aside-item {
 
     }
 
-    /* Basic */
     fwk-vertical-navigation-basic-item {
 
     }
 
-    /* Collapsable */
     fwk-vertical-navigation-collapsable-item {
 
         > .fwk-vertical-navigation-item-wrapper {
@@ -358,7 +324,6 @@ fwk-vertical-navigation {
             }
         }
 
-        /* 1st level */
         .fwk-vertical-navigation-item-children {
             overflow: hidden;
 
@@ -366,21 +331,18 @@ fwk-vertical-navigation {
                 padding-left: 56px;
             }
 
-            /* 2nd level */
             .fwk-vertical-navigation-item-children {
 
                 .fwk-vertical-navigation-item {
                     padding-left: 72px;
                 }
 
-                /* 3rd level */
                 .fwk-vertical-navigation-item-children {
 
                     .fwk-vertical-navigation-item {
                         padding-left: 88px;
                     }
 
-                    /* 4th level */
                     .fwk-vertical-navigation-item-children {
 
                         .fwk-vertical-navigation-item {
@@ -392,7 +354,6 @@ fwk-vertical-navigation {
         }
     }
 
-    /* Divider */
     fwk-vertical-navigation-divider-item {
         margin: 12px 0;
 
@@ -402,7 +363,6 @@ fwk-vertical-navigation {
         }
     }
 
-    /* Group */
     fwk-vertical-navigation-group-item {
 
         > .fwk-vertical-navigation-item-wrapper {
@@ -427,15 +387,11 @@ fwk-vertical-navigation {
         }
     }
 
-    /* Spacer */
     fwk-vertical-navigation-spacer-item {
         margin: 6px 0;
     }
 }
 
-/* ----------------------------------------------------------------------------------------------------- */
-/* @ Overlay
-/* ----------------------------------------------------------------------------------------------------- */
 .fwk-vertical-navigation-overlay {
     position: absolute;
     top: 0;
@@ -451,9 +407,6 @@ fwk-vertical-navigation {
     }
 }
 
-/* ----------------------------------------------------------------------------------------------------- */
-/* @ Aside overlay
-/* ----------------------------------------------------------------------------------------------------- */
 .fwk-vertical-navigation-aside-overlay {
     position: absolute;
     top: 0;
@@ -465,11 +418,7 @@ fwk-vertical-navigation {
     background-color: rgba(0, 0, 0, 0.3);
 }
 
-/* ----------------------------------------------------------------------------------------------------- */
-/* @ Navigation Items Colors
-/* ----------------------------------------------------------------------------------------------------- */
 
-/* Navigation items common */
 fwk-vertical-navigation-aside-item,
 fwk-vertical-navigation-basic-item,
 fwk-vertical-navigation-collapsable-item,
@@ -498,7 +447,6 @@ fwk-vertical-navigation-group-item {
     }
 }
 
-/* Aside, Basic, Collapsable */
 fwk-vertical-navigation-aside-item,
 fwk-vertical-navigation-basic-item,
 fwk-vertical-navigation-collapsable-item {
@@ -507,7 +455,6 @@ fwk-vertical-navigation-collapsable-item {
 
         .fwk-vertical-navigation-item {
 
-            /* Active state */
             &:not(.fwk-vertical-navigation-item-disabled) {
 
                 &.fwk-vertical-navigation-item-active,
@@ -528,7 +475,6 @@ fwk-vertical-navigation-collapsable-item {
                 }
             }
 
-            /* Hover state */
             &:not(.fwk-vertical-navigation-item-active-forced):not(.fwk-vertical-navigation-item-active):not(.fwk-vertical-navigation-item-disabled) {
 
                 &:hover {
@@ -552,10 +498,8 @@ fwk-vertical-navigation-collapsable-item {
     }
 }
 
-/* Collapsable */
 fwk-vertical-navigation-collapsable-item {
 
-    /* Expanded state */
     &.fwk-vertical-navigation-item-expanded {
 
         > .fwk-vertical-navigation-item-wrapper {
@@ -579,7 +523,6 @@ fwk-vertical-navigation-collapsable-item {
     }
 }
 
-/* Group */
 fwk-vertical-navigation-group-item {
 
     > .fwk-vertical-navigation-item-wrapper {

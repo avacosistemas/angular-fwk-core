@@ -10,6 +10,7 @@ export class ComponentDef {
   name!: string;
   i18n!: I18n;
   template?: string;
+  urlHelp?: string;
 
   formsDef?: FormsDef;
   ws?: WsDef;

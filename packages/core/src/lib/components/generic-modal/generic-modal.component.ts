@@ -114,10 +114,10 @@ export class GenericModalComponent implements AfterViewInit {
 
     getIconBackgroundClass(): string {
         switch (this.data.type) {
-            case 'success': return 'bg-green-100 dark:bg-green-900/30';
-            case 'warn': return 'bg-red-100 dark:bg-red-900/30';
-            case 'info': return 'bg-blue-100 dark:bg-blue-900/30';
-            default: return 'bg-accent-50 dark:bg-accent-900/30';
+            case 'success': return 'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 border-emerald-200/80 dark:border-emerald-900/80';
+            case 'warn': return 'bg-red-50 dark:bg-red-950/50 text-red-600 dark:text-red-400 border-red-200/80 dark:border-red-900/80';
+            case 'info': return 'bg-sky-50 dark:bg-sky-950/50 text-sky-600 dark:text-sky-400 border-sky-200/80 dark:border-sky-900/80';
+            default: return 'bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 border-blue-200/80 dark:border-blue-900/80';
         }
     }
 

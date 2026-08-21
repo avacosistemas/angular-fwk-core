@@ -19,6 +19,7 @@ import { FormService } from '../../services/dynamic-form/form.service';
 import { AbstractComponent } from '../abstract-component.component';
 import { FwkAlertComponent } from '../../layout/infrastructure/components/alert/alert.component';
 import { DynamicField, CONTROL_TYPE } from '../../model/dynamic-form/dynamic-field';
+import { DynamicFieldBehavior } from '../../model/dynamic-form/dynamic-field-behavior';
 
 
 import { MY_FORMATS } from '../../services/dynamic-form/form.validator.service';
@@ -43,6 +44,7 @@ import { TextFieldModule } from '@angular/cdk/text-field';
 import { IconPickerComponent } from '../icon-picker/icon-picker.component';
 import { CustomDatePickerComponent } from './custom-datepicker/custom-datepicker.component';
 import { HtmlEditorComponent } from '../html-editor/html-editor.component';
+import { ImageCropperComponent } from './image-cropper/image-cropper.component';
 
 @Component({
     selector: 'fwk-dynamic-form-component',
@@ -76,6 +78,7 @@ import { HtmlEditorComponent } from '../html-editor/html-editor.component';
         UrlInputComponent,
         IconPickerComponent,
         HtmlEditorComponent,
+        ImageCropperComponent,
         FwkAlertComponent,
         TranslatePipe
     ],
@@ -90,6 +93,7 @@ import { HtmlEditorComponent } from '../html-editor/html-editor.component';
 })
 export class DynamicFormComponent extends AbstractComponent implements OnInit, OnDestroy {
     @Input() fields: DynamicField<any>[] = [];
+    @Input() fieldsBehavior: DynamicFieldBehavior[] = [];
     @Input() parentForm!: FormGroup;
     @Input() entity: any = {};
     @Input() isEdit: boolean = false;
@@ -128,7 +132,10 @@ export class DynamicFormComponent extends AbstractComponent implements OnInit, O
     override ngOnInit(): void {
         super.ngOnInit();
         this.fieldSubscriptions.push(
-            this.onFieldsChanges.subscribe(() => {
+            this.onFieldsChanges.subscribe((data: any) => {
+                if (this.fieldsBehavior && this.fieldsBehavior.length > 0 && data && this.form) {
+                    this.formService.fieldsChangesBehavior(this.fields, this.fieldsBehavior, data, this.form);
+                }
                 this.cdRef.markForCheck();
             })
         );
@@ -154,7 +161,10 @@ export class DynamicFormComponent extends AbstractComponent implements OnInit, O
             this.parentForm.removeControl(this.subFormName);
         }
 
-        this.fields.forEach(field => {
+        const leafFields = this.formService.flattenFields(this.fields || []);
+
+        leafFields.forEach(field => {
+            if (!field || !field.controlType) return;
             if (field.controlType === 'datetimepicker') {
                 field.options = { ...field.options, withHourAndMin: true } as any;
             }
@@ -165,6 +175,20 @@ export class DynamicFormComponent extends AbstractComponent implements OnInit, O
 
         this.form = this.formService.toFormGroupEntity(this.entity, this.fields, { disabled: !this.isEdit }, this.onFieldsChanges);
         this.parentForm.addControl(this.subFormName, this.form);
+
+        if (this.fieldsBehavior && this.fieldsBehavior.length > 0) {
+            const uniqueTriggerFields = [...new Set(this.fieldsBehavior.map(fb => fb.fieldKey))];
+            const currentEntity = this.formService.injectToEntity(this.entity || {}, this.form, this.fields);
+            uniqueTriggerFields.forEach(key => {
+                this.formService.fieldChangeBehavior(
+                    key,
+                    this.fieldsBehavior,
+                    currentEntity,
+                    this.fields,
+                    this.form
+                );
+            });
+        }
 
         this.formValueChangesSub = this.form.valueChanges
             .pipe(
@@ -186,15 +210,17 @@ export class DynamicFormComponent extends AbstractComponent implements OnInit, O
             CONTROL_TYPE.Tags, CONTROL_TYPE.UrlInput, CONTROL_TYPE.File
         ];
 
-        this.firstFocusableFieldIndex = this.fields.findIndex(
-            field => focusableControlTypes.includes(field.controlType as CONTROL_TYPE) && !field.disabled
+        this.firstFocusableFieldIndex = leafFields.findIndex(
+            field => field && field.controlType && focusableControlTypes.includes(field.controlType as CONTROL_TYPE) && !field.disabled
         );
 
         this.cdRef.detectChanges();
     }
 
     private loadInitialSourceData(): void {
-        this.fields.forEach((field) => {
+        const leafFields = this.formService.flattenFields(this.fields || []);
+        leafFields.forEach((field) => {
+            if (!field) return;
             if (field.options?.handlerSourceData && this.handlerFieldSourceData) {
                 this.handlerFieldSourceData(field.key, this.entity, this.injector).subscribe(data => {
                     if (field.controlType === CONTROL_TYPE.Hidden) {

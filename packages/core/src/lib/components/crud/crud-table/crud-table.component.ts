@@ -1,5 +1,5 @@
 import { Component, OnInit, Input, ViewChild, Output, EventEmitter, Injector, AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, ElementRef, OnDestroy } from '@angular/core';
-import { CommonModule, SlicePipe } from '@angular/common';
+import { CommonModule, SlicePipe, Location } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { MatPaginator, MatPaginatorIntl, MatPaginatorModule } from '@angular/material/paginator';
@@ -39,6 +39,27 @@ import { FormService } from '../../../services/dynamic-form/form.service';
 import { RatingComponent } from '../../rating/rating.component';
 import { RatingService } from '../../rating/rating.service';
 
+import { Injectable } from '@angular/core';
+
+@Injectable()
+export class FwkPaginatorIntl extends MatPaginatorIntl {
+    override itemsPerPageLabel = 'Filas:';
+    override nextPageLabel = 'Siguiente';
+    override previousPageLabel = 'Anterior';
+    override firstPageLabel = 'Primera página';
+    override lastPageLabel = 'Última página';
+
+    override getRangeLabel = (page: number, pageSize: number, length: number): string => {
+        if (length === 0 || pageSize === 0) {
+            return `0 de ${length}`;
+        }
+        length = Math.max(length, 0);
+        const startIndex = page * pageSize;
+        const endIndex = startIndex < length ? Math.min(startIndex + pageSize, length) : startIndex + pageSize;
+        return `${startIndex + 1} – ${endIndex} de ${length}`;
+    };
+}
+
 const ACTION_COLUMN = '_action';
 const GENERAL_ACTION_COLUMN = '_general_action';
 
@@ -47,6 +68,9 @@ const GENERAL_ACTION_COLUMN = '_general_action';
     templateUrl: './crud-table.component.html',
     styleUrls: ['./crud-table.component.scss'],
     standalone: true,
+    providers: [
+        { provide: MatPaginatorIntl, useClass: FwkPaginatorIntl }
+    ],
     imports: [
         CommonModule, FormsModule, RouterModule,
         MatTableModule, MatSortModule, MatPaginatorModule,
@@ -62,6 +86,7 @@ const GENERAL_ACTION_COLUMN = '_general_action';
         ]),
     ],
     changeDetection: ChangeDetectionStrategy.OnPush,
+    host: { 'class': 'flex flex-auto flex-col h-full relative' }
 })
 export class CrudTableComponent extends AbstractComponent implements OnInit, AfterViewInit, OnDestroy {
 
@@ -76,6 +101,25 @@ export class CrudTableComponent extends AbstractComponent implements OnInit, Aft
     @Input() canDelete: boolean = false;
     @Input() containerClass: string = '';
     @Input() searchPerformed: boolean = false;
+    @Input() hasLoadError: boolean = false;
+    @Input() errorType: 'network' | 'server' = 'server';
+    @Input() updatingRowId: any = null;
+
+    isRowUpdating(element: any): boolean {
+        if (this.updatingRowId === null || this.updatingRowId === undefined || !element) return false;
+        const rowId = this.getRowId(element);
+        return rowId !== null && rowId !== undefined && String(rowId) === String(this.updatingRowId);
+    }
+
+    goBack(): void {
+        this.injector.get(Location).back();
+    }
+
+    retryLoad(): void {
+        if (this.crud) {
+            this.crud.findAll();
+        }
+    }
 
     @ViewChild('tableContainer') tableContainer!: ElementRef;
 
@@ -185,12 +229,33 @@ export class CrudTableComponent extends AbstractComponent implements OnInit, Aft
         this.setUpI18n({
             name: 'crud_table', lang: 'es',
             words: {
-                itemsPerPageLabel: 'Items por página',
+                itemsPerPageLabel: 'Filas:',
                 boolean_true: 'Sí', boolean_false: 'No',
                 action_delete: 'Eliminar', grid_action_button_delete: 'Eliminar',
             }
         });
         this.statustable = new StatusTable<any>();
+
+        try {
+            const pagIntl = injector.get(MatPaginatorIntl);
+            if (pagIntl) {
+                pagIntl.itemsPerPageLabel = 'Filas:';
+                pagIntl.nextPageLabel = 'Siguiente';
+                pagIntl.previousPageLabel = 'Anterior';
+                pagIntl.firstPageLabel = 'Primera';
+                pagIntl.lastPageLabel = 'Última';
+                pagIntl.getRangeLabel = (page: number, pageSize: number, length: number) => {
+                    if (length === 0 || pageSize === 0) {
+                        return `0 de ${length}`;
+                    }
+                    length = Math.max(length, 0);
+                    const startIndex = page * pageSize;
+                    const endIndex = startIndex < length ? Math.min(startIndex + pageSize, length) : startIndex + pageSize;
+                    return `${startIndex + 1} – ${endIndex} de ${length}`;
+                };
+                pagIntl.changes.next();
+            }
+        } catch (e) {}
     }
 
     override ngOnInit(): void {
@@ -419,10 +484,18 @@ export class CrudTableComponent extends AbstractComponent implements OnInit, Aft
                 entities: entity[action.gridModal.fromArrayField],
                 gridDef: action.gridModal.gridDef
             });
+        } else if (action.dialogComponent) {
+            this.injector.get(MatDialog).open(action.dialogComponent, {
+                width: '550px',
+                panelClass: 'control-mat-dialog',
+                data: entity
+            });
         } else if (action.actionType === 'custom_rating') {
             this.openRatingDialog(action, entity);
+        } else if (action.actionType === 'fwk_edit') {
+            this.crud.openEditOrReadDialog(entity, true);
         } else if (action.confirm) {
-            this.actionDefService.submitAction(action, entity, this.crud.i18nCurrentCrudComponent, undefined)
+            this.actionDefService.submitAction(action, entity, this.crud.i18nComponent, undefined)
                 .subscribe(r => {
                     this.spinnerGeneralControl.hide();
                     if ((r && r.success === true) || r === true) {
@@ -467,7 +540,7 @@ export class CrudTableComponent extends AbstractComponent implements OnInit, Aft
                         config: actionClone,
                         formDef: actionClone.formDef,
                         fields: actionClone.form || actionClone.formDef?.fields,
-                        i18n: this.crud.i18nCurrentCrudComponent,
+                        i18n: this.crud.i18nComponent,
                     };
 
                     const dialogRef = this.injector.get(MatDialog).open(BasicModalComponent, {
@@ -750,7 +823,7 @@ export class CrudTableComponent extends AbstractComponent implements OnInit, Aft
             config: actionClone,
             formDef: actionClone.formDef,
             fields: actionClone.form || actionClone.formDef?.fields,
-            i18n: this.crud.i18nCurrentCrudComponent,
+            i18n: this.crud.i18nComponent,
         };
 
         const dialogRef = this.injector.get(MatDialog).open(BasicModalComponent, {

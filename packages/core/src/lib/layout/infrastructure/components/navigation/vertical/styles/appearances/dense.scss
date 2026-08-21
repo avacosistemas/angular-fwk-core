@@ -1,4 +1,3 @@
-/* Variables */
 :root {
     --fwk-vertical-navigation-width: 280px;
     --fwk-vertical-navigation-dense-width: 80px;
@@ -6,42 +5,75 @@
 
 fwk-vertical-navigation {
 
-    /* Dense appearance overrides */
+    .fwk-vertical-navigation-content-header,
+    .fwk-vertical-navigation-content-footer {
+        [isCollapsableShow],
+        [is-collapsable-show],
+        [iscollapsableshow],
+        [fwkShowOnCollapsed],
+        .fwk-show-collapsed {
+            display: none !important;
+        }
+    }
+
     &.fwk-vertical-navigation-appearance-dense {
+
+        &:not(.fwk-vertical-navigation-hover):not(.fwk-vertical-navigation-mode-over) {
+
+            .fwk-vertical-navigation-wrapper {
+
+                .fwk-vertical-navigation-content-header,
+                .fwk-vertical-navigation-content-footer {
+                    overflow: hidden;
+
+                    .fwk-hide-collapsed,
+                    .fwk-only-expanded {
+                        display: none !important;
+                    }
+
+                    *:has([isCollapsableShow], [is-collapsable-show], [iscollapsableshow], [fwkShowOnCollapsed], .fwk-show-collapsed) > *:not([isCollapsableShow]):not([is-collapsable-show]):not([iscollapsableshow]):not([fwkShowOnCollapsed]):not(.fwk-show-collapsed) {
+                        display: none !important;
+                    }
+
+                    [isCollapsableShow],
+                    [is-collapsable-show],
+                    [iscollapsableshow],
+                    [fwkShowOnCollapsed],
+                    .fwk-show-collapsed {
+                        display: flex !important;
+                        align-items: center;
+                        justify-content: center;
+                    }
+                }
+            }
+        }
 
         &:not(.fwk-vertical-navigation-mode-over) {
             width: var(--fwk-vertical-navigation-dense-width);
             min-width: var(--fwk-vertical-navigation-dense-width);
             max-width: var(--fwk-vertical-navigation-dense-width);
 
-            /* Left positioned */
             &.fwk-vertical-navigation-position-left {
 
-                /* Side mode */
                 &.fwk-vertical-navigation-mode-side {
                     margin-left: calc(var(--fwk-vertical-navigation-dense-width) * -1);
                 }
 
-                /* Opened */
                 &.fwk-vertical-navigation-opened {
                     margin-left: 0;
                 }
             }
 
-            /* Right positioned */
             &.fwk-vertical-navigation-position-right {
 
-                /* Side mode */
                 &.fwk-vertical-navigation-mode-side {
                     margin-right: calc(var(--fwk-vertical-navigation-dense-width) * -1);
                 }
 
-                /* Opened */
                 &.fwk-vertical-navigation-opened {
                     margin-right: 0;
                 }
 
-                /* Aside wrapper */
                 .fwk-vertical-navigation-aside-wrapper {
                     left: auto;
                     right: var(--fwk-vertical-navigation-dense-width);
@@ -57,10 +89,8 @@ fwk-vertical-navigation {
             }
         }
 
-        /* Wrapper */
         .fwk-vertical-navigation-wrapper {
 
-            /* Content */
             .fwk-vertical-navigation-content {
 
                 fwk-vertical-navigation-aside-item,
@@ -95,10 +125,8 @@ fwk-vertical-navigation {
 
         &:not(.fwk-vertical-navigation-hover):not(.fwk-vertical-navigation-mode-over) {
 
-            /* Wrapper */
             .fwk-vertical-navigation-wrapper {
 
-                /* Content */
                 .fwk-vertical-navigation-content {
 
                     .fwk-vertical-navigation-item-wrapper {
@@ -142,12 +170,10 @@ fwk-vertical-navigation {
             }
         }
 
-        /* Aside wrapper */
         .fwk-vertical-navigation-aside-wrapper {
             left: var(--fwk-vertical-navigation-dense-width);
         }
 
-        /* Hover */
         &.fwk-vertical-navigation-hover {
 
             .fwk-vertical-navigation-wrapper {

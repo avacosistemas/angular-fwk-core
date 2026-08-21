@@ -15,6 +15,7 @@ import { ActionDef } from '../../model/component-def/action-def';
 import { CustomPageComponent } from '../../model/page-component.interface';
 import { TranslatePipe } from '../../pipe/translate.pipe';
 import { BackButtonComponent } from '../back-button/back-button.component';
+import { HelpButtonComponent } from '../help-button/help-button.component';
 import { AuthService } from '../../auth/auth.service';
 import { I18nService } from '../../services/i18n-service/i18n.service';
 import { BreadcrumbComponent } from '../../navigation/breadcrumb/breadcrumb.component';
@@ -25,7 +26,7 @@ import { BreadcrumbComponent } from '../../navigation/breadcrumb/breadcrumb.comp
     imports: [
         CommonModule, MatButtonModule, MatIconModule,
         MatTooltipModule, MatProgressSpinnerModule,
-        TranslatePipe, BackButtonComponent,
+        TranslatePipe, BackButtonComponent, HelpButtonComponent,
         BreadcrumbComponent
     ],
     templateUrl: './page-component-wrapper.component.html'
@@ -61,8 +62,24 @@ export class PageComponentWrapperComponent implements OnInit, AfterViewInit, OnD
             this.definition.actions = defData.actions.map(action => ({ ...action }));
         }
 
-        const i18n = this.i18nService.getDictionary(this.definition.i18n.name);
-        this.pageTitle = i18n?.translate?.('page_title') || this.definition.name;
+        if (this.definition.i18n) {
+            this.i18nService.addI18n(this.definition.i18n);
+        }
+        const i18n = this.i18nService.getDictionary(this.definition.i18n?.name);
+
+        let title: string | undefined = undefined;
+        if (i18n) {
+            const tDefName = i18n.translate?.(this.definition.name);
+            if (tDefName && tDefName !== this.definition.name) {
+                title = tDefName;
+            } else {
+                const tPageTitle = i18n.translate?.('page_title');
+                if (tPageTitle && tPageTitle !== 'page_title') {
+                    title = tPageTitle;
+                }
+            }
+        }
+        this.pageTitle = title || this.definition.name;
 
         if (i18n && this.definition.actions) {
             this.definition.actions.forEach((action: ActionDef) => {

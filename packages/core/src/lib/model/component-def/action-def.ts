@@ -10,7 +10,8 @@ export const ACTION_TYPES = {
   form_modal: 'form_modal',
   grid_modal: 'grid_modal',
   file_download: 'file_download',
-  file_preview: 'file_preview'
+  file_preview: 'file_preview',
+  fwk_edit: 'fwk_edit'
 };
 
 export class ActionDef {
@@ -46,4 +47,5 @@ export class ActionDef {
   confirmMessageKey?: string;
   redirectTo?: string;
   redirectToSuccess?: string;
+  dialogComponent?: any;
 }

@@ -1,0 +1,74 @@
+<div class="p-6 space-y-5 max-w-md w-full">
+    
+    <!-- Modal Header (Strong Red Lock Icon) -->
+    <div class="flex items-start gap-4">
+        <div class="w-12 h-12 rounded-2xl bg-red-100 dark:bg-red-950/60 text-red-600 dark:text-red-400 flex items-center justify-center shrink-0 border border-red-200/80 dark:border-red-800/80 shadow-xs">
+            <mat-icon svgIcon="heroicons_outline:lock-closed" class="!w-6 !h-6 text-red-600 dark:text-red-400"></mat-icon>
+        </div>
+        <div>
+            <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100 m-0 leading-tight">
+                Sesión Expirada
+            </h2>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 m-0">
+                Tu sesión ha caducado. Ingresa tu usuario y contraseña para continuar.
+            </p>
+        </div>
+    </div>
+
+    <!-- User Identity Badge (Displays full name; email only if valid) -->
+    <div *ngIf="userName || userEmail" class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800/60 rounded-xl border border-gray-100 dark:border-gray-700/60">
+        <div class="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-300 flex items-center justify-center font-bold text-xs shrink-0">
+            {{ (userName || userEmail).charAt(0).toUpperCase() }}
+        </div>
+        <div class="min-w-0 flex-1">
+            <div *ngIf="userName" class="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">
+                {{ userName }}
+            </div>
+            <div *ngIf="userEmail" class="text-xs text-gray-500 dark:text-gray-400 truncate">
+                {{ userEmail }}
+            </div>
+        </div>
+    </div>
+
+    <!-- Error Alert -->
+    <div *ngIf="errorMessage" class="p-3 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800/60 rounded-xl text-red-700 dark:text-red-300 text-xs font-medium flex items-center gap-2">
+        <mat-icon svgIcon="heroicons_outline:exclamation-circle" class="!w-4 !h-4 text-red-500 shrink-0"></mat-icon>
+        <span>{{ errorMessage }}</span>
+    </div>
+
+    <!-- Form -->
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" autocomplete="off" class="space-y-4">
+        <!-- Username Field -->
+        <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Usuario</mat-label>
+            <input matInput formControlName="username" autocomplete="off" placeholder="Ingresa tu usuario">
+            <mat-error *ngIf="form.get('username')?.hasError('required')">
+                El usuario es requerido.
+            </mat-error>
+        </mat-form-field>
+
+        <!-- Password Field -->
+        <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Contraseña</mat-label>
+            <input matInput [type]="showPassword ? 'text' : 'password'" formControlName="password" autocomplete="new-password" placeholder="Ingresa tu contraseña">
+            <button type="button" mat-icon-button matSuffix (click)="togglePasswordVisibility()" class="text-gray-400 hover:text-gray-600">
+                <mat-icon [svgIcon]="showPassword ? 'heroicons_solid:eye-slash' : 'heroicons_solid:eye'" class="!w-5 !h-5"></mat-icon>
+            </button>
+            <mat-error *ngIf="form.get('password')?.hasError('required')">
+                La contraseña es requerida.
+            </mat-error>
+        </mat-form-field>
+
+        <!-- Actions -->
+        <div class="flex items-center justify-end gap-3 pt-2">
+            <button mat-stroked-button type="button" (click)="onCancel()" [disabled]="submitting" class="!rounded-full px-5">
+                Cancelar
+            </button>
+            <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid || submitting" class="!rounded-full px-6 shadow-xs font-semibold">
+                <span *ngIf="!submitting">Iniciar Sesión</span>
+                <mat-progress-spinner *ngIf="submitting" [diameter]="20" mode="indeterminate"></mat-progress-spinner>
+            </button>
+        </div>
+    </form>
+
+</div>
