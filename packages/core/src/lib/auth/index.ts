@@ -19,3 +19,4 @@ export * from './components/change-password/change-password.component';
 export * from './components/unlock-session/unlock-session.component';
 export * from './components/reauth-modal/reauth-modal.component';
 export * from './components/confirmation-required/confirmation-required.component';
+export * from './components/sso/sso.component';

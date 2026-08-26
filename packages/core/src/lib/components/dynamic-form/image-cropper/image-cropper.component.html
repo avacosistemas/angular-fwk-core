@@ -40,8 +40,11 @@
         <button *ngIf="croppedImage && imageChangedEvent" mat-stroked-button color="accent" type="button" (click)="editCrop()" [disabled]="isDisabled">
             {{ 'image_cropper_adjust' | translate }}
         </button>
-        <button *ngIf="croppedImage" mat-stroked-button color="warn" type="button" (click)="removeImage()" [disabled]="isDisabled">
-            {{ 'image_cropper_remove_photo' | translate }}
+        <button *ngIf="croppedImage && hasInitialImage" mat-stroked-button color="warn" type="button" (click)="removeImage()" [disabled]="isDisabled">
+            {{ 'image_cropper_delete' | translate }}
+        </button>
+        <button *ngIf="croppedImage && !hasInitialImage" mat-stroked-button color="warn" type="button" (click)="cancelNewSelection()" [disabled]="isDisabled">
+            {{ 'image_cropper_cancel' | translate }}
         </button>
     </div>
     

@@ -21,7 +21,6 @@ import { extractApiErrorMessage } from '../../utils/error-utils';
   providedIn: 'root'
 })
 export class ActionDefService {
-  private spinnerGeneralControl: any;
 
   constructor(
     private spinnerService: SpinnerService,
@@ -34,7 +33,6 @@ export class ActionDefService {
     private notificationService: NotificationService,
     private dialogService: DialogService
   ) {
-    this.spinnerGeneralControl = spinnerService.getControlGlobalSpinner();
   }
 
   getActions(conditions: DisplayActionsCondition[], actions: ActionDef[], data: any): ActionDef[] {
@@ -135,11 +133,15 @@ export class ActionDefService {
     );
   }
 
+  private get spinnerGeneralControl(): any {
+    return this.spinnerService?.getControlGlobalSpinner?.();
+  }
+
   private handleFilePreviewAction(action: ActionDef, entity: any): Observable<any> {
-    this.spinnerGeneralControl.show();
+    this.spinnerGeneralControl?.show();
     return this.fileService.previewFileByAction(action, entity).pipe(
       catchError(e => this.handleActionError(e)),
-      finalize(() => this.spinnerGeneralControl.hide())
+      finalize(() => this.spinnerGeneralControl?.hide())
     );
   }
 
@@ -150,10 +152,10 @@ export class ActionDefService {
 
     if (!action.ws) return of({ error: 'No WS defined' });
 
-    this.spinnerGeneralControl.show();
+    this.spinnerGeneralControl?.show();
     return this.genericHttpService.callWs(action.ws, entity).pipe(
       catchError(e => this.handleActionError(e, action)),
-      finalize(() => this.spinnerGeneralControl.hide())
+      finalize(() => this.spinnerGeneralControl?.hide())
     );
   }
 
@@ -256,10 +258,10 @@ export class ActionDefService {
             return of({ error: errorMsg });
           }
 
-          this.spinnerGeneralControl.show();
+          this.spinnerGeneralControl?.show();
           return this.genericHttpService.callWs(action.ws, entity).pipe(
             catchError(e => this.handleActionError(e, action)),
-            finalize(() => this.spinnerGeneralControl.hide())
+            finalize(() => this.spinnerGeneralControl?.hide())
           );
         }
         return of(null);
@@ -279,7 +281,7 @@ export class ActionDefService {
       return actions ?? [];
     }
 
-    let filteredActions: ActionDef[] = this.localStorageService.clone(actions);
+    let filteredActions: ActionDef[] = actions;
     objList.forEach(obj => {
       filteredActions = filteredActions.filter(action => {
         const condition = conditions.find(c => c.key === action.actionNameKey);

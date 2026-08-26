@@ -33,6 +33,7 @@ fwk-vertical-navigation {
         position: fixed;
         top: 0;
         bottom: 0;
+        z-index: 600;
     }
 
     &.fwk-vertical-navigation-position-left {
@@ -393,14 +394,17 @@ fwk-vertical-navigation {
 }
 
 .fwk-vertical-navigation-overlay {
-    position: absolute;
+    position: fixed;
     top: 0;
     bottom: 0;
     left: 0;
     right: 0;
-    z-index: 170;
-    opacity: 0;
-    background-color: rgba(0, 0, 0, 0.6);
+    z-index: 500;
+    opacity: 1;
+    background-color: rgba(15, 23, 42, 0.5);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    pointer-events: auto;
 
     + .fwk-vertical-navigation-aside-overlay {
         background-color: transparent;

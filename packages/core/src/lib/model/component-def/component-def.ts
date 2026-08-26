@@ -21,5 +21,14 @@ export class ComponentDef {
   actions?: ActionDef[];
   dialogs?: any;
   dialogConfig?: any;
-  dashboardConfig?: DashboardLayoutDef; 
+  dashboardConfig?: DashboardLayoutDef;
+  alerts?: {
+    messageKey: string;
+    conditionKey?: string;
+    conditionValue?: any;
+    expression?: any;
+    paramKey?: string;
+    params?: any;
+    type?: 'info' | 'warning' | 'error';
+  }[];
 }

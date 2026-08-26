@@ -9,6 +9,9 @@ export interface BaseFieldOptions {
     baseFilter?: boolean;
     hidden?: boolean;
     html?: string;
+    removeUrl?: string;
+    removeWs?: any;
+    removeEndpoint?: string;
 }
 
 export interface TextboxOptions extends BaseFieldOptions {

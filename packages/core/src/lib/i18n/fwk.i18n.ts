@@ -89,6 +89,8 @@ export const FWK_I18N_DEF = {
     sign_out_title: 'Cerraste Sesión',
     signed_in_redirecting: 'Estás siendo redirigido...',
     signed_in_title: 'Iniciando Sesión',
+    sso_title: 'Iniciando Sesión...',
+    sso_subtitle: 'Verificando tu cuenta y redirigiendo...',
 
     // --- Página: Registrarse (Sign-up) ---
     agreements_required_error: 'Debes aceptar los términos y la política de privacidad',
@@ -230,6 +232,12 @@ export const FWK_I18N_DEF = {
     image_cropper_select_other: 'Seleccionar Otra',
     image_cropper_adjust: 'Ajustar',
     image_cropper_remove_photo: 'Quitar Foto',
+    image_cropper_cancel: 'Cancelar',
+    image_cropper_delete: 'Eliminar',
+    image_cropper_remove_confirm_title: 'Borrar Foto de Perfil',
+    image_cropper_remove_confirm_message: 'Estás a punto de borrar tu foto de perfil. ¿Confirmás la operación?',
+    image_cropper_remove_success_title: 'Borrar Foto de Perfil',
+    image_cropper_remove_success_message: 'Se ha borrado con éxito tu foto de perfil',
     image_cropper_modal_title: 'Ajustar foto',
     image_cropper_rotate: 'Rotar',
     image_cropper_loading: 'Cargando imagen...',
@@ -265,6 +273,9 @@ export const FWK_I18N_DEF = {
     crud_gen_ws_relative_tooltip: 'Si está activado, se antepondrá el prefijo de la API (PREFIX_DOMAIN_API).',
 
     // --- Modales: Generales y de Confirmación ---
+    btn_close: 'Cerrar',
+    btn_confirm: 'Confirmar',
+    btn_cancel: 'Cancelar',
     modal_add_title: 'Nuevo registro',
     modal_button_cancel: 'Cancelar',
     modal_button_close: 'Cerrar',

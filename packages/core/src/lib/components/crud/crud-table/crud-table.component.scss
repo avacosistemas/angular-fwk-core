@@ -80,6 +80,10 @@
             background-color: var(--header-bg) !important;
         }
 
+        .mat-mdc-header-cell {
+            z-index: 2 !important;
+        }
+
         .mat-mdc-header-cell,
         .mat-mdc-cell {
             display: table-cell !important;

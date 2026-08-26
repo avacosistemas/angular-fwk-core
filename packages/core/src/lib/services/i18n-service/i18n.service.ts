@@ -55,11 +55,15 @@ export class I18nService extends BaseService {
     addI18n(i18n: I18n): void {
         if (!i18n || !i18n.name || typeof i18n.name !== 'string') return;
         const key = i18n.name.toLowerCase();
-        if (!this.dictionaries.has(key)) {
-            const i18nInstance = new I18n();
-            if (i18nInstance.clone) i18nInstance.clone(i18n);
-            else Object.assign(i18nInstance, JSON.parse(JSON.stringify(i18n)));
+        let i18nInstance = this.dictionaries.get(key);
+        if (!i18nInstance) {
+            i18nInstance = new I18n();
             this.dictionaries.set(key, i18nInstance);
+        }
+        if (i18nInstance.clone) {
+            i18nInstance.clone(i18n);
+        } else {
+            Object.assign(i18nInstance, JSON.parse(JSON.stringify(i18n)));
         }
     }
 }

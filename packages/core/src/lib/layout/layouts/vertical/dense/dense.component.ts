@@ -110,6 +110,15 @@ export class DenseLayoutComponent implements OnInit, OnDestroy {
     ngOnInit(): void {
         this.showCollapseSidebarIcon = this._fwkConfig.sidebar.collapseIcon;
         this.sidebarOpened = this._fwkConfig.sidebar.opened;
+
+        try {
+            const savedAppearance = localStorage.getItem('fwk_sidebar_navigation_appearance') as 'default' | 'dense' | null;
+            if (savedAppearance === 'default' || savedAppearance === 'dense') {
+                this.navigationAppearance = savedAppearance;
+            }
+        } catch (e) {
+            console.error('[DenseLayout] Error reading saved navigation appearance:', e);
+        }
         this._navigationService.navigation$
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe((navigation: Navigation) => {
@@ -154,6 +163,11 @@ export class DenseLayoutComponent implements OnInit, OnDestroy {
 
     toggleNavigationAppearance(): void {
         this.navigationAppearance = this.navigationAppearance === 'default' ? 'dense' : 'default';
+        try {
+            localStorage.setItem('fwk_sidebar_navigation_appearance', this.navigationAppearance);
+        } catch (e) {
+            console.error('[DenseLayout] Error saving navigation appearance:', e);
+        }
     }
 
     private _updateClusterState(): void {

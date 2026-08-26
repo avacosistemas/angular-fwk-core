@@ -5,6 +5,7 @@ import { GridDef } from './grid-def';
 import { ActionDef } from './action-def';
 import { DisplayActionsCondition } from '../display-actions-condition';
 import { DynamicFieldConditionIf } from '../dynamic-form/dynamic-field-condition-if';
+import { WsDef } from '../ws-def';
 
 export class CrudDef extends ComponentDef {
   grid?: GridDef;
@@ -17,6 +18,7 @@ export class CrudDef extends ComponentDef {
   forceGetDetail?: boolean;
   crudActions?: ActionDef[];
   displayGlobalActions?: DisplayActionsCondition[];
+  initWs?: WsDef;
   filterInMemory?: boolean;
   readCondition?: DynamicFieldConditionIf;
   pagination?: {
@@ -51,6 +53,8 @@ export class CrudDef extends ComponentDef {
   deniedCreateAlerts?: {
     messageKey: string;
     conditionKey?: string;
+    conditionValue?: any;
+    expression?: DynamicFieldConditionIf;
     paramKey?: string;
     type?: 'info' | 'warning' | 'error';
   }[];
@@ -58,6 +62,8 @@ export class CrudDef extends ComponentDef {
   alerts?: {
     messageKey: string;
     conditionKey?: string;
+    conditionValue?: any;
+    expression?: DynamicFieldConditionIf;
     paramKey?: string;
     type?: 'info' | 'warning' | 'error';
   }[];
@@ -65,9 +71,30 @@ export class CrudDef extends ComponentDef {
   generalAlerts?: {
     messageKey: string;
     conditionKey?: string;
+    conditionValue?: any;
+    expression?: DynamicFieldConditionIf;
     paramKey?: string;
     type?: 'info' | 'warning' | 'error';
   }[];
 
   clusterConfig?: any;
+
+  confirmSave?: {
+    titleKey?: string;
+    title?: string;
+    messageKey?: string;
+    message?: string;
+    type?: 'info' | 'warning' | 'error' | 'success';
+    confirmButtonKey?: string;
+    cancelButtonKey?: string;
+  };
+
+  successModal?: {
+    titleKey?: string;
+    title?: string;
+    messageKey?: string;
+    message?: string;
+    type?: 'info' | 'warning' | 'error' | 'success';
+    closeButtonKey?: string;
+  };
 }

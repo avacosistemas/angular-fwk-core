@@ -19,6 +19,8 @@ import { HelpButtonComponent } from '../help-button/help-button.component';
 import { AuthService } from '../../auth/auth.service';
 import { I18nService } from '../../services/i18n-service/i18n.service';
 import { BreadcrumbComponent } from '../../navigation/breadcrumb/breadcrumb.component';
+import { FwkAlertComponent } from '../../layout/infrastructure/components/alert/alert.component';
+import { ExpressionService } from '../../services/expression-service/expression.service';
 
 @Component({
     selector: 'fwk-page-component-wrapper',
@@ -27,7 +29,7 @@ import { BreadcrumbComponent } from '../../navigation/breadcrumb/breadcrumb.comp
         CommonModule, MatButtonModule, MatIconModule,
         MatTooltipModule, MatProgressSpinnerModule,
         TranslatePipe, BackButtonComponent, HelpButtonComponent,
-        BreadcrumbComponent
+        BreadcrumbComponent, FwkAlertComponent
     ],
     templateUrl: './page-component-wrapper.component.html'
 })
@@ -65,6 +67,7 @@ export class PageComponentWrapperComponent implements OnInit, AfterViewInit, OnD
         if (this.definition.i18n) {
             this.i18nService.addI18n(this.definition.i18n);
         }
+        this.updateAlerts();
         const i18n = this.i18nService.getDictionary(this.definition.i18n?.name);
 
         let title: string | undefined = undefined;
@@ -147,6 +150,77 @@ export class PageComponentWrapperComponent implements OnInit, AfterViewInit, OnD
         return this.definition.actions.filter(action =>
             this.authService.hasPermission(action.actionSecurity) && !action.hidden
         );
+    }
+
+    private expressionService = inject(ExpressionService);
+
+    public generalAlerts: { messageKey: string; params: any; type: 'info' | 'warning' | 'error' }[] = [];
+
+    public updateAlerts(): void {
+        if (!this.definition || !this.definition.alerts) {
+            this.generalAlerts = [];
+            return;
+        }
+        this.generalAlerts = this.getActiveAlerts(this.definition.alerts);
+    }
+
+    public trackByAlert(index: number, alert: any): string {
+        return alert?.messageKey || index.toString();
+    }
+
+    private getActiveAlerts(alertDefs: any[]): { messageKey: string; params: any; type: 'info' | 'warning' | 'error' }[] {
+        const user = this.authService.getUserFromLocalStorage();
+        const context = {
+            ...(user || {})
+        };
+
+        const active: any[] = [];
+
+        for (const alert of alertDefs) {
+            if (alert.expression) {
+                if (this.expressionService.evaluate(alert.expression, context)) {
+                    const alertParams = {
+                        ...context,
+                        ...(alert.paramKey && context ? { fecha: context[alert.paramKey] } : {}),
+                        ...(alert.params || {})
+                    };
+                    active.push({
+                        messageKey: alert.messageKey,
+                        params: alertParams,
+                        type: alert.type || (alert.messageKey.includes('error') ? 'error' : 'info')
+                    });
+                }
+            } else if (!alert.conditionKey) {
+                const alertParams = {
+                    ...context,
+                    ...(alert.paramKey && context ? { fecha: context[alert.paramKey] } : {}),
+                    ...(alert.params || {})
+                };
+                active.push({
+                    messageKey: alert.messageKey,
+                    params: alertParams,
+                    type: alert.type || (alert.messageKey.includes('error') ? 'error' : 'info')
+                });
+            } else {
+                const value = context[alert.conditionKey];
+                const isMatch = alert.conditionValue !== undefined 
+                    ? value === alert.conditionValue 
+                    : !!value;
+                if (isMatch) {
+                    const alertParams = {
+                        ...context,
+                        ...(alert.paramKey && context ? { fecha: context[alert.paramKey] } : {}),
+                        ...(alert.params || {})
+                    };
+                    active.push({
+                        messageKey: alert.messageKey,
+                        params: alertParams,
+                        type: alert.type || (alert.messageKey.includes('error') ? 'error' : 'info')
+                    });
+                }
+            }
+        }
+        return active;
     }
 
     executeAction(action: ActionDef): void {

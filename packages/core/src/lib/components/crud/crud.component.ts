@@ -13,6 +13,7 @@ import { CrudModalComponent } from './crud-modal/crud-modal.component';
 import { CrudDef } from '../../model/component-def/crud-def';
 import { FormDef } from '../../model/form-def';
 import { ActionDef } from '../../model/component-def/action-def';
+import { I18n } from '../../model/i18n';
 import { AuthService } from '../../auth/auth.service';
 import { UserService } from '../../auth/user.service';
 
@@ -319,20 +320,26 @@ export class CrudComponent extends AbstractCrudComponent<any, any> implements On
   }
 
   executeCrudAction(action: ActionDef): void {
-    if (!this.i18nComponent) return;
+    console.log('[CrudComponent] executeCrudAction triggered for action:', action);
+    const i18n = this.i18nComponent ?? new I18n();
 
     const actionKey = action.actionNameKey || action.actionName || 'default';
-    if (this.actionLoadingStates.get(actionKey)) return;
+    if (this.actionLoadingStates.get(actionKey)) {
+      console.warn('[CrudComponent] Action is already loading:', actionKey);
+      return;
+    }
 
     this.actionLoadingStates.set(actionKey, true);
     this._cdr.markForCheck();
 
+    const entityToPass = (Array.isArray(this.selects) && this.selects.length > 0) ? this.selects : null;
+
     this.refreshTokenIfNeeded(false).pipe(
       switchMap(() => {
         if (action.formDef) {
-          return action.ws ? this.genericHttpService.callWs(action.ws, this.selects) : of(undefined);
+          return action.ws ? this.genericHttpService.callWs(action.ws, entityToPass) : of(undefined);
         }
-        return this.actionDefService.submitAction(action, this.selects, this.i18nComponent!, this.crudDef?.dialogConfig);
+        return this.actionDefService.submitAction(action, entityToPass, i18n, this.crudDef?.dialogConfig);
       }),
       finalize(() => {
         this.actionLoadingStates.set(actionKey, false);
@@ -340,15 +347,18 @@ export class CrudComponent extends AbstractCrudComponent<any, any> implements On
       })
     ).subscribe({
       next: (res) => {
+        console.log('[CrudComponent] executeCrudAction success:', res);
         if (action.formDef) {
           this.callCrudDialog(action, res);
         } else {
           this.findAll();
-          this.notificationService.notifySuccess(this.translate('success_message'));
+          this.executeInitWs();
+          const successMsg = this.translate('success_message');
+          this.notificationService.notifySuccess(successMsg !== 'success_message' ? successMsg : 'Operación realizada correctamente.');
         }
       },
       error: (err) => {
-        console.error('Error executing crud action:', err);
+        console.error('[CrudComponent] executeCrudAction error:', err);
         const msg = err?.message || this.translate('action_execution_generic_error');
         this.notificationService.notifyError(msg);
       }
@@ -356,8 +366,6 @@ export class CrudComponent extends AbstractCrudComponent<any, any> implements On
   }
 
   private callCrudDialog(action: ActionDef, entity: any): void {
-    if (!this.i18nComponent) return;
-
     const dialogRef = this.dialog.open(CrudModalComponent, {
       width: this.crudDef.dialogConfig?.width ?? '500px',
       panelClass: 'control-mat-dialog',
@@ -365,8 +373,8 @@ export class CrudComponent extends AbstractCrudComponent<any, any> implements On
         entity: entity,
         translate: (key: string) => this.translate(key),
         submitActions: (actionDef: ActionDef) => {
-          if (!this.i18nComponent) return;
-          this.actionDefService.submitAction(actionDef, this.selects, this.i18nComponent, this.crudDef.dialogConfig)
+          const i18n = this.i18nComponent ?? new I18n();
+          this.actionDefService.submitAction(actionDef, this.selects, i18n, this.crudDef.dialogConfig)
             .pipe(finalize(() => dialogRef.close()))
             .subscribe(() => {
               this.findAll();
@@ -380,7 +388,21 @@ export class CrudComponent extends AbstractCrudComponent<any, any> implements On
   }
 
   getCrudActions(): ActionDef[] {
-    return this.actionDefService.filterActionsByCondition(this.crudDef.crudActions ?? [], this.crudDef.displayGlobalActions ?? [], this.selects);
+    const contextList = [
+      {
+        ...this.globalActionContext,
+        ...(this.selects.length > 0 ? this.selects[0] : {})
+      }
+    ];
+    return this.actionDefService.filterActionsByCondition(
+      this.crudDef.crudActions ?? [],
+      this.crudDef.displayGlobalActions ?? [],
+      contextList
+    );
+  }
+
+  trackByAction(index: number, action: ActionDef): string {
+    return action.actionNameKey || action.actionName || index.toString();
   }
 
   getFormCreate(crudDef: CrudDef): Observable<FormDef> {
@@ -440,6 +462,14 @@ export class CrudComponent extends AbstractCrudComponent<any, any> implements On
     return this._generalAlerts;
   }
 
+  public trackByAlert(index: number, alert: any): string {
+    return alert?.messageKey || index.toString();
+  }
+
+  override postInitWs(res: any): void {
+    this.updateAlerts();
+  }
+
   private updateAlerts(): void {
     if (!this.crudDef) {
       this._deniedCreateAlerts = [];
@@ -458,16 +488,55 @@ export class CrudComponent extends AbstractCrudComponent<any, any> implements On
 
   private getActiveAlerts(alertDefs: any[]): { messageKey: string; params: any; type: 'info' | 'warning' | 'error' }[] {
     const user = this.authService.getUserFromLocalStorage();
+    const context = {
+      ...(user || {}),
+      ...this.globalActionContext
+    };
+
     const active: any[] = [];
 
     for (const alert of alertDefs) {
-      if (!alert.conditionKey || (user && (user as any)[alert.conditionKey])) {
-        const params = alert.paramKey && user ? { fecha: (user as any)[alert.paramKey] } : null;
+      if (alert.expression) {
+        if (this.expressionService.evaluate(alert.expression, context)) {
+          const alertParams = {
+            ...context,
+            ...(alert.paramKey && context ? { fecha: context[alert.paramKey] } : {}),
+            ...(alert.params || {})
+          };
+          active.push({
+            messageKey: alert.messageKey,
+            params: alertParams,
+            type: alert.type || (alert.messageKey.includes('error') ? 'error' : 'info')
+          });
+        }
+      } else if (!alert.conditionKey) {
+        const alertParams = {
+          ...context,
+          ...(alert.paramKey && context ? { fecha: context[alert.paramKey] } : {}),
+          ...(alert.params || {})
+        };
         active.push({
           messageKey: alert.messageKey,
-          params,
+          params: alertParams,
           type: alert.type || (alert.messageKey.includes('error') ? 'error' : 'info')
         });
+      } else {
+        const value = context[alert.conditionKey];
+        const isMatch = alert.conditionValue !== undefined 
+          ? value === alert.conditionValue 
+          : !!value;
+        if (isMatch) {
+          const alertParams = {
+            ...context,
+            ...(alert.paramKey && context ? { fecha: context[alert.paramKey] } : {}),
+            ...(alert.params || {})
+          };
+          active.push({
+            messageKey: alert.messageKey,
+            params: alertParams,
+            type: alert.type || (alert.messageKey.includes('error') ? 'error' : 'info')
+          });
+        }
       }
     }
     return active;

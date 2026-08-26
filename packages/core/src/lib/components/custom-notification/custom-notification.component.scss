@@ -6,6 +6,12 @@
     border-radius: 10px !important;
 }
 
+::ng-deep .custom-notification-panel,
+::ng-deep .cdk-overlay-pane.custom-notification-panel,
+::ng-deep .cdk-overlay-container .cdk-overlay-pane:has(.custom-notification-panel) {
+    z-index: 99999 !important;
+}
+
 ::ng-deep .mdc-snackbar__surface {
     background-color: transparent !important;
     padding: 0px !important;

@@ -18,7 +18,7 @@
                 </div>
             </div>
 
-            <div class="flex shrink-0 items-center mt-6 sm:mt-0 sm:ml-4 space-x-2 print:hidden">
+            <div class="flex shrink-0 items-center sm:mt-6 sm:mt-0 sm:ml-4 space-x-2 print:hidden">
                 <ng-container *ngFor="let action of getVisibleActions()">
                     <ng-container *ngIf="!action.hidden" [ngSwitch]="action.appearance">
 
@@ -64,6 +64,12 @@
                     </ng-container>
                 </ng-container>
             </div>
+        </div>
+        <div *ngIf="generalAlerts.length > 0" class="flex flex-col gap-2 w-full px-4 sm:px-6 pb-4 pt-0">
+            <fwk-alert *ngFor="let alert of generalAlerts; trackBy: trackByAlert"
+                class="max-w-full" [type]="alert.type" [appearance]="'soft'" [showIcon]="true">
+                <span [innerHTML]="alert.messageKey | translate:alert.params:definition.i18n?.name"></span>
+            </fwk-alert>
         </div>
     </div>
 

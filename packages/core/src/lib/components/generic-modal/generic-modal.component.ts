@@ -5,6 +5,7 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { TranslatePipe } from '../../pipe/translate.pipe';
 
 export interface CustomModalComponentWithValue {
     getValue(): any;
@@ -16,6 +17,7 @@ export interface GenericDialogData {
     message: SafeHtml | string;
     icon?: string;
     type?: 'primary' | 'accent' | 'warn' | 'info' | 'success';
+    confirmButtonColor?: 'primary' | 'accent' | 'warn';
     showCloseButton?: boolean;
     showConfirmButton?: boolean;
     confirmButtonText?: string;
@@ -33,7 +35,8 @@ export interface GenericDialogData {
         MatDialogModule,
         MatButtonModule,
         MatIconModule,
-        MatTooltipModule
+        MatTooltipModule,
+        TranslatePipe
     ],
     encapsulation: ViewEncapsulation.None
 })
@@ -101,6 +104,9 @@ export class GenericModalComponent implements AfterViewInit {
     }
 
     getConfirmColor(): 'primary' | 'accent' | 'warn' {
+        if (this.data.confirmButtonColor) {
+            return this.data.confirmButtonColor;
+        }
         switch (this.data.type) {
             case 'warn': return 'warn';
             case 'success': return 'accent';
@@ -114,19 +120,19 @@ export class GenericModalComponent implements AfterViewInit {
 
     getIconBackgroundClass(): string {
         switch (this.data.type) {
-            case 'success': return 'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 border-emerald-200/80 dark:border-emerald-900/80';
+            case 'success': return 'bg-green-50 dark:bg-green-950/50 text-green-600 dark:text-green-400 border-green-200/80 dark:border-green-900/80';
             case 'warn': return 'bg-red-50 dark:bg-red-950/50 text-red-600 dark:text-red-400 border-red-200/80 dark:border-red-900/80';
-            case 'info': return 'bg-sky-50 dark:bg-sky-950/50 text-sky-600 dark:text-sky-400 border-sky-200/80 dark:border-sky-900/80';
+            case 'info': return 'bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 border-blue-200/80 dark:border-blue-900/80';
             default: return 'bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 border-blue-200/80 dark:border-blue-900/80';
         }
     }
 
     getIconColorClass(): string {
         switch (this.data.type) {
-            case 'success': return 'text-green-600 dark:text-green-400';
-            case 'warn': return 'text-red-600 dark:text-red-400';
-            case 'info': return 'text-blue-600 dark:text-blue-400';
-            default: return 'text-accent-600 dark:text-accent-400';
+            case 'success': return '!text-green-600 dark:!text-green-400';
+            case 'warn': return '!text-red-600 dark:!text-red-400';
+            case 'info': return '!text-blue-600 dark:!text-blue-400';
+            default: return '!text-accent-600 dark:!text-accent-400';
         }
     }
 }

@@ -75,7 +75,7 @@ export class GenericHttpService extends HttpService {
     callWs(ws: WsDef, data: any = null): Observable<any> {
         switch (ws.method?.toUpperCase()) {
             case HTTP_METHODS.post:
-                return this.basicPost(ws.url, data);
+                return this.basicPost(ws.url, data ?? {});
             case HTTP_METHODS.delete:
                 return this.basicDelete(ws.url, data);
             case HTTP_METHODS.delete_ternaria: {

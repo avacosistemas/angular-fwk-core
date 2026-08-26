@@ -516,26 +516,28 @@ export class FwkVerticalNavigationComponent implements OnChanges, OnInit, AfterV
      */
     private _showOverlay(): void
     {
-        if ( this._asideOverlay )
+        if ( this._overlay )
         {
             return;
         }
 
         this._overlay = this._renderer2.createElement('div');
 
-        this._overlay.classList.add('fwk-vertical-navigation-overlay backdrop-blur-sm');
+        this._renderer2.addClass(this._overlay, 'fwk-vertical-navigation-overlay');
 
         if ( this.transparentOverlay )
         {
-            this._overlay.classList.add('fwk-vertical-navigation-overlay-transparent');
+            this._renderer2.addClass(this._overlay, 'fwk-vertical-navigation-overlay-transparent');
         }
 
-        this._renderer2.appendChild(this._elementRef.nativeElement.parentElement, this._overlay);
+        const parent = this._elementRef.nativeElement.parentElement || this._document.body;
+        this._renderer2.appendChild(parent, this._overlay);
 
         this._scrollStrategy.enable();
 
         this._player = this._animationBuilder.build([
-            animate('300ms cubic-bezier(0.25, 0.8, 0.25, 1)', style({opacity: 1})),
+            style({ opacity: 0 }),
+            animate('300ms cubic-bezier(0.25, 0.8, 0.25, 1)', style({ opacity: 1 })),
         ]).create(this._overlay);
 
         this._player.play();

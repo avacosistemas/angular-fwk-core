@@ -2,7 +2,7 @@
     
     <div class="w-14 h-14 rounded-2xl flex items-center justify-center mb-4 shrink-0 border shadow-xs transition-transform duration-300 hover:scale-105"
         [ngClass]="getIconBackgroundClass()">
-        <mat-icon [svgIcon]="getIconName()" class="!w-7 !h-7"></mat-icon>
+        <mat-icon [svgIcon]="getIconName()" [ngClass]="getIconColorClass()" class="!w-7 !h-7"></mat-icon>
     </div>
 
     <h2 *ngIf="data.title" class="text-xl sm:text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100 m-0 text-center leading-tight">
@@ -14,7 +14,7 @@
         <div #customComponentContainer class="mt-4 text-left w-full"></div>
     </div>
 
-    <div class="flex flex-col-reverse sm:flex-row items-center justify-stretch gap-3 mt-7 w-full">
+    <div class="flex flex-col-reverse sm:flex-row items-center justify-stretch gap-3 w-full">
         <button *ngIf="data.cancelButtonText"
             mat-stroked-button
             (click)="onCancel()"

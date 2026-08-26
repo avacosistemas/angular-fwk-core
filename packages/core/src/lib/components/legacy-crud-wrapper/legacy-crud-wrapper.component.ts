@@ -26,6 +26,8 @@ import { I18n } from '../../model/i18n';
 import { ActionDefService } from '../../services/action-def-service/action-def.service';
 import { TranslatePipe } from '../../pipe/translate.pipe';
 import { FwkAlertComponent } from '../../layout/infrastructure/components/alert/alert.component';
+import { ExpressionService } from '../../services/expression-service/expression.service';
+import { DialogService } from '../../services/dialog-service/dialog.service';
 
 @Component({
   selector: 'fwk-legacy-crud-wrapper',
@@ -81,6 +83,7 @@ export class LegacyCrudWrapperComponent implements OnInit, OnDestroy {
   private _notificationService = inject(NotificationService);
   private _i18nService = inject(I18nService);
   private _actionDefService = inject(ActionDefService);
+  private _dialogService = inject(DialogService);
   private _fwkConfig = inject<FwkConfig>(FWK_CONFIG);
   private destroy$ = new Subject<void>();
 
@@ -95,6 +98,8 @@ export class LegacyCrudWrapperComponent implements OnInit, OnDestroy {
     if (this.crudDef.i18n) {
       this._i18nService.addI18n(this.crudDef.i18n);
     }
+
+    this.updateAlerts();
 
     const isStandaloneForm = !this.crudDef.grid && (
       !!this.crudDef.formsDef?.read || !!this.crudDef.formsDef?.update ||
@@ -240,6 +245,7 @@ export class LegacyCrudWrapperComponent implements OnInit, OnDestroy {
             } else {
               this.contactEntity = array[0];
             }
+            this.updateAlerts();
             
             this._evaluateInlineView();
 
@@ -429,12 +435,42 @@ export class LegacyCrudWrapperComponent implements OnInit, OnDestroy {
   }
 
   get isSaveDisabled(): boolean {
-    return this.parentForm.invalid || this.isSaving || this.parentForm.disabled;
+    return this.parentForm.invalid || this.isSaving || this.parentForm.disabled || !!this.contactEntity?.pendiente;
   }
 
   saveChanges(): void {
     const def = this.crudDef;
     if (this.parentForm.invalid || !this.contactEntity || !def) return;
+
+    if (def.confirmSave) {
+      const confirmConfig = def.confirmSave;
+      const title = this.translate(confirmConfig.titleKey || 'confirm_title');
+      const message = this.translate(confirmConfig.messageKey || 'confirm_message');
+      const confirmLabel = this.translate('btn_confirm') || 'Confirmar';
+      const cancelLabel = this.translate('btn_close') || 'Cerrar';
+
+      this._dialogService.showQuestionModal({
+        title: title || 'Confirmación',
+        message: message || '¿Deseás realizar esta acción?',
+        icon: {
+          show: true,
+          name: 'heroicons_outline:exclamation-triangle',
+          color: confirmConfig.type === 'warning' ? 'warn' : 'primary'
+        },
+        actions: {
+          confirm: { show: true, label: confirmLabel, color: 'primary' },
+          cancel: { show: true, label: cancelLabel }
+        },
+        onSubmit: () => this._performSave()
+      });
+    } else {
+      this._performSave();
+    }
+  }
+
+  private _performSave(): void {
+    const def = this.crudDef;
+    if (!def) return;
 
     const subForm = this.parentForm.get('subForm');
     const formValues = subForm ? subForm.value : {};
@@ -455,6 +491,11 @@ export class LegacyCrudWrapperComponent implements OnInit, OnDestroy {
     let url = def.ws?.url || (this._fwkConfig.apiBaseUrl! + 'admin/personas');
     let method = 'PUT';
 
+    if (def.ws?.removeUrl && ((formValues as any)?.image === '' || (formValues as any)?.image === null)) {
+      url = def.ws.removeUrl;
+      method = 'GET';
+    }
+
     let currentActionDef: any = null;
     if (this.activeActionKey && def.clusterConfig?.actionsItems) {
       currentActionDef = def.clusterConfig.actionsItems.find(
@@ -472,6 +513,8 @@ export class LegacyCrudWrapperComponent implements OnInit, OnDestroy {
       request$ = this._genericHttpService.basicPost(url, updatedEntity);
     } else if (method === 'DELETE') {
       request$ = this._genericHttpService.basicDelete(url, updatedEntity);
+    } else if (method === 'GET') {
+      request$ = this._genericHttpService.basicGet(url, updatedEntity, null, {});
     } else {
       request$ = this._genericHttpService.basicPut(url, updatedEntity);
     }
@@ -482,23 +525,50 @@ export class LegacyCrudWrapperComponent implements OnInit, OnDestroy {
     request$.subscribe({
       next: (res) => {
         this.isSaving = false;
-        const successMsg = def.ws?.messageSuccess || res?.messageSuccess || res?.successMessage || res?.data?.successMessage || this.translate('success_message') || this.translate('data_update_success_message');
-        this._notificationService.notifySuccess(successMsg);
-        this._notificationService.checkAndNotifyExtraMessages(res);
-        
-        if (this.activeActionKey) {
-          this.parentForm = new FormGroup({});
-          this.renderForm = false;
-          this._loadContactData();
+
+        const onFinishSave = () => {
+          if (this.activeActionKey) {
+            this.parentForm = new FormGroup({});
+            this.renderForm = false;
+            this._loadContactData();
+          } else {
+            const readFields = def.formsDef?.read?.fields || def.forms?.read;
+            const hasRead = !!readFields && (readFields.length ?? 0) > 0;
+            this.isEditing = !hasRead;
+            this.parentForm = new FormGroup({});
+            this.renderForm = false;
+            this._evaluateInlineView();
+            this._setupFormFields();
+            this._loadContactData();
+          }
+        };
+
+        if (def.successModal) {
+          const successConfig = def.successModal;
+          const title = this.translate(successConfig.titleKey || 'success_title');
+          const message = this.translate(successConfig.messageKey || 'success_message');
+          const closeLabel = this.translate('btn_close') || 'Cerrar';
+
+          this._dialogService.showQuestionModal({
+            title: title || 'Foto de Perfil',
+            message: message || 'Procesado con éxito.',
+            icon: {
+              show: true,
+              name: 'heroicons_outline:check-circle',
+              color: 'success'
+            },
+            actions: {
+              confirm: { show: false },
+              cancel: { show: true, label: closeLabel }
+            },
+            onReject: () => onFinishSave(),
+            onSubmit: () => onFinishSave()
+          });
         } else {
-          const readFields = def.formsDef?.read?.fields || def.forms?.read;
-          const hasRead = !!readFields && (readFields.length ?? 0) > 0;
-          this.isEditing = !hasRead;
-          this.parentForm = new FormGroup({});
-          this.renderForm = false;
-          this._evaluateInlineView();
-          this._setupFormFields();
-          this._loadContactData();
+          const successMsg = def.ws?.messageSuccess || res?.messageSuccess || res?.successMessage || res?.data?.successMessage || this.translate('success_message') || this.translate('data_update_success_message');
+          this._notificationService.notifySuccess(successMsg);
+          this._notificationService.checkAndNotifyExtraMessages(res);
+          onFinishSave();
         }
       },
       error: (err) => {
@@ -676,5 +746,77 @@ export class LegacyCrudWrapperComponent implements OnInit, OnDestroy {
         }
       }
     });
+  }
+
+  private expressionService = inject(ExpressionService);
+
+  public generalAlerts: { messageKey: string; params: any; type: 'info' | 'warning' | 'error' }[] = [];
+
+  public updateAlerts(): void {
+    if (!this.crudDef || !this.crudDef.alerts) {
+      this.generalAlerts = [];
+      return;
+    }
+    this.generalAlerts = this.getActiveAlerts(this.crudDef.alerts);
+  }
+
+  public trackByAlert(index: number, alert: any): string {
+    return alert?.messageKey || index.toString();
+  }
+
+  private getActiveAlerts(alertDefs: any[]): { messageKey: string; params: any; type: 'info' | 'warning' | 'error' }[] {
+    const user = this._authService.getUserFromLocalStorage();
+    const context = {
+      ...(user || {}),
+      ...(this.contactEntity || {})
+    };
+
+    const active: any[] = [];
+
+    for (const alert of alertDefs) {
+      if (alert.expression) {
+        if (this.expressionService.evaluate(alert.expression, context)) {
+          const alertParams = {
+            ...context,
+            ...(alert.paramKey && context ? { fecha: context[alert.paramKey] } : {}),
+            ...(alert.params || {})
+          };
+          active.push({
+            messageKey: alert.messageKey,
+            params: alertParams,
+            type: alert.type || (alert.messageKey.includes('error') ? 'error' : 'info')
+          });
+        }
+      } else if (!alert.conditionKey) {
+        const alertParams = {
+          ...context,
+          ...(alert.paramKey && context ? { fecha: context[alert.paramKey] } : {}),
+          ...(alert.params || {})
+        };
+        active.push({
+          messageKey: alert.messageKey,
+          params: alertParams,
+          type: alert.type || (alert.messageKey.includes('error') ? 'error' : 'info')
+        });
+      } else {
+        const value = context[alert.conditionKey];
+        const isMatch = alert.conditionValue !== undefined 
+          ? value === alert.conditionValue 
+          : !!value;
+        if (isMatch) {
+          const alertParams = {
+            ...context,
+            ...(alert.paramKey && context ? { fecha: context[alert.paramKey] } : {}),
+            ...(alert.params || {})
+          };
+          active.push({
+            messageKey: alert.messageKey,
+            params: alertParams,
+            type: alert.type || (alert.messageKey.includes('error') ? 'error' : 'info')
+          });
+        }
+      }
+    }
+    return active;
   }
 }

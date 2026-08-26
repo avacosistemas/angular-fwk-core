@@ -18,4 +18,5 @@ export class WsDef {
     querystring?: Params;
     messageSuccess?: string;
     messageError?: string;
+    removeUrl?: string;
 }

@@ -29,7 +29,7 @@
 
 <div class="flex flex-col flex-auto w-full min-w-0 h-screen overflow-auto">
     <div
-        class="bg-card dark:bg-transparent dark:shadow-none flex flex-0 items-center p-2 sm:px-4 print:hidden relative w-full z-49">
+        class="bg-card dark:bg-transparent dark:shadow-none flex flex-0 items-center p-2 sm:px-4 print:hidden relative w-full z-30">
         <div class="flex items-center space-x-2">
             <button mat-icon-button (click)="toggleNavigation('mainNavigation')">
                 <mat-icon [svgIcon]="'heroicons_outline:bars-3'"></mat-icon>
@@ -149,16 +149,16 @@
             class="flex-auto overflow-y-auto relative bg-white dark:bg-transparent flex flex-col min-h-0 w-full min-w-0">
 
             <div *ngIf="showClusterSidebar && isScreenSmall"
-                class="w-full bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 print:hidden z-30 select-none">
+                class="sticky top-0 w-full bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 print:hidden z-50 select-none flex-none">
 
                 <div (click)="toggleClusterCollapse()" class="flex items-center justify-between p-3 border-b border-gray-100 dark:border-gray-800">
                     <div class="flex flex-col min-w-0">
                         <span *ngIf="clusterTitlePrefix"
-                            class="text-xs font-bold text-gray-400 dark:text-gray-500 tracking-wider">
+                            class="text-[10px] text-gray-400 dark:text-gray-500 tracking-wider uppercase">
                             {{ clusterTitlePrefix }}
                         </span>
-                        <div class="flex items-center gap-1.5 min-w-0 text-lg font-bold">
-                            <span class="text-gray-400 dark:text-gray-500 shrink-0">
+                        <div class="flex items-center gap-1.5 min-w-0 text-base font-extrabold">
+                            <span class="text-gray-800 dark:text-gray-100 tracking-tight truncate">
                                 {{ clusterTitle }}
                             </span>
                             <span class="text-gray-300 dark:text-gray-600">/</span>
@@ -181,7 +181,7 @@
             </div>
 
             <div *ngIf="showClusterSidebar && isScreenSmall && !clusterCollapsed"
-                class="fixed inset-0 z-[9999] !top-[7rem] bg-white dark:bg-gray-900 w-ful p-4 sm:p-6 overflow-y-auto flex flex-col select-none print:hidden">
+                class="fixed inset-x-0 bottom-0 z-40 !top-[7rem] bg-white dark:bg-gray-900 w-full p-4 sm:p-6 flex flex-col select-none print:hidden overflow-hidden">
                 <div *ngIf="activeProfileActions.length > 0" class="mb-3">
                     <button type="button" [matMenuTriggerFor]="actionsMenuMobileFull"
                         class="flex items-center justify-center w-full px-4 py-2.5 text-sm font-bold rounded-xl border-0 bg-blue-600 text-white shadow-sm">
@@ -199,7 +199,7 @@
                     </mat-menu>
                 </div>
 
-                <div class="flex-1 space-y-1 overflow-y-auto pt-1">
+                <div class="flex-1 space-y-1 overflow-y-auto min-h-0 pt-1">
                     <a *ngFor="let item of activeSidebarItems" (click)="navigateTo(item)"
                         class="flex items-center pl-1 pr-3 py-3 rounded-xl text-base font-semibold transition-colors cursor-pointer"
                         [ngClass]="isItemActive(item) ? 
@@ -221,7 +221,7 @@
 
             </div>
 
-            <div class="flex-auto">
+            <div class="flex-auto relative z-0">
                 <router-outlet *ngIf="true"></router-outlet>
             </div>
 

@@ -39,6 +39,7 @@ export abstract class AbstractCrudComponent<E extends Entity, S extends CRUD<E>>
     filterEntity: any = {};
     appliedFilterEntity: any = {};
     i18nComponent?: I18n;
+    globalActionContext: any = {};
     public parentTitle: string | null = null;
     public searchPerformed = false;
     public hasLoadError: boolean = false;
@@ -261,6 +262,7 @@ export abstract class AbstractCrudComponent<E extends Entity, S extends CRUD<E>>
             }
 
             this.postSetUpCrud(this.crudDef);
+            this.executeInitWs();
         };
 
         if (this.crudDef.i18n) {
@@ -280,6 +282,35 @@ export abstract class AbstractCrudComponent<E extends Entity, S extends CRUD<E>>
     }
 
     postSetUpCrud(crudDef: CrudDef): void { /* Hook para clases hijas */ }
+    postInitWs(res: any): void { /* Hook para clases hijas */ }
+
+    executeInitWs(): void {
+        if (this.crudDef?.initWs) {
+            this.genericHttpService.callWs(this.crudDef.initWs).subscribe({
+                next: (res: any) => {
+                    if (typeof res === 'boolean') {
+                        this.globalActionContext = {
+                            result: res,
+                            value: res,
+                            data: res
+                        };
+                    } else if (res && typeof res === 'object') {
+                        const dataVal = res.data !== undefined ? res.data : (res.result !== undefined ? res.result : res.value);
+                        this.globalActionContext = Array.isArray(res)
+                            ? { items: res, data: res, result: res, value: res }
+                            : { data: dataVal, result: dataVal, value: dataVal, ...res };
+                    } else {
+                        this.globalActionContext = { value: res, result: res, data: res };
+                    }
+                    this.postInitWs(res);
+                    this._cdr.markForCheck();
+                },
+                error: (err: any) => {
+                    console.warn('[AbstractCrudComponent] initWs error:', err);
+                }
+            });
+        }
+    }
 
     private setUpI18nForms(forms: any, i18n: I18n): void {
         if (!forms) { return; }
