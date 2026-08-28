@@ -1,8 +1,8 @@
-import { Injectable, Inject, Injector } from '@angular/core';
+import { Injectable, Inject, Injector, NgZone } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
-import { Observable, of, BehaviorSubject, throwError, catchError, tap, finalize, filter, take, map, shareReplay } from 'rxjs';
+import { Observable, of, BehaviorSubject, throwError, catchError, tap, finalize, filter, take, map, shareReplay, switchMap } from 'rxjs';
 import { User } from './user.types';
 import { UserService } from './user.service';
 import { AbstractAuthService, SignInData } from './abstract-auth.service';
@@ -13,6 +13,8 @@ import { AuthUtils } from './auth.utils';
 import { extractApiErrorMessage } from '../utils/error-utils';
 import { formatImageSrc } from '../utils/image-utils';
 import { ReauthModalComponent } from './components/reauth-modal/reauth-modal.component';
+
+declare var grecaptcha: any;
 
 @Injectable({ providedIn: 'root' })
 export class AuthService implements AbstractAuthService {
@@ -35,6 +37,7 @@ export class AuthService implements AbstractAuthService {
         private _i18nService: I18nService,
         private _notificationService: NotificationService,
         private _injector: Injector,
+        private _ngZone: NgZone,
         @Inject(FWK_CONFIG) private _fwkConfig: FwkConfig
     ) {
         this.TOKEN_KEY = (this._fwkConfig.appId || 'app') + '_accessToken';
@@ -214,13 +217,111 @@ export class AuthService implements AbstractAuthService {
     }
 
     forgotPassword(email: string): Observable<any> {
-        return this._httpClient.post(this._fwkConfig.auth!.forgotPassword!, { email }).pipe(
+        return this.getRecaptchaToken('recoverPassword').pipe(
+            switchMap((token) => {
+                const body = {
+                    userOEmail: email,
+                    email: email,
+                    username: email,
+                    captcha: token || '',
+                    recaptchaToken: token || ''
+                };
+                return this._httpClient.post(this._fwkConfig.auth!.forgotPassword!, body);
+            }),
+            tap((response: any) => {
+                if (response && (response.success === false || response.ok === false)) {
+                    const errorMsg = response.message || response.error || extractApiErrorMessage(response);
+                    const fallbackMsg = this._i18nService.translate('forgot_password_error_message');
+                    const finalMsg = errorMsg || fallbackMsg;
+                    this._notificationService.notifyError(finalMsg);
+                    throw {
+                        error: response,
+                        userMessage: finalMsg,
+                        message: finalMsg
+                    };
+                }
+            }),
             catchError((error) => this.handleGenericAuthError(error, 'forgot_password_error_message'))
         );
     }
 
+    private getRecaptchaToken(action: string = 'recoverPassword'): Observable<string> {
+        const siteKey = this._fwkConfig.recaptchaSiteKey || this._fwkConfig.auth?.recaptchaSiteKey;
+        if (!siteKey || typeof siteKey !== 'string' || siteKey.trim() === '') {
+            return of('');
+        }
+
+        return new Observable<string>((observer) => {
+            const scriptId = 'google-recaptcha-v3-script';
+            const executeGrecaptcha = () => {
+                if (typeof grecaptcha !== 'undefined' && grecaptcha.ready) {
+                    grecaptcha.ready(() => {
+                        grecaptcha.execute(siteKey, { action })
+                            .then((token: string) => {
+                                this._ngZone.run(() => {
+                                    observer.next(token || '');
+                                    observer.complete();
+                                });
+                            })
+                            .catch((err: any) => {
+                                console.error('Error al ejecutar reCAPTCHA:', err);
+                                this._ngZone.run(() => {
+                                    observer.error(err);
+                                });
+                            });
+                    });
+                } else {
+                    this._ngZone.run(() => {
+                        observer.next('');
+                        observer.complete();
+                    });
+                }
+            };
+
+            if (typeof document !== 'undefined' && document.getElementById(scriptId)) {
+                executeGrecaptcha();
+                return;
+            }
+
+            if (typeof document !== 'undefined') {
+                const script = document.createElement('script');
+                script.id = scriptId;
+                script.src = `https://www.google.com/recaptcha/api.js?render=${encodeURIComponent(siteKey)}`;
+                script.async = true;
+                script.defer = true;
+                script.onload = () => executeGrecaptcha();
+                script.onerror = (err) => {
+                    console.error('Error al cargar script de reCAPTCHA:', err);
+                    this._ngZone.run(() => {
+                        observer.error(err);
+                    });
+                };
+                document.head.appendChild(script);
+            } else {
+                this._ngZone.run(() => {
+                    observer.next('');
+                    observer.complete();
+                });
+            }
+        });
+    }
+
     resetPassword(data: any): Observable<any> {
-        return this._httpClient.post(this._fwkConfig.auth!.resetPassword!, data).pipe(
+        const body = typeof data === 'string' ? { pass: data, password: data } : data;
+        return this._httpClient.post(this._fwkConfig.auth!.resetPassword!, body).pipe(
+            tap((response: any) => {
+                if (response && (response.success === false || response.ok === false)) {
+                    const errorMsg = response.message || response.error || extractApiErrorMessage(response);
+                    const fallbackMsg = this._i18nService.translate('reset_password_error_message');
+                    const finalMsg = errorMsg || fallbackMsg;
+                    this._notificationService.notifyError(finalMsg);
+                    throw {
+                        error: response,
+                        userMessage: finalMsg,
+                        message: finalMsg
+                    };
+                }
+            }),
             catchError((error) => this.handleGenericAuthError(error, 'reset_password_error_message'))
         );
     }
@@ -332,17 +433,11 @@ export class AuthService implements AbstractAuthService {
             name: displayName,
             email: data.email || storedUser?.email || emailNotSpecified,
             avatar: processedPhoto,
-            foto: processedPhoto,
-            imagen: processedPhoto,
             status: 'online',
             permisos: permisosProcesados,
             username: resolvedUsername,
             user: resolvedUser,
-            passwordExpired: data.passwordExpired !== undefined ? (data.passwordExpired ?? undefined) : storedUser?.passwordExpired,
-            fechaVencimiento: data.fechaVencimiento !== undefined ? (data.fechaVencimiento ?? undefined) : storedUser?.fechaVencimiento,
-            matricula: data.matricula !== undefined ? data.matricula : storedUser?.matricula,
-            idMatricula: data.idMatricula !== undefined ? data.idMatricula : storedUser?.idMatricula,
-            tipoMatricula: data.tipoMatricula !== undefined ? data.tipoMatricula : storedUser?.tipoMatricula
+            passwordExpired: data.passwordExpired !== undefined ? (data.passwordExpired ?? undefined) : storedUser?.passwordExpired
         };
 
         this.setToken(accessToken);

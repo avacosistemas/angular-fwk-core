@@ -6,7 +6,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { fwkAnimations } from '../../../layout/infrastructure/animations';
 import { FwkAlertComponent, FwkAlertType } from '../../../layout/infrastructure/components/alert';
 import { FwkValidators } from '../../../layout/infrastructure/validators';
@@ -41,7 +41,10 @@ export class AuthResetPasswordComponent implements OnInit {
     };
     resetPasswordForm!: FormGroup<ResetPasswordForm>;
     showAlert: boolean = false;
+    token: string = '';
+    email: string = '';
     private _i18nService = inject(I18nService);
+    private _route = inject(ActivatedRoute);
 
     constructor(
         private _authService: AuthService,
@@ -50,6 +53,18 @@ export class AuthResetPasswordComponent implements OnInit {
     }
 
     ngOnInit(): void {
+        this.token = this._route.snapshot.queryParams['token'] || this._route.snapshot.queryParams['code'] || '';
+        this.email = this._route.snapshot.queryParams['email'] || '';
+
+        this._route.queryParams.subscribe((params) => {
+            if (params['token'] || params['code']) {
+                this.token = params['token'] || params['code'];
+            }
+            if (params['email']) {
+                this.email = params['email'];
+            }
+        });
+
         this.resetPasswordForm = this._formBuilder.group({
             password: ['', Validators.required],
             passwordConfirm: ['', Validators.required],
@@ -68,7 +83,15 @@ export class AuthResetPasswordComponent implements OnInit {
         this.resetPasswordForm.disable();
         this.showAlert = false;
 
-        this._authService.resetPassword(this.resetPasswordForm.get('password')?.value ?? '')
+        const password = this.resetPasswordForm.get('password')?.value ?? '';
+        const payload = {
+            email: this.email,
+            pass: password,
+            password: password,
+            token: this.token,
+        };
+
+        this._authService.resetPassword(payload)
             .pipe(
                 finalize(() => {
                     this.resetPasswordForm.enable();

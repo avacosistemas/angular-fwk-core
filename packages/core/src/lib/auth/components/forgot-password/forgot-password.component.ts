@@ -1,5 +1,5 @@
 import { NgIf, NgStyle } from '@angular/common';
-import { Component, OnInit, ViewChild, ViewEncapsulation, inject } from '@angular/core';
+import { Component, OnInit, ViewChild, ViewEncapsulation, inject, ChangeDetectorRef } from '@angular/core';
 import { FormsModule, NgForm, ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormControl } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -44,6 +44,7 @@ export class AuthForgotPasswordComponent implements OnInit {
 
     private _i18nService = inject(I18nService);
     private _router = inject(Router);
+    private _cdr = inject(ChangeDetectorRef);
 
     constructor(
         private _authService: AuthService,
@@ -62,6 +63,7 @@ export class AuthForgotPasswordComponent implements OnInit {
             return;
         }
 
+        this.isSuccess = false;
         this.forgotPasswordForm.disable();
         this.showAlert = false;
 
@@ -72,19 +74,32 @@ export class AuthForgotPasswordComponent implements OnInit {
                         this.forgotPasswordForm.enable();
                     }
                     this.showAlert = true;
+                    this._cdr.markForCheck();
                 }),
             )
             .subscribe(
                 (response) => {
+                    if (response && (response.success === false || response.ok === false)) {
+                        this.isSuccess = false;
+                        const fallback = this._i18nService.translate('forgot_password_error_message');
+                        this.alert = {
+                            type: 'error',
+                            message: response?.message || response?.userMessage || fallback,
+                        };
+                        this._cdr.markForCheck();
+                        return;
+                    }
                     this.isSuccess = true;
                     this.startCountdown();
                 },
                 (response) => {
+                    this.isSuccess = false;
                     const fallback = this._i18nService.translate('forgot_password_error_message');
                     this.alert = {
                         type: 'error',
                         message: response?.userMessage || response?.message || fallback,
                     };
+                    this._cdr.markForCheck();
                 },
             );
     }

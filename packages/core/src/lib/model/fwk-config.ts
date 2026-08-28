@@ -34,6 +34,7 @@ export interface AuthConfig {
     changePassword?: string | null;
     signUp?: string;
     sideBackground?: AuthSideBackgroundConfig;
+    recaptchaSiteKey?: string;
     links?: {
         forgotPassword?: AuthLinkOption;
         signUp?: AuthLinkOption;
@@ -138,6 +139,7 @@ export interface FwkConfig {
     dummyServices?: boolean;
     hmr?: boolean;
     autocompleteWaitingTime?: number;
+    recaptchaSiteKey?: string;
     customRoutes?: Route[];
 
     auth?: AuthConfig;

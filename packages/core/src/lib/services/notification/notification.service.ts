@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, NgZone } from '@angular/core';
 import { MatSnackBar, MatSnackBarConfig } from '@angular/material/snack-bar';
 
 import { BaseService } from '../base-service/base.service';
@@ -30,7 +30,8 @@ export class NotificationService extends BaseService {
 
   constructor(
     private snackBar: MatSnackBar,
-    public i18nService: I18nService
+    public i18nService: I18nService,
+    private ngZone: NgZone
   ) {
     super();
   }
@@ -114,12 +115,16 @@ export class NotificationService extends BaseService {
       data: { message: item.message, type: item.type }
     };
 
-    const snackBarRef = this.snackBar.openFromComponent(CustomNotificationComponent, config);
+    this.ngZone.run(() => {
+      const snackBarRef = this.snackBar.openFromComponent(CustomNotificationComponent, config);
 
-    snackBarRef.afterDismissed().subscribe(() => {
-      this.isShowing = false;
-      this.currentMessage = null;
-      this.processQueue();
+      snackBarRef.afterDismissed().subscribe(() => {
+        this.ngZone.run(() => {
+          this.isShowing = false;
+          this.currentMessage = null;
+          this.processQueue();
+        });
+      });
     });
   }
 }

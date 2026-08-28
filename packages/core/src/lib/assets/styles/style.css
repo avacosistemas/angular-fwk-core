@@ -26,6 +26,10 @@
     --error-color: #f87171;
 }
 
+.grecaptcha-badge {
+    visibility: hidden;
+}
+
 
 /* ==========================================================================
    FORM FIELDS & INPUTS (MDC & Material Form Field)

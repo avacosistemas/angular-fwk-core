@@ -1,6 +1,6 @@
 {
   "name": "@avacosistemas/core",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Admin FWK - CRUD engine, auth, layout and dynamic forms",
   "schematics": "./schematics/collection.json",
   "peerDependencies": {
