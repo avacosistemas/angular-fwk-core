@@ -53,12 +53,12 @@ export class AuthResetPasswordComponent implements OnInit {
     }
 
     ngOnInit(): void {
-        this.token = this._route.snapshot.queryParams['token'] || this._route.snapshot.queryParams['code'] || '';
+        this.token = this._route.snapshot.queryParams['token'] || '';
         this.email = this._route.snapshot.queryParams['email'] || '';
 
         this._route.queryParams.subscribe((params) => {
-            if (params['token'] || params['code']) {
-                this.token = params['token'] || params['code'];
+            if (params['token']) {
+                this.token = params['token'];
             }
             if (params['email']) {
                 this.email = params['email'];

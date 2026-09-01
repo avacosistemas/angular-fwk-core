@@ -40,7 +40,7 @@ export class AuthForgotPasswordComponent implements OnInit {
     showAlert: boolean = false;
     
     isSuccess: boolean = false;
-    countdown: number = 5;
+    countdown: number = 20;
 
     private _i18nService = inject(I18nService);
     private _router = inject(Router);
