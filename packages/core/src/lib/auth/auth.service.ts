@@ -226,7 +226,11 @@ export class AuthService implements AbstractAuthService {
                     captcha: token || '',
                     recaptchaToken: token || ''
                 };
-                return this._httpClient.post(this._fwkConfig.auth!.forgotPassword!, body);
+                const url = this._fwkConfig.auth!.forgotPassword!;
+                if (url.endsWith('.json')) {
+                    return this._httpClient.get(url);
+                }
+                return this._httpClient.post(url, body);
             }),
             tap((response: any) => {
                 if (response && (response.success === false || response.ok === false)) {

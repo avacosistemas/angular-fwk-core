@@ -42,6 +42,8 @@ export class AuthForgotPasswordComponent implements OnInit {
     isSuccess: boolean = false;
     countdown: number = 20;
 
+    private apiSuccessMessage: string | null = null;
+
     private _i18nService = inject(I18nService);
     private _router = inject(Router);
     private _cdr = inject(ChangeDetectorRef);
@@ -64,6 +66,7 @@ export class AuthForgotPasswordComponent implements OnInit {
         }
 
         this.isSuccess = false;
+        this.apiSuccessMessage = null;
         this.forgotPasswordForm.disable();
         this.showAlert = false;
 
@@ -90,6 +93,7 @@ export class AuthForgotPasswordComponent implements OnInit {
                         return;
                     }
                     this.isSuccess = true;
+                    this.apiSuccessMessage = response?.message || (response?.data && typeof response.data === 'string' ? response.data : null);
                     this.startCountdown();
                 },
                 (response) => {
@@ -119,10 +123,21 @@ export class AuthForgotPasswordComponent implements OnInit {
     }
 
     private updateSuccessMessage(): void {
-        const message = this._i18nService.translate('forgot_password_success_message');
+        const countdownNote = `Serás redirigido al inicio de sesión en ${this.countdown} segundos.`;
+        let message = '';
+        if (this.apiSuccessMessage) {
+            message = `${this.apiSuccessMessage}<br><br><span class="text-xs font-semibold text-secondary opacity-80">${countdownNote}</span>`;
+        } else {
+            const fallback = this._i18nService.translate('forgot_password_success_message');
+            message = fallback.includes('{{countdown}}')
+                ? fallback.replace('{{countdown}}', this.countdown.toString())
+                : `${fallback}<br><br><span class="text-xs font-semibold text-secondary opacity-80">${countdownNote}</span>`;
+        }
+
         this.alert = {
             type: 'success',
-            message: message.replace('{{countdown}}', this.countdown.toString())
+            message: message
         };
+        this._cdr.markForCheck();
     }
 }
