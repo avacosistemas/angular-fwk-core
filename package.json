@@ -1,8 +1,8 @@
 {
   "name": "fwk-core-monorepo",
-  "version": "1.0.45",
+  "version": "1.0.46",
   "private": true,
-  "description": "Monorepo for @fwk/* packages — CPAU Admin Framework",
+  "description": "Monorepo for @fwk.core/* packages — AVACO Admin Framework",
   "workspaces": [
     "packages/*"
   ],

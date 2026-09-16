@@ -121,7 +121,11 @@ export const FWK_I18N_DEF = {
     reset_password_subtitle: 'Crea una nueva contraseña para tu cuenta',
     reset_password_success_message: 'Tu contraseña ha sido restablecida.',
     reset_password_title: 'Restablece tu contraseña',
+    reset_password_success_title: 'Contraseña Actualizada',
+    reset_password_redirect_countdown: 'Redirigiendo en {{countdown}} segundos...',
+    reset_password_redirecting_now: 'Estás siendo redirigido a la pantalla de inicio de sesión',
     reset_your_password_button: 'Restablecer contraseña',
+    reset_password_go_to_login: 'Ir al inicio de sesión ahora',
     send_reset_link_button: 'Enviar enlace de restablecimiento',
 
     // --- Páginas: Otras de Autenticación ---
