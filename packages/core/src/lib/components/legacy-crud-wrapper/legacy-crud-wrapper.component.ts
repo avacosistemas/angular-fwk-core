@@ -28,6 +28,7 @@ import { TranslatePipe } from '../../pipe/translate.pipe';
 import { FwkAlertComponent } from '../../layout/infrastructure/components/alert/alert.component';
 import { ExpressionService } from '../../services/expression-service/expression.service';
 import { DialogService } from '../../services/dialog-service/dialog.service';
+import { ClusterContextService } from '../../services/cluster-context.service';
 
 @Component({
   selector: 'fwk-legacy-crud-wrapper',
@@ -84,8 +85,13 @@ export class LegacyCrudWrapperComponent implements OnInit, OnDestroy {
   private _i18nService = inject(I18nService);
   private _actionDefService = inject(ActionDefService);
   private _dialogService = inject(DialogService);
+  private _clusterContextService = inject(ClusterContextService);
   private _fwkConfig = inject<FwkConfig>(FWK_CONFIG);
   private destroy$ = new Subject<void>();
+
+  get isInCluster(): boolean {
+    return this._clusterContextService?.isActive ?? false;
+  }
 
   ngOnInit(): void {
     this.crudDef = this.route.snapshot.data['definition'];

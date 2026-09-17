@@ -21,6 +21,7 @@ import { I18nService } from '../../services/i18n-service/i18n.service';
 import { BreadcrumbComponent } from '../../navigation/breadcrumb/breadcrumb.component';
 import { FwkAlertComponent } from '../../layout/infrastructure/components/alert/alert.component';
 import { ExpressionService } from '../../services/expression-service/expression.service';
+import { ClusterContextService } from '../../services/cluster-context.service';
 
 @Component({
     selector: 'fwk-page-component-wrapper',
@@ -50,6 +51,11 @@ export class PageComponentWrapperComponent implements OnInit, AfterViewInit, OnD
     private authService = inject(AuthService);
     private i18nService = inject(I18nService);
     private injector = inject(Injector);
+    private _clusterContextService = inject(ClusterContextService);
+
+    get isInCluster(): boolean {
+        return this._clusterContextService?.isActive ?? false;
+    }
 
     ngOnInit(): void {
         const defData = this.route.snapshot.data['definition'];

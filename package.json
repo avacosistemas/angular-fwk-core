@@ -1,6 +1,6 @@
 {
   "name": "fwk-core-monorepo",
-  "version": "1.0.46",
+  "version": "1.0.47",
   "private": true,
   "description": "Monorepo for @fwk.core/* packages — AVACO Admin Framework",
   "workspaces": [

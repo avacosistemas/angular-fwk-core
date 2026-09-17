@@ -53,7 +53,7 @@
 
         <div class="flex flex-col items-center justify-center py-6 px-4 text-center h-full">
             <div class="text-accent-600 group-hover:scale-110 transition-transform bg-accent-50 dark:bg-accent-900/30 p-4 rounded-full mb-3">
-                <mat-icon class="icon-size-8" [svgIcon]="mainIcon"></mat-icon>
+                <mat-icon class="icon-size-8 text-accent-600 dark:bg-accent-900/30 flex" [svgIcon]="mainIcon"></mat-icon>
             </div>
             
             <div class="text-[15px] font-medium text-gray-700 dark:text-gray-200">
@@ -63,12 +63,12 @@
             <div class="flex flex-wrap items-center justify-center gap-2 mt-3">
                 
                 <span class="inline-flex items-center px-2 py-1 rounded text-xs font-semibold bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
-                    <mat-icon class="icon-size-3.5 mr-1" svgIcon="heroicons_outline:document-duplicate"></mat-icon>
+                    <mat-icon class="icon-size-3.5 mr-1 text-blue-700 dark:bg-blue-900/30" svgIcon="heroicons_outline:document-duplicate"></mat-icon>
                     {{ uploadLimitText }}
                 </span>
 
                 <span *ngIf="maxSizeMB" class="inline-flex items-center px-2 py-1 rounded text-xs font-semibold bg-orange-50 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400">
-                    <mat-icon class="icon-size-3.5 mr-1" svgIcon="heroicons_outline:scale"></mat-icon>
+                    <mat-icon class="icon-size-3.5 mr-1 bg-orange-50 dark:text-orange-400" svgIcon="heroicons_outline:scale"></mat-icon>
                     {{ 'file_uploader_max_size_label' | translate:{maxSizeMB: maxSizeMB} }}
                 </span>
 

@@ -26,6 +26,8 @@ export const FWK_I18N_DEF = {
     year_label: 'Año',
     change_password: 'Cambiar Contraseña',
     fullscreen_toggle: 'Pantalla completa',
+    rating_cancel_button: 'Cancelar',
+    rating_accept_button: 'Aceptar',
 
     // --- Cluster y Detalles ---
     cluster_details_title: 'Detalles',

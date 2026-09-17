@@ -33,7 +33,7 @@ export interface AuthConfig {
     resetPassword?: string;
     changePassword?: string | null;
     signUp?: string;
-    sideBackground?: AuthSideBackgroundConfig;
+    sideBackground?: AuthSideBackgroundConfig | null;
     recaptchaSiteKey?: string;
     links?: {
         forgotPassword?: AuthLinkOption;

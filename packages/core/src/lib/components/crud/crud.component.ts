@@ -86,6 +86,15 @@ export class CrudComponent extends AbstractCrudComponent<any, any> implements On
     }
   }
 
+  @Input()
+  set isInCluster(val: boolean | undefined) {
+    this._isInClusterOverride = val;
+  }
+  override get isInCluster(): boolean {
+    return this._isInClusterOverride ?? super.isInCluster;
+  }
+  private _isInClusterOverride?: boolean;
+
   @Output() onChangeSearchEntity = new EventEmitter<any>();
 
   display = {
