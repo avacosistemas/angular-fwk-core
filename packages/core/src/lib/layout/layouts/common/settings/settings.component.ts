@@ -5,7 +5,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { Router } from '@angular/router';
-import { FwkConfig, FwkConfigService, Scheme, Theme, Themes } from '../../../infrastructure/services/config';
+import { FwkConfig, Scheme, Theme, Themes } from '../../../../model/fwk-config';
+import { FwkConfigService } from '../../../infrastructure/services/config';
 import { TranslatePipe } from '../../../../pipe/translate.pipe';
 
 import { Subject, takeUntil } from 'rxjs';

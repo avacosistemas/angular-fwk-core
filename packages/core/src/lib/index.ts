@@ -1,7 +1,7 @@
 // FWK Core — Public API
 // Import everything from subdirectory barrels
 
-// Layout (Fuse fork — dense, empty, navigation, alert, loading, etc.)
+// Layout (dense, empty, navigation, alert, loading, etc.)
 export * from './layout/index';
 
 // Auth (services, guards, components, provider)

@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 
 const targetDir = path.join(__dirname, 'src', 'app', 'resources');
-const importLine = 'import { SecurityDef } from "@fwk/model/component-def/security-def";\n\n';
+const importLine = 'import { SecurityDef } from "@avacosistemas/core";\n\n';
 
 function processDirectory(directory) {
     const files = fs.readdirSync(directory);
@@ -27,7 +27,7 @@ function updateSecurityFile(filePath) {
         return;
     }
 
-    if (!content.includes('from "@fwk/model/component-def/security-def"')) {
+    if (!content.includes('from "@avacosistemas/core"')) {
         content = importLine + content;
     }
 

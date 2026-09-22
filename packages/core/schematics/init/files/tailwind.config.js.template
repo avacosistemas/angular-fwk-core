@@ -5,9 +5,7 @@ module.exports = {
   presets: [require('@avacosistemas/core/tailwind-preset')],
   content: [
     './src/**/*.{html,ts,scss}',
-    './node_modules/@avacosistemas/core/**/*.{html,ts,scss,mjs}',
-    '../fwk-core/dist/packages/core/**/*.{html,ts,scss,mjs}',
-    '../fwk-core/packages/core/src/**/*.{html,ts,scss,mjs}',
+    './node_modules/@avacosistemas/core/**/*.{html,ts,scss,mjs,js}',
   ],
   darkMode: 'class',
   important: true,

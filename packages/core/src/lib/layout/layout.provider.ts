@@ -2,19 +2,14 @@ import { ENVIRONMENT_INITIALIZER, EnvironmentProviders, importProvidersFrom, inj
 import { MATERIAL_SANITY_CHECKS } from '@angular/material/core';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field';
-import { FwkConfig } from './infrastructure/services/config';
-import { FWK_CONFIG } from './infrastructure/services/config/config.constants';
+import { FwkConfig, FWK_CONFIG } from '../model/fwk-config';
 import { FwkLoadingService } from './infrastructure/services/loading';
 import { FwkMediaWatcherService } from './infrastructure/services/media-watcher';
 import { FwkPlatformService } from './infrastructure/services/platform';
 import { FwkSplashScreenService } from './infrastructure/services/splash-screen';
 import { FwkUtilsService } from './infrastructure/services/utils';
 
-export type FwkLayoutConfig = {
-    fwk?: FwkConfig
-}
-
-export const provideFwkLayout = (config: FwkLayoutConfig): Array<Provider | EnvironmentProviders> =>
+export const provideFwkLayout = (config: FwkConfig): Array<Provider | EnvironmentProviders> =>
 {
     const providers: Array<Provider | EnvironmentProviders> = [
         {
@@ -33,7 +28,7 @@ export const provideFwkLayout = (config: FwkLayoutConfig): Array<Provider | Envi
         },
         {
             provide : FWK_CONFIG,
-            useValue: config?.fwk ?? {},
+            useValue: config,
         },
 
         importProvidersFrom(MatDialogModule),

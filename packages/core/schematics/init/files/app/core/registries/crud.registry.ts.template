@@ -1,4 +1,4 @@
-import { CrudModuleDefinition } from '@avacosistemas/core';
+import { CrudModuleDefinition, CrudDef } from '@avacosistemas/core';
 
 export const CRUD_MODULES: CrudModuleDefinition[] = [];
 

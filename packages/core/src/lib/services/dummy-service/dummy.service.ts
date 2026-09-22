@@ -3,6 +3,9 @@ import { Observable, of } from 'rxjs';
 import { LocalStorageService } from '../local-storage/local-storage.service';
 import { SetUpDummyDataService } from './setup-dummy-data.service';
 
+const MOCK_DATA_INITIALIZED_STORAGE_KEY = 'mock_data_storage';
+const DUMMY_CACHE_STORAGE_KEY = 'dummy_service';
+
 interface Cache {
   [url: string]: any[];
 }
@@ -24,15 +27,15 @@ export class DummyService {
   }
 
   private initializeDataIfNeeded(): void {
-    const value = this.localStorageService.get('mock_data_storage');
+    const value = this.localStorageService.get(MOCK_DATA_INITIALIZED_STORAGE_KEY);
     if (value == null) {
       // this.setUpDummyDataService.initializeDummyData();
-      this.localStorageService.save('mock_data_storage', true);
+      this.localStorageService.save(MOCK_DATA_INITIALIZED_STORAGE_KEY, true);
     }
   }
 
   private getCache(url: string): Cache {
-    let cache: Cache | null = this.localStorageService.get('dummy_service');
+    let cache: Cache | null = this.localStorageService.get(DUMMY_CACHE_STORAGE_KEY);
     if (!cache) {
       cache = {};
     }
@@ -43,7 +46,7 @@ export class DummyService {
   }
 
   private saveCache(cache: Cache): void {
-    this.localStorageService.save('dummy_service', cache);
+    this.localStorageService.save(DUMMY_CACHE_STORAGE_KEY, cache);
   }
 
   httpGet(url: string): Observable<any[]> {

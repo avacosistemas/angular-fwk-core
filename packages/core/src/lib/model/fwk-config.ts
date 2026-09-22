@@ -118,12 +118,22 @@ export interface AppColors {
     };
 }
 
+export type Scheme = 'auto' | 'dark' | 'light';
+export type Screens = { [key: string]: string };
+export type Theme = 'theme-default' | string;
+export type Themes = { id: string; name: string }[];
+
 export interface FwkConfig {
     brand: BrandConfig;
     welcome: WelcomeConfig;
     sidebar: SidebarConfig;
     search: SearchConfig;
     routing: RoutingConfig;
+    layout: string;
+    scheme: Scheme;
+    screens: Screens;
+    theme: Theme;
+    themes: Themes;
     colors?: AppColors;
 
     customTopbarComponent?: Type<any>;
@@ -149,8 +159,8 @@ export const DEFAULT_fwk_CONFIG: FwkConfig = {
     brand: {
         name: 'FRAMEWORK',
         logo: {
-            auth: 'assets/images/logo/logo.png',
-            sidebar: 'assets/images/logo/logo.png',
+            auth: 'assets/images/logo/logo.svg',
+            sidebar: 'assets/images/logo/logo.svg',
         },
         isologo: 'assets/images/logo/logo.svg',
         style: {
@@ -184,6 +194,18 @@ export const DEFAULT_fwk_CONFIG: FwkConfig = {
         defaultRedirect: null,
         welcomeDashboard: true,
     },
+    layout: 'dense',
+    scheme: 'auto',
+    screens: {
+        sm: '600px',
+        md: '960px',
+        lg: '1280px',
+        xl: '1440px',
+    },
+    theme: 'theme-default',
+    themes: [
+        { id: 'theme-default', name: 'Default' },
+    ],
     production: false,
     security: true,
     dummyServices: false,

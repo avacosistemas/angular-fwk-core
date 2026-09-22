@@ -7,7 +7,8 @@ import { UserService } from '../../../../auth/user.service';
 import { AuthService } from '../../../../auth/auth.service';
 import { formatImageSrc } from '../../../../utils/image-utils';
 
-import { FwkConfig, FwkConfigService, Scheme } from '../../../infrastructure/services/config';
+import { FwkConfig, Scheme } from '../../../../model/fwk-config';
+import { FwkConfigService } from '../../../infrastructure/services/config';
 
 import { NgIf, NgClass, NgComponentOutlet } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';

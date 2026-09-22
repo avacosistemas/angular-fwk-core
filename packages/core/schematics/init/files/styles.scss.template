@@ -13,7 +13,7 @@
 @import 'node_modules/@avacosistemas/core/assets/styles/tailwind.scss';
 @import 'node_modules/@avacosistemas/core/assets/styles/themes.scss';
 @import 'node_modules/@avacosistemas/core/assets/styles/main.scss';
-@import 'src/assets/styles/style.css';
+@import 'node_modules/@avacosistemas/core/assets/styles/style.css';
 
 @tailwind utilities;
 /*

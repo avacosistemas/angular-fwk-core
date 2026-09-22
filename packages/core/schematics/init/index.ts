@@ -35,14 +35,12 @@ export function init(options: any): Rule {
       appName,
       appRoot,
       minimal,
-      APPLICATION_IMPORTS: '',
-      ENVIRONMENT_IMPORTS: '',
     };
 
     const rootFiles = ['tailwind.config.js.template', 'web.config.template'];
 
     const mainSource = apply(url('./files'), [
-      filter(p => !rootFiles.some(f => p.endsWith(f))),
+      filter(p => !rootFiles.some(f => p.endsWith(f)) && (minimal ? !p.includes('/modules/welcome/') : true)),
       template(templateData),
       move(sourceRoot),
     ]);
@@ -222,6 +220,7 @@ function updateTsConfig(host: Tree): Tree {
   const paths = config.compilerOptions.paths;
   const requiredPaths: Record<string, string[]> = {
     '@fwk': ['node_modules/@avacosistemas/core'],
+    '@fwk/core': ['node_modules/@avacosistemas/core'],
     '@avacosistemas/core': ['node_modules/@avacosistemas/core'],
     '@fwk/*': ['node_modules/@avacosistemas/core/*'],
     'environments/*': ['src/environments/*'],
@@ -260,7 +259,8 @@ function updatePackageJson(host: Tree): Tree {
     "lodash-es": "^4.17.21",
     "luxon": "^3.4.0",
     "perfect-scrollbar": "^1.5.5",
-    "ngx-image-cropper": "^7.1.0"
+    "ngx-image-cropper": "^7.1.0",
+    "tinymce": "^7.0.0"
   };
   pkg.dependencies = { ...depsToAdd, ...pkg.dependencies };
 

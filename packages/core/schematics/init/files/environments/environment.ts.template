@@ -3,6 +3,7 @@ export const PREFIX_DOMAIN_WEB = 'https://www.example.com/';
 export const PREFIX_STATS_API = PREFIX_DOMAIN_API + 'estadisticas/';
 
 export const environment = {
+    version: '1.0.0',
     production: false,
     security: true,
     dummyServices: false,

@@ -41,24 +41,29 @@ export class SearchService {
         }
     }
     
-    private async loadAllCrudDefs(): Promise<CrudDef[]> {
+    private async loadAllCrudDefs(): Promise<{ def: CrudDef; path: string }[]> {
         try {
             const crudModules = await this.crudModulesLoader();
-            const loaderPromises = crudModules.map((moduleDef: any) => moduleDef.loader());
-            const loadedModules = await Promise.all(loaderPromises);
+            const loaderPromises = (crudModules || []).map(async (moduleDef: any) => {
+                try {
+                    const loadedModule = await moduleDef.loader();
+                    const defKey = Object.keys(loadedModule).find(key => key.endsWith('_DEF'));
+                    const def = defKey ? loadedModule[defKey] : null;
+                    return def ? { def, path: moduleDef.path } : null;
+                } catch {
+                    return null;
+                }
+            });
+            const results = await Promise.all(loaderPromises);
+            const validDefs = results.filter(Boolean) as { def: CrudDef; path: string }[];
 
-            const defs = loadedModules.map(module => {
-                const defKey = Object.keys(module).find(key => key.endsWith('_DEF'));
-                return defKey ? module[defKey] : null;
-            }).filter(Boolean) as CrudDef[];
-
-            defs.forEach(def => {
+            validDefs.forEach(({ def }) => {
                 if (def.i18n) {
                     this.i18nService.addI18n(def.i18n);
                 }
             });
 
-            return defs;
+            return validDefs;
         } catch (e) {
             console.error('[SearchService] Error loading CRUD defs:', e);
             return [];
@@ -79,7 +84,7 @@ export class SearchService {
         this.isBuildingIndex = true;
 
         try {
-            const crudDefs = await this.loadAllCrudDefs();
+            const validDefs = await this.loadAllCrudDefs();
             const results: SearchResult[] = [];
             const addedLinks = new Set<string>();
 
@@ -93,6 +98,7 @@ export class SearchService {
                     'oferta-servicios': 'Oferta de Servicios',
                     'perfil': 'Mi Perfil',
                     'store': 'Compras On-line',
+                    'compras-online': 'Compras On-line',
                     'suscripciones': 'Suscripciones',
                     'inscripciones': 'Inscripciones'
                 };
@@ -115,6 +121,9 @@ export class SearchService {
                 if (dict && navDef?.translateKey && dict[navDef.translateKey]) {
                     return dict[navDef.translateKey];
                 }
+                if (dict && dict[def.name]) {
+                    return dict[def.name];
+                }
                 if (dict && dict['page_title']) {
                     return dict['page_title'];
                 }
@@ -124,7 +133,7 @@ export class SearchService {
                 return def.name;
             };
 
-            crudDefs.forEach(def => {
+            validDefs.forEach(({ def, path }) => {
                 const navDef = def.navigation;
                 const readPermission = def.security?.readAccess;
 
@@ -132,8 +141,22 @@ export class SearchService {
                     return;
                 }
 
+                // If navigation explicitly says don't show in menu, or if path has route parameters (e.g. :id, :hash), do not index
+                if (navDef?.showInMenu === false || (path && path.includes(':'))) {
+                    return;
+                }
+
+                // Only index if navigation definition exists, or non-parameterized root module
+                if (!navDef && (!path || path.includes('/'))) {
+                    return;
+                }
+
                 const title = resolveTitle(def);
-                const linkUrl = navDef?.url || `/${def.name.toLowerCase()}`;
+                const rawUrl = navDef?.url || (path ? (path.startsWith('/') ? path : `/${path}`) : null);
+                if (!rawUrl || rawUrl.includes(':')) {
+                    return;
+                }
+                const linkUrl = rawUrl;
 
                 let parentBreadcrumb = '';
                 if (navDef?.group) {
@@ -174,7 +197,7 @@ export class SearchService {
 
                         const itemLink = item.path ? (item.path.startsWith('/') ? item.path : `/${item.path}`) : linkUrl;
 
-                        if (!addedLinks.has(itemLink)) {
+                        if (!addedLinks.has(itemLink) && !itemLink.includes(':')) {
                             addedLinks.add(itemLink);
                             results.push({
                                 title: itemTitle,

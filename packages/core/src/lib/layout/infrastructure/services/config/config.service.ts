@@ -1,19 +1,19 @@
 import { Inject, Injectable } from '@angular/core';
-import { FWK_CONFIG } from './config.constants';
 import { merge } from 'lodash-es';
 import { BehaviorSubject, Observable } from 'rxjs';
+import { FwkConfig, FWK_CONFIG } from '../../../../model/fwk-config';
 
 const THEME_STORAGE_KEY = 'Fwk-theme-scheme';
 
 @Injectable({providedIn: 'root'})
 export class FwkConfigService
 {
-    private _config: BehaviorSubject<any>;
+    private _config: BehaviorSubject<FwkConfig>;
 
     /**
      * Constructor
      */
-    constructor(@Inject(FWK_CONFIG) config: any)
+    constructor(@Inject(FWK_CONFIG) config: FwkConfig)
     {
         let initialConfig = config;
 
@@ -37,10 +37,15 @@ export class FwkConfigService
     /**
      * Setter & getter for config
      */
-    set config(value: any)
+    get config(): FwkConfig
+    {
+        return this._config.getValue();
+    }
+
+    set config(value: Partial<FwkConfig>)
     {
         // Merge the new config over to the current config
-        const config = merge({}, this._config.getValue(), value);
+        const config: FwkConfig = merge({}, this._config.getValue(), value);
 
         if (value && value.scheme && ['dark', 'light', 'auto'].includes(value.scheme)) {
             try {
@@ -55,7 +60,7 @@ export class FwkConfigService
     }
 
     // eslint-disable-next-line @typescript-eslint/member-ordering
-    get config$(): Observable<any>
+    get config$(): Observable<FwkConfig>
     {
         return this._config.asObservable();
     }

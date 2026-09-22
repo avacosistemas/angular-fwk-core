@@ -42,6 +42,38 @@ export class AuthService implements AbstractAuthService {
     ) {
         this.TOKEN_KEY = (this._fwkConfig.appId || 'app') + '_accessToken';
         this.USER_DATA_KEY = (this._fwkConfig.appId || 'app') + '_currentUser';
+        this.initStorageListener();
+    }
+
+    private initStorageListener(): void {
+        if (typeof window === 'undefined') return;
+
+        window.addEventListener('storage', (event: StorageEvent) => {
+            if (event.key === this.TOKEN_KEY) {
+                if (!event.newValue) {
+                    this._ngZone.run(() => {
+                        this.clearRefreshTimeout();
+                        this._authenticated.next(false);
+                        this._userService.user = { id: '', name: '', email: '' };
+                        this._userPermissions.clear();
+                        try {
+                            const dialog = this._injector.get(MatDialog);
+                            dialog.closeAll();
+                        } catch (e) {}
+                        const currentUrl = this._router.url;
+                        const hasValidPath = currentUrl && currentUrl !== '/' && !currentUrl.startsWith('/sign-in') && !currentUrl.startsWith('/sign-out');
+                        const targetUrl = hasValidPath
+                            ? `/sign-in?redirectURL=${encodeURIComponent(currentUrl)}`
+                            : (this._fwkConfig?.routing?.redirectOnLogout || '/sign-in');
+                        this._router.navigateByUrl(targetUrl);
+                    });
+                } else if (event.newValue && event.newValue !== event.oldValue) {
+                    this._ngZone.run(() => {
+                        this.check().subscribe();
+                    });
+                }
+            }
+        });
     }
 
     get authenticated$(): Observable<boolean> { return this._authenticated.asObservable(); }
@@ -82,9 +114,21 @@ export class AuthService implements AbstractAuthService {
         );
     }
 
-    signOut(): Observable<any> {
+    signOut(redirectToSignIn: boolean = false): Observable<any> {
         this.clearRefreshTimeout();
         this.clearLocalStorageAndState();
+        try {
+            const dialog = this._injector.get(MatDialog);
+            dialog.closeAll();
+        } catch (e) {}
+        if (redirectToSignIn) {
+            const currentUrl = this._router.url;
+            const hasValidPath = currentUrl && currentUrl !== '/' && !currentUrl.startsWith('/sign-in') && !currentUrl.startsWith('/sign-out');
+            const targetUrl = hasValidPath
+                ? `/sign-in?redirectURL=${encodeURIComponent(currentUrl)}`
+                : (this._fwkConfig?.routing?.redirectOnLogout || '/sign-in');
+            this._router.navigateByUrl(targetUrl);
+        }
         return of(true);
     }
 

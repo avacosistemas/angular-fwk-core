@@ -1,20 +1,16 @@
 {
   "name": "fwk-core-monorepo",
-  "version": "1.0.47",
+  "version": "1.0.49",
   "private": true,
-  "description": "Monorepo for @fwk.core/* packages — AVACO Admin Framework",
+  "description": "Monorepo for @avacosistemas/core — AVACO Admin Framework",
   "workspaces": [
     "packages/*"
   ],
   "scripts": {
     "build": "ng build fwk-core && tsc -p packages/core/tsconfig.schematics.json",
-    "build:core": "ng build fwk-core && tsc -p packages/core/tsconfig.schematics.json",
     "postbuild": "node -e \"require('fs-extra').copySync('tools/scripts/_scripts', 'dist/packages/core/_scripts', { overwrite: true })\"",
-    "postbuild:core": "node -e \"require('fs-extra').copySync('tools/scripts/_scripts', 'dist/packages/core/_scripts', { overwrite: true })\"",
     "build:core:watch": "ng build fwk-core --watch --configuration development",
-    "build:all": "ng build fwk-core",
-    "lint": "ng lint fwk-core",
-    "test": "ng test fwk-core"
+    "build:all": "npm run build"
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "^17.0.3",
@@ -34,7 +30,16 @@
     "@tinymce/tinymce-angular": "^7.0.0",
     "apexcharts": "3.44.0",
     "autoprefixer": "10.4.16",
+    "axios": "^0.21.4",
+    "@babel/generator": "^7.26.10",
+    "@babel/parser": "^7.29.7",
+    "@babel/traverse": "^7.29.7",
+    "@babel/types": "^7.29.7",
+    "cheerio": "^1.0.0",
+    "cors": "^2.8.6",
+    "express": "^4.22.2",
     "fs-extra": "^11.3.5",
+    "glob": "^10.5.0",
     "ng-apexcharts": "1.8.0",
     "ng-packagr": "^17.0.0",
     "ngx-color-picker": "16.0.0",
@@ -42,6 +47,7 @@
     "rxjs": "7.8.1",
     "tailwindcss": "3.3.5",
     "typescript": "5.2.2",
+    "uuid": "^8.3.2",
     "zone.js": "0.14.2"
   },
   "dependencies": {

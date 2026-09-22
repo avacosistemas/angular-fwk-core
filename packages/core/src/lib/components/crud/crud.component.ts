@@ -168,6 +168,17 @@ export class CrudComponent extends AbstractCrudComponent<any, any> implements On
   }
 
   openAddDialog(): void {
+    if (!this.authService.getToken()) {
+      this.authService.signOut().subscribe(() => {
+        const currentUrl = this.router.url;
+        const hasValidPath = currentUrl && currentUrl !== '/' && !currentUrl.startsWith('/sign-in') && !currentUrl.startsWith('/sign-out');
+        const targetUrl = hasValidPath
+          ? `/sign-in?redirectURL=${encodeURIComponent(currentUrl)}`
+          : (this.fwkConfig?.routing?.redirectOnLogout || '/sign-in');
+        this.router.navigateByUrl(targetUrl);
+      });
+      return;
+    }
     this.refreshTokenIfNeeded(true).pipe(
       switchMap(() => this.getFormCreate(this.crudDef)),
       switchMap((formCreate: FormDef) => {
@@ -199,6 +210,17 @@ export class CrudComponent extends AbstractCrudComponent<any, any> implements On
   }
 
   handleRowClick(row: any): void {
+    if (!this.authService.getToken()) {
+      this.authService.signOut().subscribe(() => {
+        const currentUrl = this.router.url;
+        const hasValidPath = currentUrl && currentUrl !== '/' && !currentUrl.startsWith('/sign-in') && !currentUrl.startsWith('/sign-out');
+        const targetUrl = hasValidPath
+          ? `/sign-in?redirectURL=${encodeURIComponent(currentUrl)}`
+          : (this.fwkConfig?.routing?.redirectOnLogout || '/sign-in');
+        this.router.navigateByUrl(targetUrl);
+      });
+      return;
+    }
     this.refreshTokenIfNeeded(false).subscribe(() => {
       if (this.onClickRow) {
         this.onClickRow(row);
@@ -330,6 +352,17 @@ export class CrudComponent extends AbstractCrudComponent<any, any> implements On
 
   executeCrudAction(action: ActionDef): void {
     console.log('[CrudComponent] executeCrudAction triggered for action:', action);
+    if (!this.authService.getToken()) {
+      this.authService.signOut().subscribe(() => {
+        const currentUrl = this.router.url;
+        const hasValidPath = currentUrl && currentUrl !== '/' && !currentUrl.startsWith('/sign-in') && !currentUrl.startsWith('/sign-out');
+        const targetUrl = hasValidPath
+          ? `/sign-in?redirectURL=${encodeURIComponent(currentUrl)}`
+          : (this.fwkConfig?.routing?.redirectOnLogout || '/sign-in');
+        this.router.navigateByUrl(targetUrl);
+      });
+      return;
+    }
     const i18n = this.i18nComponent ?? new I18n();
 
     const actionKey = action.actionNameKey || action.actionName || 'default';
@@ -455,11 +488,11 @@ export class CrudComponent extends AbstractCrudComponent<any, any> implements On
   private lastRefreshTime = 0;
 
   private refreshTokenIfNeeded(force: boolean = false): Observable<any> {
-    //   const now = Date.now();
-    //   if (force || (now - this.lastRefreshTime > 50000)) {
-    //     this.lastRefreshTime = now;
-    //     return this.authService.refreshToken();
-    //   }
+      const now = Date.now();
+      if (force || (now - this.lastRefreshTime > 50000)) {
+        this.lastRefreshTime = now;
+        return this.authService.refreshToken();
+      }
     return of(null);
   }
 

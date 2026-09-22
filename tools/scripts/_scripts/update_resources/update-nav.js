@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 
 const targetDir = path.join(__dirname, 'src', 'app', 'resources');
-const importLine = 'import { NavigationDef } from "@fwk/model/component-def/navigation-def";\n\n';
+const importLine = 'import { NavigationDef } from "@avacosistemas/core";\n\n';
 
 function processDirectory(directory) {
     const files = fs.readdirSync(directory);
@@ -27,7 +27,7 @@ function updateNavFile(filePath) {
         return;
     }
 
-    if (!content.includes('from "@fwk/model/component-def/navigation-def"')) {
+    if (!content.includes('from "@avacosistemas/core"')) {
         content = importLine + content;
     }
 

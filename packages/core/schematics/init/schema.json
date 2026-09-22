@@ -19,9 +19,8 @@
     "appName": {
       "type": "string",
       "description": "Application display name.",
-      "default": "Aplicación"
+      "default": "Mi Aplicación"
     }
   },
   "required": []
 }
-

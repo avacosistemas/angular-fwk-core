@@ -475,6 +475,17 @@ export class CrudTableComponent extends AbstractComponent implements OnInit, Aft
         if ($event && !($event.currentTarget as HTMLElement).hasAttribute('mat-menu-item')) {
             $event.stopPropagation();
         }
+        if (!this.authService.getToken()) {
+            this.authService.signOut().subscribe(() => {
+                const currentUrl = this.router.url;
+                const hasValidPath = currentUrl && currentUrl !== '/' && !currentUrl.startsWith('/sign-in') && !currentUrl.startsWith('/sign-out');
+                const targetUrl = hasValidPath
+                    ? `/sign-in?redirectURL=${encodeURIComponent(currentUrl)}`
+                    : (this.fwkConfig?.routing?.redirectOnLogout || '/sign-in');
+                this.router.navigateByUrl(targetUrl);
+            });
+            return;
+        }
         if (this.columnDefId) {
             entity.id = entity[this.columnDefId];
         }

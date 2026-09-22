@@ -86,7 +86,7 @@ defFiles.forEach(file => {
 crudModules.sort((a, b) => a.path.localeCompare(b.path));
 allCrudDefsForNav.sort();
 
-const crudRegistryContent = `import { CrudModuleDefinition, CrudDef } from '@fwk/core';
+const crudRegistryContent = `import { CrudModuleDefinition, CrudDef } from '@avacosistemas/core';
 
 export const CRUD_MODULES: CrudModuleDefinition[] = [
 ${crudModules.map(m => `    {

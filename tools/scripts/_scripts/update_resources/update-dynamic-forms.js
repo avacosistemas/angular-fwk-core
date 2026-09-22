@@ -6,13 +6,13 @@ const targetDir = path.join(__dirname, 'src', 'app', 'resources');
 const CONFIG = {
     fields: {
         suffix: '.fields.ts',
-        importLine: 'import { DynamicField } from "@fwk/model/dynamic-form/dynamic-field";\n',
+        importLine: 'import { DynamicField } from "@avacosistemas/core";\n',
         typeName: 'DynamicField<any>[]',
         regex: /export\s+const\s+([A-Z0-9_]+(?:_FIELDS|_FIELDS_DEF|_FIELDS_DEF_FIELD))\s*(?::\s*[^=]+)?\s*=\s*(?:\r?\n\s*)?\[/g
     },
     behavior: {
         suffix: '.behavior.ts',
-        importLine: 'import { DynamicFieldBehavior } from "@fwk/model/dynamic-form/dynamic-field-behavior";\n',
+        importLine: 'import { DynamicFieldBehavior } from "@avacosistemas/core";\n',
         typeName: 'DynamicFieldBehavior[]',
         regex: /export\s+const\s+([A-Z0-9_]+(?:_BEHAVIOR|_BEHAVIOR_DEF))\s*(?::\s*[^=]+)?\s*=\s*(?:\r?\n\s*)?\[/g
     }

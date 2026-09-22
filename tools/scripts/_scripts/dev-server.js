@@ -306,7 +306,7 @@ async function updateVariableInFile(filePath, varName, newData) {
     const potentialImports = [
         { keyword: 'PREFIX_DOMAIN_API', path: 'environments/environment' },
         { keyword: 'PREFIX_STATS_API', path: 'environments/environment' },
-        { keyword: 'FILTER_TYPE', path: '@fwk/services/filter-service/filter.service' }
+        { keyword: 'FILTER_TYPE', path: '@avacosistemas/core' }
     ];
 
     potentialImports.forEach(imp => {
@@ -578,7 +578,7 @@ app.post('/api/dev/generate-crud', async (req, res) => {
                     content = `import { PREFIX_DOMAIN_API } from "environments/environment";\n${content}`;
                 }
                 if (needsFilterTypeImport) {
-                    content = `import { FILTER_TYPE } from "@fwk/services/filter-service/filter.service";\n${content}`;
+                    content = `import { FILTER_TYPE } from "@avacosistemas/core";\n${content}`;
                 }
 
                 content = content
@@ -602,7 +602,7 @@ app.post('/api/dev/generate-crud', async (req, res) => {
 
                 const fieldsString = generateFieldsString(relevantFields, constName, formType);
 
-                let imports = `import { DynamicField } from "@fwk/model/dynamic-form/dynamic-field";\n`;
+                let imports = `import { DynamicField } from "@avacosistemas/core";\n`;
 
                 if (content.includes('PREFIX_DOMAIN_API') || fieldsString.includes('PREFIX_DOMAIN_API')) {
                     imports += `import { PREFIX_DOMAIN_API } from "environments/environment";\n`;
@@ -679,7 +679,7 @@ function generateBehaviorString(behaviorData, allFields, formType, constName) {
 
     const needsImport = behaviorString.includes('FILTER_TYPE');
     if (needsImport) {
-        return `import { FILTER_TYPE } from '@fwk/services/filter-service/filter.service';\n\nexport const ${constName}_${formType.toUpperCase()}_FORM_BEHAVIOR_DEF = ${behaviorString};`;
+        return `import { FILTER_TYPE } from '@avacosistemas/core';\n\nexport const ${constName}_${formType.toUpperCase()}_FORM_BEHAVIOR_DEF = ${behaviorString};`;
     }
 
     return `: DynamicFieldBehavior[] = ${behaviorString}`;
@@ -1001,7 +1001,7 @@ app.post('/api/dev/navigation-groups', async (req, res) => {
             const iconPart = g.icon ? `\n        icon: '${g.icon}',` : '';
             return `    {\n        id: '${g.id}',\n        title: '${g.title}',\n        type: 'group',${iconPart}\n    }`;
         }).join(',\n');
-        const newFileContent = `import { FwkNavigationItem } from '@fwk-layout/components/navigation';
+        const newFileContent = `import { FwkNavigationItem } from '@avacosistemas/core';
 
 export interface NavigationGroup extends FwkNavigationItem {
     id: string;
@@ -1853,7 +1853,7 @@ async function updateFormVariableInFile(filePath, varName, newData) {
     const potentialImports = [
         { keyword: 'PREFIX_DOMAIN_API', path: 'environments/environment' },
         { keyword: 'PREFIX_STATS_API', path: 'environments/environment' },
-        { keyword: 'FILTER_TYPE', path: '@fwk/services/filter-service/filter.service' }
+        { keyword: 'FILTER_TYPE', path: '@avacosistemas/core' }
     ];
 
     potentialImports.forEach(imp => {

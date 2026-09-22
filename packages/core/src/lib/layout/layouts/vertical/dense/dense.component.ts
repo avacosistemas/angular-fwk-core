@@ -32,6 +32,8 @@ import { I18n } from '../../../../model/i18n';
 import { ClusterContextService } from '../../../../services/cluster-context.service';
 import { NotificationService } from '../../../../services/notification/notification.service';
 
+const SIDEBAR_NAVIGATION_APPEARANCE_STORAGE_KEY = 'fwk_sidebar_navigation_appearance';
+
 @Component({
     selector: 'dense-layout',
     templateUrl: './dense.component.html',
@@ -112,7 +114,7 @@ export class DenseLayoutComponent implements OnInit, OnDestroy {
         this.sidebarOpened = this._fwkConfig.sidebar.opened;
 
         try {
-            const savedAppearance = localStorage.getItem('fwk_sidebar_navigation_appearance') as 'default' | 'dense' | null;
+            const savedAppearance = localStorage.getItem(SIDEBAR_NAVIGATION_APPEARANCE_STORAGE_KEY) as 'default' | 'dense' | null;
             if (savedAppearance === 'default' || savedAppearance === 'dense') {
                 this.navigationAppearance = savedAppearance;
             }
@@ -164,7 +166,7 @@ export class DenseLayoutComponent implements OnInit, OnDestroy {
     toggleNavigationAppearance(): void {
         this.navigationAppearance = this.navigationAppearance === 'default' ? 'dense' : 'default';
         try {
-            localStorage.setItem('fwk_sidebar_navigation_appearance', this.navigationAppearance);
+            localStorage.setItem(SIDEBAR_NAVIGATION_APPEARANCE_STORAGE_KEY, this.navigationAppearance);
         } catch (e) {
             console.error('[DenseLayout] Error saving navigation appearance:', e);
         }

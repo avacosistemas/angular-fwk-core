@@ -1,7 +1,8 @@
 import { DOCUMENT, NgIf } from '@angular/common';
 import { Component, Inject, OnDestroy, OnInit, Renderer2, ViewEncapsulation } from '@angular/core';
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
-import { FwkConfig, FwkConfigService } from '../infrastructure/services/config';
+import { FwkConfig } from '../../model/fwk-config';
+import { FwkConfigService } from '../infrastructure/services/config';
 import { FwkMediaWatcherService } from '../infrastructure/services/media-watcher';
 import { FwkPlatformService } from '../infrastructure/services/platform';
 import { combineLatest, filter, map, Subject, takeUntil } from 'rxjs';
@@ -51,17 +52,14 @@ export class LayoutComponent implements OnInit, OnDestroy
             takeUntil(this._unsubscribeAll),
             map(([config, mql]) =>
             {
-                const options = {
-                    scheme: config.scheme,
+                const scheme = config.scheme === 'auto'
+                    ? mql.breakpoints['(prefers-color-scheme: dark)'] ? 'dark' : 'light'
+                    : config.scheme;
+
+                return {
+                    scheme,
                     theme : config.theme,
                 };
-
-                if ( config.scheme === 'auto' )
-                {
-                    options.scheme = mql.breakpoints['(prefers-color-scheme: dark)'] ? 'dark' : 'light';
-                }
-
-                return options;
             }),
         ).subscribe((options) =>
         {

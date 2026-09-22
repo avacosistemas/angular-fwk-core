@@ -1,7 +1,8 @@
 import { Directive, Injector, OnInit, OnDestroy } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { Router } from '@angular/router';
-import { FwkConfig, FwkConfigService } from '../layout/infrastructure/services/config';
+import { FwkConfig } from '../model/fwk-config';
+import { FwkConfigService } from '../layout/infrastructure/services/config';
 import { I18nService } from '../services/i18n-service/i18n.service';
 import { I18n } from '../model/i18n';
 import { NotificationService } from '../services/notification/notification.service';
@@ -18,6 +19,7 @@ export abstract class AbstractComponent implements OnInit, OnDestroy {
     protected fwkConfigService: FwkConfigService;
 
     private _fwkConfigSubscription: Subscription;
+    private _i18nSubscription?: Subscription;
 
     fwkConfig: FwkConfig;
     i18n?: I18n;
@@ -42,7 +44,7 @@ export abstract class AbstractComponent implements OnInit, OnDestroy {
     ngOnInit(): void {
         const i18nNameToLoad = this.getI18nName();
         if (i18nNameToLoad) {
-            this.i18nService.getByName(i18nNameToLoad).subscribe(
+            this._i18nSubscription = this.i18nService.getByName(i18nNameToLoad).subscribe(
                 i18n => {
                     this.i18n = i18n;
                     this.i18nLoaded = true;
@@ -55,6 +57,7 @@ export abstract class AbstractComponent implements OnInit, OnDestroy {
 
     ngOnDestroy(): void {
         this._fwkConfigSubscription?.unsubscribe();
+        this._i18nSubscription?.unsubscribe();
     }
 
     getI18nName(): string {
