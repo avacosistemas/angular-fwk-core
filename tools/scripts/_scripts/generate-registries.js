@@ -86,14 +86,16 @@ defFiles.forEach(file => {
 crudModules.sort((a, b) => a.path.localeCompare(b.path));
 allCrudDefsForNav.sort();
 
-const crudRegistryContent = `import { CrudModuleDefinition, CrudDef } from '@avacosistemas/core';
-
-export const CRUD_MODULES: CrudModuleDefinition[] = [
-${crudModules.map(m => `    {
+const modulesEntries = crudModules.length > 0
+    ? '\n' + crudModules.map(m => `    {
         path: '${m.path}',
         loader: () => import('${m.importPath}')
-    }`).join(',\n')},
-];
+    }`).join(',\n') + ',\n'
+    : '';
+
+const crudRegistryContent = `import { CrudModuleDefinition, CrudDef } from '@avacosistemas/core';
+
+export const CRUD_MODULES: CrudModuleDefinition[] = [${modulesEntries}];
 
 export function loadAllCrudDefs(): Promise<any[]> {
   return Promise.all(CRUD_MODULES.map(m => m.loader().then((mod: any) => {

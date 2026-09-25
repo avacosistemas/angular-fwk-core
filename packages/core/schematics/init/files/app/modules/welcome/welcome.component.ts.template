@@ -1,18 +1,17 @@
-import { Component, ViewEncapsulation, ChangeDetectionStrategy, inject, OnInit } from '@angular/core';
+import { Component, ViewEncapsulation, ChangeDetectionStrategy, inject, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Observable } from 'rxjs';
-import { User } from '@fwk';
-import { UserService } from '@fwk';
+import { User, UserService, AuthService, I18nService, TranslatePipe } from '@fwk/core';
 import { RouterLink } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
-import { WELCOME_DATA } from './welcome.data';
-import { WelcomeSection } from './welcome.types';
-import { AuthService } from '@fwk';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { WELCOME_DATA, WELCOME_SHORTCUTS } from './welcome.data';
+import { WelcomeSection, WelcomeShortcut } from './welcome.types';
 
 @Component({
     selector: 'welcome',
     standalone: true,
-    imports: [CommonModule, RouterLink, MatIconModule],
+    imports: [CommonModule, RouterLink, MatIconModule, MatTooltipModule, TranslatePipe],
     templateUrl: './welcome.component.html',
     styleUrls: ['./welcome.component.scss'],
     encapsulation: ViewEncapsulation.None,
@@ -20,18 +19,63 @@ import { AuthService } from '@fwk';
 })
 export class WelcomeComponent implements OnInit {
     user$: Observable<User>;
+    currentUser: User | null = null;
     sections: WelcomeSection[] = [];
-    appName = '<%= appName %>';
+    shortcuts: WelcomeShortcut[] = [];
+    appName = '<%= appName || "Aplicación" %>';
+    appLogo = 'assets/images/logo/logo.svg';
 
     private _userService = inject(UserService);
     private _authService = inject(AuthService);
+    private _i18nService = inject(I18nService);
+    private _cdr = inject(ChangeDetectorRef);
 
     constructor() {
         this.user$ = this._userService.user$;
     }
 
     ngOnInit(): void {
-        this.filterSectionsByPermission();
+        this.user$.subscribe(u => {
+            this.currentUser = u;
+            this.filterSectionsByPermission();
+            this._cdr.markForCheck();
+        });
+    }
+
+    get timeGreeting(): string {
+        let hour: number;
+        try {
+            const formatter = new Intl.DateTimeFormat('es-AR', {
+                timeZone: 'America/Argentina/Buenos_Aires',
+                hour: 'numeric',
+                hour12: false
+            });
+            hour = parseInt(formatter.format(new Date()), 10);
+        } catch (e) {
+            hour = new Date().getHours();
+        }
+
+        if (hour >= 5 && hour < 12) return this._i18nService.translate('welcome_greeting_morning');
+        if (hour >= 12 && hour < 20) return this._i18nService.translate('welcome_greeting_afternoon');
+        return this._i18nService.translate('welcome_greeting_night');
+    }
+
+    get userName(): string {
+        if (!this.currentUser) return '';
+        return this.currentUser.name || this.currentUser.username || this.currentUser.user || '';
+    }
+
+    get userRole(): string {
+        if (!this.currentUser) return '';
+        const permisos = this.currentUser.permisos || [];
+        if (permisos.includes('ADMIN') || permisos.some(p => p.includes('USUARIOS'))) {
+            return this._i18nService.translate('welcome_role_admin');
+        }
+        return this._i18nService.translate('welcome_role_user');
+    }
+
+    get bannerSubtitle(): string {
+        return this._i18nService.translate('welcome_banner_subtitle');
     }
 
     private filterSectionsByPermission(): void {
@@ -50,6 +94,12 @@ export class WelcomeComponent implements OnInit {
         });
 
         this.sections = filteredSections.filter(section => section.items.length > 0);
+
+        this.shortcuts = WELCOME_SHORTCUTS.filter(item => {
+            if (!item.permission) {
+                return true;
+            }
+            return this._authService.hasPermission(item.permission);
+        });
     }
 }
-

@@ -15,6 +15,7 @@ export const FWK_I18N_DEF = {
     and: 'y',
     back_button_tooltip: 'Volver',
     breadcrumb_home: 'Inicio',
+    menu_principal: 'Menú Principal',
     day_label: 'Día',
     generic_error_try_again: 'Algo salió mal, por favor intenta de nuevo.',
     go_to_link: 'Ir a',

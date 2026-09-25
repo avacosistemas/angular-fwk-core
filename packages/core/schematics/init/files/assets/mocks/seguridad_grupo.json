@@ -1,0 +1,21 @@
+{
+  "status": "200",
+  "ok": true,
+  "data": [
+    {
+      "id": 1,
+      "name": "Administradores",
+      "nombre": "Administradores"
+    },
+    {
+      "id": 2,
+      "name": "Supervisores",
+      "nombre": "Supervisores"
+    },
+    {
+      "id": 3,
+      "name": "Operadores",
+      "nombre": "Operadores"
+    }
+  ]
+}

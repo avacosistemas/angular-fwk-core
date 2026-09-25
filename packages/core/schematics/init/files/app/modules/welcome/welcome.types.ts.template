@@ -1,3 +1,12 @@
+export interface WelcomeShortcut {
+    title: string;
+    subtitle: string;
+    icon: string;
+    route: string;
+    color: 'primary' | 'teal' | 'purple' | 'orange' | 'sky' | 'rose' | 'indigo' | 'blue' | 'amber' | 'green' | 'cyan' | 'emerald' | 'slate';
+    permission?: string;
+}
+
 export interface WelcomeCard {
     title: string;
     description: string;
@@ -5,10 +14,12 @@ export interface WelcomeCard {
     route: string;
     color: 'primary' | 'teal' | 'purple' | 'orange' | 'sky' | 'rose' | 'indigo' | 'blue' | 'amber' | 'green' | 'cyan' | 'emerald' | 'slate';
     permission?: string;
+    badge?: string;
 }
 
 export interface WelcomeSection {
     title: string;
+    subtitle?: string;
+    icon?: string;
     items: WelcomeCard[];
 }
-

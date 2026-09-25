@@ -23,11 +23,11 @@ export const appRoutes: Route[] = [
         component: LayoutComponent,
         data: { layout: 'empty' },
         children: [
-            { path: 'confirmation-required', loadComponent: () => import('@avacosistemas/core').then(m => m.AuthConfirmationRequiredComponent) },
-            { path: 'forgot-password', loadComponent: () => import('@avacosistemas/core').then(m => m.AuthForgotPasswordComponent) },
-            { path: 'reset-password', loadComponent: () => import('@avacosistemas/core').then(m => m.AuthResetPasswordComponent) },
-            { path: 'sign-in', loadComponent: () => import('@avacosistemas/core').then(m => m.AuthSignInComponent) },
-            { path: 'sign-up', loadComponent: () => import('@avacosistemas/core').then(m => m.AuthSignUpComponent) }
+            { path: 'confirmation-required', loadComponent: () => import('@fwk/core').then(m => m.AuthConfirmationRequiredComponent) },
+            { path: 'forgot-password', loadComponent: () => import('@fwk/core').then(m => m.AuthForgotPasswordComponent) },
+            { path: 'reset-password', loadComponent: () => import('@fwk/core').then(m => m.AuthResetPasswordComponent) },
+            { path: 'sign-in', loadComponent: () => import('@fwk/core').then(m => m.AuthSignInComponent) },
+            { path: 'sign-up', loadComponent: () => import('@fwk/core').then(m => m.AuthSignUpComponent) }
         ]
     },
 
@@ -38,11 +38,11 @@ export const appRoutes: Route[] = [
         component: LayoutComponent,
         resolve: { initialData: initialDataResolver },
         children: [
-            { path: 'unlock-session', data: { layout: 'empty' }, loadComponent: () => import('@avacosistemas/core').then(m => m.AuthUnlockSessionComponent) },
+            { path: 'unlock-session', data: { layout: 'empty' }, loadComponent: () => import('@fwk/core').then(m => m.AuthUnlockSessionComponent) },
             {
                 path: 'change-password',
                 data: { layout: 'empty' },
-                loadComponent: () => import('@avacosistemas/core').then(m => m.AuthChangePasswordComponent)
+                loadComponent: () => import('@fwk/core').then(m => m.AuthChangePasswordComponent)
             },
             ...(APP_CONFIG.customRoutes || []),
             ...CRUD_MODULES.map(crudModule => ({
@@ -60,11 +60,11 @@ export const appRoutes: Route[] = [
         component: LayoutComponent,
         data: { layout: 'empty' },
         children: [
-            { path: 'sign-out', loadComponent: () => import('@avacosistemas/core').then(m => m.AuthSignOutComponent) },
+            { path: 'sign-out', loadComponent: () => import('@fwk/core').then(m => m.AuthSignOutComponent) },
         ]
     },
 
-    { path: '403', loadComponent: () => import('@avacosistemas/core').then(m => m.Error403Component) },
-    { path: '404', loadComponent: () => import('@avacosistemas/core').then(m => m.Error404Component) },
+    { path: '403', loadComponent: () => import('@fwk/core').then(m => m.Error403Component) },
+    { path: '404', loadComponent: () => import('@fwk/core').then(m => m.Error404Component) },
     { path: '**', redirectTo: '/404' }
 ];

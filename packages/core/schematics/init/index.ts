@@ -11,6 +11,7 @@ import {
   url,
 } from '@angular-devkit/schematics';
 import { strings } from '@angular-devkit/core';
+import { NodePackageInstallTask } from '@angular-devkit/schematics/tasks';
 
 function buildDefaultPath(host: Tree, projectName: string): string {
   const workspace = host.read('angular.json');
@@ -22,7 +23,7 @@ function buildDefaultPath(host: Tree, projectName: string): string {
 
 export function init(options: any): Rule {
   return (host: Tree, context: SchematicContext) => {
-    const appName = options.appName || 'Mi Aplicación';
+    const appName = options.appName || 'Aplicación';
     const project = options.project || '';
     const sourceRoot = buildDefaultPath(host, project);
     const appRoot = `${sourceRoot}/app`;
@@ -50,6 +51,8 @@ export function init(options: any): Rule {
       template(templateData),
       move('/'),
     ]);
+
+    context.addTask(new NodePackageInstallTask());
 
     return chain([
       mergeWith(mainSource),
@@ -127,7 +130,12 @@ function updateAngularJson(host: Tree, sourceRoot: string): Tree {
     typeof a === 'object' && a.input === fwkAsset.input
   );
   if (!exists) {
-    filteredAssets.push(fwkAsset);
+    const srcAssetsIdx = filteredAssets.findIndex((a: any) => a === `${sourceRoot}/assets` || a === 'src/assets');
+    if (srcAssetsIdx !== -1) {
+      filteredAssets.splice(srcAssetsIdx, 0, fwkAsset);
+    } else {
+      filteredAssets.unshift(fwkAsset);
+    }
   }
 
   const tinymceAsset = { glob: '**/*', input: 'node_modules/tinymce', output: 'tinymce' };
@@ -255,6 +263,9 @@ function updatePackageJson(host: Tree): Tree {
 
   if (!pkg.dependencies) pkg.dependencies = {};
   const depsToAdd = {
+    "@angular/material": "^17.3.0",
+    "@angular/cdk": "^17.3.0",
+    "@angular/material-date-fns-adapter": "^17.3.0",
     "date-fns": "^2.30.0",
     "lodash-es": "^4.17.21",
     "luxon": "^3.4.0",
@@ -266,9 +277,6 @@ function updatePackageJson(host: Tree): Tree {
 
   if (!pkg.devDependencies) pkg.devDependencies = {};
   const devDepsToAdd = {
-    "@angular/material": "^17.0.3",
-    "@angular/cdk": "^17.0.3",
-    "@angular/material-date-fns-adapter": "^17.0.3",
     "@tailwindcss/typography": "0.5.10",
     "@tinymce/tinymce-angular": "^7.0.0",
     "apexcharts": "3.44.0",

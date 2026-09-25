@@ -1,5 +1,10 @@
 import { Route } from '@angular/router';
-import { FwkConfig, AppColors } from '@avacosistemas/core';
+import { FwkConfig, AppColors } from '@fwk/core';
+// import { CustomTopNavigationComponent } from 'app/core/components/custom/top-navigation/custom-top-navigation.component';
+// import { CustomTopbarComponent } from 'app/core/components/custom/topbar/custom-topbar.component';
+// import { CustomUserMenuComponent } from 'app/core/components/custom/user-menu/custom-user-menu.component';
+// import { CustomMainFooterComponent } from 'app/core/components/custom/main-footer/custom-main-footer.component';
+// import { CustomAuthFooterComponent } from 'app/core/components/custom/auth-footer/custom-auth-footer.component';
 
 export { AppColors };
 
@@ -12,6 +17,13 @@ export const APP_CONFIG: {
     colors: AppColors;
     customRoutes: Route[];
     autocompleteWaitingTime: number;
+    customTopbarComponent?: FwkConfig['customTopbarComponent'];
+    customUserMenuComponent?: FwkConfig['customUserMenuComponent'];
+    customMainFooterComponent?: FwkConfig['customMainFooterComponent'];
+    customAuthFormFooterComponent?: FwkConfig['customAuthFormFooterComponent'];
+    auth?: FwkConfig['auth'];
+    customNavigationItems?: FwkConfig['customNavigationItems'];
+    navigationItems?: FwkConfig['navigationItems'];
 } = {
     brand: {
         name: '<%= appName %>',
@@ -39,15 +51,42 @@ export const APP_CONFIG: {
         titleLine1: 'Administrador de',
         titleLine2: 'Contenidos',
         signInSubtitle: '¡Bienvenido! Desde aquí podrás gestionar los contenidos.',
+        showInMenu: true,
     },
     sidebar: {
         opened: true,
         collapseIcon: true,
+        // customTopComponent: CustomTopNavigationComponent,
     },
+    // customTopbarComponent: CustomTopbarComponent,
+    // customUserMenuComponent: CustomUserMenuComponent,
+    // customMainFooterComponent: CustomMainFooterComponent,
+    // customAuthFormFooterComponent: CustomAuthFooterComponent,
+    // auth: {
+    //     sideBackground: {
+    //         imageUrl: '/assets/images/background.jpg',
+    //         backgroundSize: 'cover',
+    //         backgroundPosition: 'center',
+    //         overlayOpacity: 0.45,
+    //         subtitleColor: 'rgba(255, 255, 255, 0.85)'
+    //     },
+    //     links: {
+    //         forgotPassword: {
+    //             show: true,
+    //             url: '/forgot-password',
+    //             isExternal: false
+    //         },
+    //         signUp: {
+    //             show: true,
+    //             url: '/register',
+    //             isExternal: false
+    //         }
+    //     }
+    // },
     search: {
         showButton: true,
     },
-routing: {
+    routing: {
         redirectOnLogout: '/sign-in',
         defaultRedirect: null,
         welcomeDashboard: <% if (!minimal) { %>true<% } else { %>false<% } %>,
@@ -89,7 +128,7 @@ routing: {
             icon: '#94a3b8',
         },
     },
-customRoutes: [
+    customRoutes: [
         <% if (!minimal) { %>
         { path: 'welcome', loadChildren: () => import('app/modules/welcome/welcome.routes') }
         <% } %>

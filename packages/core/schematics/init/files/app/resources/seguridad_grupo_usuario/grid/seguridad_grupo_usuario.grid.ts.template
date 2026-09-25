@@ -1,0 +1,27 @@
+import { GridDef } from "@fwk/core";
+
+export const SEGURIDAD_GRUPO_USUARIO_GRID_DEF: GridDef = {
+  columnsDef: [
+    {
+      columnDef: 'id',
+      columnNameKey: 'seguridad_grupo_usuario_grid_def_column_id'
+    },
+    {
+      columnDef: 'idGrupo',
+      columnNameKey: 'seguridad_grupo_usuario_grid_def_column_idgrupo'
+    },
+    {
+      columnDef: 'idUsuario',
+      columnNameKey: 'seguridad_grupo_usuario_grid_def_column_idusuario'
+    },
+    {
+      columnDef: 'perfilNombre',
+      columnNameKey: 'seguridad_grupo_usuario_grid_def_column_idgrupo'
+    },
+  ],
+  sortAllColumns: true,
+  displayedColumns: [
+    'perfilNombre'
+  ],
+  deleteAction: true,
+};

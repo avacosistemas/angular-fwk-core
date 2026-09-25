@@ -1,0 +1,69 @@
+import { SEGURIDAD_GRUPO_USUARIO_NAV_DEF } from "../../seguridad_grupo_usuario/navigation/seguridad_grupo_usuario.nav";
+import { GridDef, HTTP_METHODS } from "@fwk/core";
+import { PREFIX_DOMAIN_API } from 'environments/environment';
+
+export const USUARIOS_GRID_DEF: GridDef = {
+  columnsDef: [
+    {
+      columnDef: 'username',
+      columnNameKey: 'usuarios_grid_def_column_username'
+    },
+    {
+      columnDef: 'name',
+      columnNameKey: 'usuarios_grid_def_column_name'
+    },
+    {
+      columnDef: 'lastname',
+      columnNameKey: 'usuarios_grid_def_column_lastname'
+    },
+    {
+      columnDef: 'email',
+      columnNameKey: 'usuarios_grid_def_column_email'
+    },
+    {
+      columnDef: 'enabled',
+      columnNameKey: 'usuarios_grid_def_column_enabled'
+    },
+    {
+      columnDef: 'admin',
+      columnNameKey: 'usuarios_grid_def_column_admin'
+    }
+  ],
+  sortAllColumns: true,
+  deleteAction: true,
+  displayedColumns: [
+    'username',
+    'name',
+    'lastname',
+    'email',
+    'enabled',
+    'admin'
+  ],
+  actions: [
+      {
+        actionNameKey: 'Permisos',
+        actionType: 'redirect',
+        redirect: {
+          url: SEGURIDAD_GRUPO_USUARIO_NAV_DEF.url,
+          querystring: {
+            idUsuario : 'id',
+            parentTitle: 'username'
+          }
+        },
+        icon: 'heroicons_outline:key'
+      },
+      {
+        actionNameKey: 'usuarios_action_reset_password',
+        actionType: 'normal',
+        icon: 'heroicons_outline:lock-closed',
+        confirm: {
+          messageKey: 'usuarios_action_reset_password_confirm'
+        },
+        ws: {
+          key: 'RESET_PASSWORD_USER',
+          url: PREFIX_DOMAIN_API + 'password/reset', 
+          method: HTTP_METHODS.post
+        }
+      }
+    ]
+};

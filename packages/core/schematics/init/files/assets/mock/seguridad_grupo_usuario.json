@@ -1,0 +1,10 @@
+{
+  "status": "200",
+  "ok": true,
+  "data": [
+    { "id": 1, "idGrupo": 1, "idUsuario": 1, "perfilNombre": "Administradores" },
+    { "id": 2, "idGrupo": 1, "idUsuario": 2, "perfilNombre": "Administradores" },
+    { "id": 3, "idGrupo": 2, "idUsuario": 2, "perfilNombre": "Supervisores" },
+    { "id": 4, "idGrupo": 3, "idUsuario": 3, "perfilNombre": "Operadores" }
+  ]
+}

@@ -43,7 +43,7 @@ import { Injectable } from '@angular/core';
 
 @Injectable()
 export class FwkPaginatorIntl extends MatPaginatorIntl {
-    override itemsPerPageLabel = 'Filas:';
+    override itemsPerPageLabel = 'Items por página';
     override nextPageLabel = 'Siguiente';
     override previousPageLabel = 'Anterior';
     override firstPageLabel = 'Primera página';
@@ -270,8 +270,12 @@ export class CrudTableComponent extends AbstractComponent implements OnInit, Aft
 
     ngAfterViewInit(): void {
         if (this.paginator) {
-            this.paginator._intl = new MatPaginatorIntl();
-            this.paginator._intl.itemsPerPageLabel = this.translate('table_items_per_page');
+            this.paginator._intl = new FwkPaginatorIntl();
+            const label = this.translate('table_items_per_page');
+            if (label && label !== 'table_items_per_page') {
+                this.paginator._intl.itemsPerPageLabel = label;
+            }
+            this.paginator._intl.changes.next();
         }
         this.wireUpDataSource();
 

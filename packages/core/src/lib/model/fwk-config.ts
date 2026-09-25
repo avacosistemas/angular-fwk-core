@@ -1,5 +1,6 @@
 import { InjectionToken, Type } from '@angular/core';
 import { Route } from '@angular/router';
+import { FwkNavigationItem } from '../layout/infrastructure/components/navigation';
 
 export const FWK_SIDEBAR_CUSTOM_TOP_COMPONENT = new InjectionToken<Type<any>>('FWK_SIDEBAR_CUSTOM_TOP_COMPONENT');
 export const FWK_SIDEBAR_CUSTOM_FOOTER_COMPONENT = new InjectionToken<Type<any>>('FWK_SIDEBAR_CUSTOM_FOOTER_COMPONENT');
@@ -67,6 +68,12 @@ export interface WelcomeConfig {
     titleLine1: string;
     titleLine2: string;
     signInSubtitle?: string | null;
+    showInMenu?: boolean;
+    menuTitle?: string;
+    icon?: string;
+    url?: string;
+    order?: number;
+    group?: string;
 }
 
 export interface SidebarConfig {
@@ -153,6 +160,11 @@ export interface FwkConfig {
     customRoutes?: Route[];
 
     auth?: AuthConfig;
+    customNavigationItems?: FwkNavigationItem[];
+    navigationItems?: FwkNavigationItem[];
+    navigation?: {
+        items?: FwkNavigationItem[];
+    };
 }
 
 export const DEFAULT_fwk_CONFIG: FwkConfig = {

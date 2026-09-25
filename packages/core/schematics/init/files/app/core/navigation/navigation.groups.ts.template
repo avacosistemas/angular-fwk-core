@@ -1,4 +1,4 @@
-import { FwkNavigationItem } from '@avacosistemas/core';
+import { FwkNavigationItem } from '@fwk/core';
 
 export interface NavigationGroup extends FwkNavigationItem {
     id: string;
@@ -11,6 +11,12 @@ export interface NavigationGroup extends FwkNavigationItem {
 
 export const NAVIGATION_GROUPS_MAP: NavigationGroup[] = [
     {
+        id: 'principal',
+        title: 'Menú Principal',
+        type: 'group',
+        order: 0,
+    },
+    {
         id: 'gestion',
         title: 'Gestión',
         type: 'collapsable',
@@ -18,11 +24,17 @@ export const NAVIGATION_GROUPS_MAP: NavigationGroup[] = [
         order: 1,
     },
     {
+        id: 'seguridad',
+        title: 'Seguridad',
+        type: 'collapsable',
+        icon: 'heroicons_outline:shield-check',
+        order: 2,
+    },
+    {
         id: 'sistema',
         title: 'Sistema',
         type: 'collapsable',
         icon: 'heroicons_outline:cog-6-tooth',
-        order: 2,
+        order: 3,
     },
 ];
-

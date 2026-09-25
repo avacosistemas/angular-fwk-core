@@ -1,36 +1,108 @@
-import { WelcomeSection } from './welcome.types';
+import { WelcomeSection, WelcomeShortcut } from './welcome.types';
 
-/**
- * Welcome page sections and cards.
- * Edit this file to customize the welcome page for your application.
- * Cards without 'permission' are always visible.
- */
-export const WELCOME_DATA: WelcomeSection[] = [
+export const WELCOME_SHORTCUTS: WelcomeShortcut[] = [
     {
-        title: 'Accesos Rápidos',
-        items: [
-            {
-                title: 'Cambiar Contraseña',
-                description: 'Actualiza tu clave de acceso al sistema.',
-                icon: 'heroicons_outline:lock-closed',
-                route: '/change-password',
-                color: 'primary',
-            },
-            {
-                title: 'Configuración',
-                description: 'Ajustes de la aplicación y preferencias.',
-                icon: 'heroicons_outline:cog-6-tooth',
-                route: '/settings',
-                color: 'slate',
-            },
-            {
-                title: 'Cerrar Sesión',
-                description: 'Finaliza tu sesión actual de forma segura.',
-                icon: 'heroicons_outline:arrow-right-on-rectangle',
-                route: '/sign-out',
-                color: 'rose',
-            },
-        ],
+        title: 'welcome_shortcut_gestion_title',
+        subtitle: 'welcome_shortcut_gestion_subtitle',
+        icon: 'heroicons_outline:users',
+        route: '/users',
+        color: 'purple',
+        permission: 'USUARIOS_READ'
     },
+    {
+        title: 'welcome_shortcut_seguridad_title',
+        subtitle: 'welcome_shortcut_seguridad_subtitle',
+        icon: 'heroicons_outline:user-group',
+        route: '/seguridadgrupo',
+        color: 'indigo',
+        permission: 'SEGURIDAD_GRUPO_READ'
+    },
+    {
+        title: 'welcome_shortcut_control_title',
+        subtitle: 'welcome_shortcut_control_subtitle',
+        icon: 'heroicons_outline:key',
+        route: '/permiso',
+        color: 'teal',
+        permission: 'PERMISOS_READ'
+    },
+    {
+        title: 'welcome_shortcut_cuenta_title',
+        subtitle: 'welcome_shortcut_cuenta_subtitle',
+        icon: 'heroicons_outline:lock-closed',
+        route: '/change-password',
+        color: 'blue'
+    }
 ];
 
+export const WELCOME_DATA: WelcomeSection[] = [
+    {
+        title: 'welcome_sec_gestion_title',
+        subtitle: 'welcome_sec_gestion_subtitle',
+        icon: 'heroicons_outline:shield-check',
+        items: [
+            {
+                title: 'welcome_card_usuarios_title',
+                description: 'welcome_card_usuarios_desc',
+                icon: 'heroicons_outline:users',
+                route: '/users',
+                color: 'purple',
+                permission: 'USUARIOS_READ',
+                badge: 'welcome_card_usuarios_badge'
+            },
+            {
+                title: 'welcome_card_grupos_title',
+                description: 'welcome_card_grupos_desc',
+                icon: 'heroicons_outline:user-group',
+                route: '/seguridadgrupo',
+                color: 'indigo',
+                permission: 'SEGURIDAD_GRUPO_READ',
+                badge: 'welcome_card_grupos_badge'
+            },
+            {
+                title: 'welcome_card_permisos_title',
+                description: 'welcome_card_permisos_desc',
+                icon: 'heroicons_outline:key',
+                route: '/permiso',
+                color: 'teal',
+                permission: 'PERMISOS_READ'
+            },
+            {
+                title: 'welcome_card_grupos_usuario_title',
+                description: 'welcome_card_grupos_usuario_desc',
+                icon: 'heroicons_outline:user-plus',
+                route: '/seguridadgrupousuario',
+                color: 'blue',
+                permission: 'SEGURIDAD_GRUPO_USUARIO_READ'
+            },
+            {
+                title: 'welcome_card_permisos_grupo_title',
+                description: 'welcome_card_permisos_grupo_desc',
+                icon: 'heroicons_outline:shield-exclamation',
+                route: '/seguridadgrupopermiso',
+                color: 'emerald',
+                permission: 'SEGURIDAD_GRUPO_PERMISO_READ'
+            }
+        ]
+    },
+    {
+        title: 'welcome_sec_cuenta_title',
+        subtitle: 'welcome_sec_cuenta_subtitle',
+        icon: 'heroicons_outline:user-circle',
+        items: [
+            {
+                title: 'welcome_card_password_title',
+                description: 'welcome_card_password_desc',
+                icon: 'heroicons_outline:lock-closed',
+                route: '/change-password',
+                color: 'blue'
+            },
+            {
+                title: 'welcome_card_logout_title',
+                description: 'welcome_card_logout_desc',
+                icon: 'heroicons_outline:arrow-right-on-rectangle',
+                route: '/sign-out',
+                color: 'rose'
+            }
+        ]
+    }
+];

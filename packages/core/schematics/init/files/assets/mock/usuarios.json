@@ -1,0 +1,33 @@
+{
+  "status": "200",
+  "ok": true,
+  "data": [
+    {
+      "id": 1,
+      "username": "admin",
+      "name": "Administrador",
+      "lastname": "Sistema",
+      "email": "admin@example.com",
+      "enabled": true,
+      "admin": true
+    },
+    {
+      "id": 2,
+      "username": "cristian.aguedo",
+      "name": "Cristian",
+      "lastname": "Aguedo",
+      "email": "cristian.aguedo@example.com",
+      "enabled": true,
+      "admin": false
+    },
+    {
+      "id": 3,
+      "username": "beto.gonzalez",
+      "name": "Beto",
+      "lastname": "Gonzalez",
+      "email": "beto.gonzalez@example.com",
+      "enabled": true,
+      "admin": false
+    }
+  ]
+}

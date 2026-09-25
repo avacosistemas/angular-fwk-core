@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/schema",
   "$id": "SchematicsFwkInit",
-  "title": "@avacosistemas/core Init Schema",
+  "title": "@fwk/core Init Schema",
   "type": "object",
   "properties": {
     "project": {

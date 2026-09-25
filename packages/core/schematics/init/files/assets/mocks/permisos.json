@@ -1,0 +1,132 @@
+{
+  "status": "200",
+  "ok": true,
+  "data": [
+    {
+      "id": 1,
+      "code": "USUARIOS_READ",
+      "codigo": "USUARIOS_READ",
+      "description": "Usuarios - Lectura",
+      "nombre": "Usuarios - Lectura"
+    },
+    {
+      "id": 2,
+      "code": "USUARIOS_CREATE",
+      "codigo": "USUARIOS_CREATE",
+      "description": "Usuarios - Creación",
+      "nombre": "Usuarios - Creación"
+    },
+    {
+      "id": 3,
+      "code": "USUARIOS_UPDATE",
+      "codigo": "USUARIOS_UPDATE",
+      "description": "Usuarios - Modificación",
+      "nombre": "Usuarios - Modificación"
+    },
+    {
+      "id": 4,
+      "code": "USUARIOS_DELETE",
+      "codigo": "USUARIOS_DELETE",
+      "description": "Usuarios - Eliminación",
+      "nombre": "Usuarios - Eliminación"
+    },
+    {
+      "id": 5,
+      "code": "SEGURIDAD_GRUPO_READ",
+      "codigo": "SEGURIDAD_GRUPO_READ",
+      "description": "Grupos - Lectura",
+      "nombre": "Grupos - Lectura"
+    },
+    {
+      "id": 6,
+      "code": "SEGURIDAD_GRUPO_CREATE",
+      "codigo": "SEGURIDAD_GRUPO_CREATE",
+      "description": "Grupos - Creación",
+      "nombre": "Grupos - Creación"
+    },
+    {
+      "id": 7,
+      "code": "SEGURIDAD_GRUPO_UPDATE",
+      "codigo": "SEGURIDAD_GRUPO_UPDATE",
+      "description": "Grupos - Modificación",
+      "nombre": "Grupos - Modificación"
+    },
+    {
+      "id": 8,
+      "code": "SEGURIDAD_GRUPO_DELETE",
+      "codigo": "SEGURIDAD_GRUPO_DELETE",
+      "description": "Grupos - Eliminación",
+      "nombre": "Grupos - Eliminación"
+    },
+    {
+      "id": 9,
+      "code": "SEGURIDAD_GRUPO_PERMISO_READ",
+      "codigo": "SEGURIDAD_GRUPO_PERMISO_READ",
+      "description": "Grupos Permisos - Lectura",
+      "nombre": "Grupos Permisos - Lectura"
+    },
+    {
+      "id": 10,
+      "code": "SEGURIDAD_GRUPO_PERMISO_CREATE",
+      "codigo": "SEGURIDAD_GRUPO_PERMISO_CREATE",
+      "description": "Grupos Permisos - Creación",
+      "nombre": "Grupos Permisos - Creación"
+    },
+    {
+      "id": 11,
+      "code": "SEGURIDAD_GRUPO_PERMISO_DELETE",
+      "codigo": "SEGURIDAD_GRUPO_PERMISO_DELETE",
+      "description": "Grupos Permisos - Eliminación",
+      "nombre": "Grupos Permisos - Eliminación"
+    },
+    {
+      "id": 12,
+      "code": "SEGURIDAD_GRUPO_USUARIO_READ",
+      "codigo": "SEGURIDAD_GRUPO_USUARIO_READ",
+      "description": "Grupos Usuarios - Lectura",
+      "nombre": "Grupos Usuarios - Lectura"
+    },
+    {
+      "id": 13,
+      "code": "SEGURIDAD_GRUPO_USUARIO_CREATE",
+      "codigo": "SEGURIDAD_GRUPO_USUARIO_CREATE",
+      "description": "Grupos Usuarios - Creación",
+      "nombre": "Grupos Usuarios - Creación"
+    },
+    {
+      "id": 14,
+      "code": "SEGURIDAD_GRUPO_USUARIO_DELETE",
+      "codigo": "SEGURIDAD_GRUPO_USUARIO_DELETE",
+      "description": "Grupos Usuarios - Eliminación",
+      "nombre": "Grupos Usuarios - Eliminación"
+    },
+    {
+      "id": 15,
+      "code": "PERMISOS_READ",
+      "codigo": "PERMISOS_READ",
+      "description": "Permisos - Lectura",
+      "nombre": "Permisos - Lectura"
+    },
+    {
+      "id": 16,
+      "code": "PERMISOS_CREATE",
+      "codigo": "PERMISOS_CREATE",
+      "description": "Permisos - Creación",
+      "nombre": "Permisos - Creación"
+    },
+    {
+      "id": 17,
+      "code": "PERMISOS_UPDATE",
+      "codigo": "PERMISOS_UPDATE",
+      "description": "Permisos - Modificación",
+      "nombre": "Permisos - Modificación"
+    },
+    {
+      "id": 18,
+      "code": "PERMISOS_DELETE",
+      "codigo": "PERMISOS_DELETE",
+      "description": "Permisos - Eliminación",
+      "nombre": "Permisos - Eliminación"
+    }
+  ]
+}

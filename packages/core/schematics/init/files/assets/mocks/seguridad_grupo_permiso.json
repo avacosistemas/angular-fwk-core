@@ -1,0 +1,24 @@
+{
+  "status": "200",
+  "ok": true,
+  "data": [
+    { "id": 1, "idGrupo": 1, "idPermiso": 1, "permisoNombre": "Usuarios - Lectura", "codigo": "USUARIOS_READ", "descripcion": "Usuarios - Lectura" },
+    { "id": 2, "idGrupo": 1, "idPermiso": 2, "permisoNombre": "Usuarios - Creación", "codigo": "USUARIOS_CREATE", "descripcion": "Usuarios - Creación" },
+    { "id": 3, "idGrupo": 1, "idPermiso": 3, "permisoNombre": "Usuarios - Modificación", "codigo": "USUARIOS_UPDATE", "descripcion": "Usuarios - Modificación" },
+    { "id": 4, "idGrupo": 1, "idPermiso": 4, "permisoNombre": "Usuarios - Eliminación", "codigo": "USUARIOS_DELETE", "descripcion": "Usuarios - Eliminación" },
+    { "id": 5, "idGrupo": 1, "idPermiso": 5, "permisoNombre": "Grupos - Lectura", "codigo": "SEGURIDAD_GRUPO_READ", "descripcion": "Grupos - Lectura" },
+    { "id": 6, "idGrupo": 1, "idPermiso": 6, "permisoNombre": "Grupos - Creación", "codigo": "SEGURIDAD_GRUPO_CREATE", "descripcion": "Grupos - Creación" },
+    { "id": 7, "idGrupo": 1, "idPermiso": 7, "permisoNombre": "Grupos - Modificación", "codigo": "SEGURIDAD_GRUPO_UPDATE", "descripcion": "Grupos - Modificación" },
+    { "id": 8, "idGrupo": 1, "idPermiso": 8, "permisoNombre": "Grupos - Eliminación", "codigo": "SEGURIDAD_GRUPO_DELETE", "descripcion": "Grupos - Eliminación" },
+    { "id": 9, "idGrupo": 1, "idPermiso": 9, "permisoNombre": "Grupos Permisos - Lectura", "codigo": "SEGURIDAD_GRUPO_PERMISO_READ", "descripcion": "Grupos Permisos - Lectura" },
+    { "id": 10, "idGrupo": 1, "idPermiso": 10, "permisoNombre": "Grupos Permisos - Creación", "codigo": "SEGURIDAD_GRUPO_PERMISO_CREATE", "descripcion": "Grupos Permisos - Creación" },
+    { "id": 11, "idGrupo": 1, "idPermiso": 11, "permisoNombre": "Grupos Permisos - Eliminación", "codigo": "SEGURIDAD_GRUPO_PERMISO_DELETE", "descripcion": "Grupos Permisos - Eliminación" },
+    { "id": 12, "idGrupo": 1, "idPermiso": 12, "permisoNombre": "Grupos Usuarios - Lectura", "codigo": "SEGURIDAD_GRUPO_USUARIO_READ", "descripcion": "Grupos Usuarios - Lectura" },
+    { "id": 13, "idGrupo": 1, "idPermiso": 13, "permisoNombre": "Grupos Usuarios - Creación", "codigo": "SEGURIDAD_GRUPO_USUARIO_CREATE", "descripcion": "Grupos Usuarios - Creación" },
+    { "id": 14, "idGrupo": 1, "idPermiso": 14, "permisoNombre": "Grupos Usuarios - Eliminación", "codigo": "SEGURIDAD_GRUPO_USUARIO_DELETE", "descripcion": "Grupos Usuarios - Eliminación" },
+    { "id": 15, "idGrupo": 1, "idPermiso": 15, "permisoNombre": "Permisos - Lectura", "codigo": "PERMISOS_READ", "descripcion": "Permisos - Lectura" },
+    { "id": 16, "idGrupo": 1, "idPermiso": 16, "permisoNombre": "Permisos - Creación", "codigo": "PERMISOS_CREATE", "descripcion": "Permisos - Creación" },
+    { "id": 17, "idGrupo": 1, "idPermiso": 17, "permisoNombre": "Permisos - Modificación", "codigo": "PERMISOS_UPDATE", "descripcion": "Permisos - Modificación" },
+    { "id": 18, "idGrupo": 1, "idPermiso": 18, "permisoNombre": "Permisos - Eliminación", "codigo": "PERMISOS_DELETE", "descripcion": "Permisos - Eliminación" }
+  ]
+}

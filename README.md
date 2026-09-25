@@ -1,4 +1,4 @@
-# @avacosistemas/core — CPAU Admin Framework
+# @avacosistemas/core — Admin Framework
 
 Este monorepo contiene los paquetes principales del framework corporativo **@avacosistemas/core**, un motor de desarrollo rápido de aplicaciones web administrativas en Angular basado en layouts densos, generación dinámica de formularios, autenticación integrada y un motor declarativo para operaciones CRUD.
 
@@ -29,7 +29,7 @@ npm install @avacosistemas/core --legacy-peer-deps
 ```
 
 #### Opción B: Desde Repositorio Local (Desarrollo Activo de Framework con Symlinks)
-Si estás realizando modificaciones en el código fuente de `fwk-core` y quieres probarlas en vivo en tu aplicación (`perfil-cpau`):
+Si estás realizando modificaciones en el código fuente de `fwk-core` y quieres probarlas en vivo en tu aplicación (`mi-aplicacion`):
 
 1. **Compilar el Framework**:
    En el directorio raíz del monorepo (`fwk-core`), ejecuta:
@@ -46,7 +46,7 @@ Si estás realizando modificaciones en el código fuente de `fwk-core` y quieres
      "name": "avaco-workspace",
      "private": true,
      "workspaces": [
-       "perfil-cpau",
+       "mi-aplicacion",
        "fwk-core"
      ]
    }
@@ -165,7 +165,7 @@ npm version patch
    ```
 
 ### 3. Actualizar la aplicación
-En tu aplicación (`perfil-cpau`), ejecuta la instalación de la versión más reciente:
+En tu aplicación (`mi-aplicacion`), ejecuta la instalación de la versión más reciente:
 ```bash
 npm install @avacosistemas/core@latest --legacy-peer-deps
 ```

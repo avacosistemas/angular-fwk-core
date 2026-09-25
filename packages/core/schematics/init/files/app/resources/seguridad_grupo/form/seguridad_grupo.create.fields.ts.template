@@ -1,0 +1,11 @@
+import { DynamicField } from "@fwk/core";
+
+export const SEGURIDAD_GRUPO_CREATE_FORM_FIELDS_DEF: DynamicField<any>[] = [
+  {
+    key: 'name',
+    labelKey: 'seguridad_grupo_create_form_fields_def_field_nombre',
+    label: 'Nombre',
+    type: 'string',
+    controlType: 'textbox'
+  }
+];

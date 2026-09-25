@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@angular/core';
+import { Inject, Injectable, inject } from '@angular/core';
 import { from, Observable, ReplaySubject, of } from 'rxjs';
 import { filter, switchMap, tap } from 'rxjs/operators';
 import { NavigationEnd, Router } from '@angular/router';
@@ -8,6 +8,7 @@ import { Navigation, NavigationGroup } from './navigation.types';
 import { FWK_CRUD_MODULES_LOADER, FWK_NAVIGATION_GROUPS } from './navigation.tokens';
 import { AbstractAuthService } from '../auth/abstract-auth.service';
 import { I18nService } from '../services/i18n-service/i18n.service';
+import { FWK_CONFIG, FwkConfig } from '../model/fwk-config';
 
 interface ExtendedNavigationItem extends FwkNavigationItem {
     order?: number;
@@ -16,6 +17,7 @@ interface ExtendedNavigationItem extends FwkNavigationItem {
 @Injectable({ providedIn: 'root' })
 export class NavigationService {
     private _navigation: ReplaySubject<Navigation> = new ReplaySubject<Navigation>(1);
+    private fwkConfig = inject<FwkConfig>(FWK_CONFIG, { optional: true });
 
     private _allCrudDefs: CrudDef[] = [];
     private _currentNavigation: Navigation | null = null;
@@ -137,9 +139,10 @@ export class NavigationService {
         const crudDefs = await this.loadAllCrudDefs();
         this._allCrudDefs = crudDefs;
 
-        const menuGeneralGroup: ExtendedNavigationItem = {
-            id: 'menu-general',
-            title: 'Menú General',
+        const defaultTitle = this.i18nService.getDictionary('fwk')?.translate?.('menu_principal') || 'Menú Principal';
+        const menuPrincipalGroup: ExtendedNavigationItem = {
+            id: 'menu-principal',
+            title: defaultTitle,
             type: 'group',
             children: [],
             order: 0
@@ -158,6 +161,54 @@ export class NavigationService {
             });
         });
 
+        // 1. Welcome navigation item opcional (desde fwkConfig.welcome)
+        const welcomeConfig = this.fwkConfig?.welcome as any;
+        if (welcomeConfig?.showInMenu) {
+            const welcomeTitle = welcomeConfig.menuTitle || welcomeConfig.title || this.i18nService.getDictionary('fwk')?.translate?.('breadcrumb_home') || 'Inicio';
+            const welcomeItem: ExtendedNavigationItem = {
+                id: 'welcome',
+                title: welcomeTitle,
+                type: 'basic',
+                icon: welcomeConfig.icon || 'heroicons_outline:home',
+                link: welcomeConfig.url || '/welcome',
+                order: welcomeConfig.order !== undefined ? welcomeConfig.order : -1
+            };
+
+            if (welcomeConfig.group) {
+                const parentMenu = collapsibleMenus.get(welcomeConfig.group);
+                if (parentMenu) {
+                    parentMenu.children?.push(welcomeItem);
+                } else {
+                    menuPrincipalGroup.children?.push(welcomeItem);
+                }
+            } else {
+                menuPrincipalGroup.children?.push(welcomeItem);
+            }
+        }
+
+        // 2. Custom navigation items opcionales (desde fwkConfig)
+        const customItems: FwkNavigationItem[] = [
+            ...(this.fwkConfig?.customNavigationItems || []),
+            ...(this.fwkConfig?.navigationItems || []),
+            ...((this.fwkConfig as any)?.navigation?.items || [])
+        ];
+
+        customItems.forEach(item => {
+            const extItem: ExtendedNavigationItem = { ...item };
+            const groupName = (item as any).group;
+            if (groupName) {
+                const parentMenu = collapsibleMenus.get(groupName);
+                if (parentMenu) {
+                    parentMenu.children?.push(extItem);
+                } else {
+                    menuPrincipalGroup.children?.push(extItem);
+                }
+            } else {
+                menuPrincipalGroup.children?.push(extItem);
+            }
+        });
+
+        // 3. CRUD defs navigation
         crudDefs.forEach(def => {
             const navDef = def.navigation;
             const readPermission = def.security?.readAccess;
@@ -190,7 +241,7 @@ export class NavigationService {
 
                 if (!parentMenu) {
                     console.warn(`[NavigationService] Grupo '${rootGroupId}' no encontrado para ${navDef.id}.`);
-                    menuGeneralGroup.children?.push(navItem);
+                    menuPrincipalGroup.children?.push(navItem);
                     return;
                 }
 
@@ -215,7 +266,7 @@ export class NavigationService {
                 parentMenu.children?.push(navItem);
 
             } else {
-                menuGeneralGroup.children?.push(navItem);
+                menuPrincipalGroup.children?.push(navItem);
             }
         });
 
@@ -228,9 +279,33 @@ export class NavigationService {
             }
         });
 
-        if (menuGeneralGroup.children && menuGeneralGroup.children.length > 0) {
-            menuGeneralGroup.children.sort(this.sortNavigationItems);
-            rootItems.push(menuGeneralGroup);
+        if (menuPrincipalGroup.children && menuPrincipalGroup.children.length > 0) {
+            menuPrincipalGroup.children.sort(this.sortNavigationItems);
+            rootItems.push(menuPrincipalGroup);
+        }
+
+        const hasNavigableItems = (items: ExtendedNavigationItem[]): boolean => {
+            return items.some(item => {
+                if (item.type === 'basic' || item.link) {
+                    return true;
+                }
+                if (item.type === 'collapsable' && item.children && item.children.length > 0) {
+                    return hasNavigableItems(item.children as ExtendedNavigationItem[]);
+                }
+                if (item.type === 'group' && item.children && item.children.length > 0) {
+                    return hasNavigableItems(item.children as ExtendedNavigationItem[]);
+                }
+                return false;
+            });
+        };
+
+        if (!hasNavigableItems(rootItems)) {
+            return [];
+        }
+
+        const hasGroupHeader = rootItems.some(item => item.type === 'group');
+        if (!hasGroupHeader) {
+            rootItems.unshift(menuPrincipalGroup);
         }
 
         rootItems.sort(this.sortNavigationItems);

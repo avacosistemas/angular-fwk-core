@@ -16,38 +16,118 @@
 @import 'node_modules/@avacosistemas/core/assets/styles/style.css';
 
 @tailwind utilities;
-/*
-:root {
-  --fwk-primary: #6366f1;
-  --fwk-primary-rgb: 99, 102, 241;
-  --fwk-accent: #8b5cf6;
-  --fwk-accent-rgb: 139, 92, 246;
-  --fwk-warn: #ef4444;
-  --fwk-warn-rgb: 239, 68, 68;
-  --fwk-bg-default: #f1f5f9;
-  --fwk-bg-card: #ffffff;
-  --fwk-bg-dialog: #ffffff;
-  --fwk-bg-hover: rgba(148, 163, 184, 0.12);
-  --fwk-text-default: #1e293b;
-  --fwk-text-secondary: #64748b;
-  --fwk-text-hint: #94a3b8;
-  --fwk-text-disabled: #94a3b8;
-  --fwk-border: #e2e8f0;
-  --fwk-divider: #e2e8f0;
-  --fwk-icon: #64748b;
-}
-.dark {
-  --fwk-bg-default: #0f172a;
-  --fwk-bg-card: #1e293b;
-  --fwk-bg-dialog: #1e293b;
-  --fwk-bg-hover: rgba(255, 255, 255, 0.05);
-  --fwk-text-default: #ffffff;
-  --fwk-text-secondary: #94a3b8;
-  --fwk-text-hint: #64748b;
-  --fwk-text-disabled: #475569;
-  --fwk-border: rgba(241, 245, 249, 0.12);
-  --fwk-divider: rgba(241, 245, 249, 0.12);
-  --fwk-icon: #94a3b8;
-}
-*/
 
+/* ------------------------------------------------------------------
+ * Brand Colors (:root)
+ * ------------------------------------------------------------------ */
+:root {
+  /*
+  --fwk-primary: #3b82f6;
+  --fwk-primary-rgb: 59, 130, 246;
+  --fwk-accent: #3b82f6;
+  --fwk-accent-rgb: 59, 130, 246;
+  */
+
+  /* Color del sidebar / navegación vertical */
+  --fwk-sidebar-bg: #18181b;
+}
+
+/* ------------------------------------------------------------------
+ * Vinculación de Material MDC a las variables del :root
+ * Conecta los componentes de Angular Material directamente a var(--fwk-primary).
+ * ------------------------------------------------------------------ */
+.theme-default,
+.theme-default.light,
+.theme-default .light,
+.theme-default.dark,
+.theme-default .dark {
+  /* Botones, Checkboxes, Radios, Spinners y Tabs */
+  .mat-primary,
+  .mat-accent {
+    --mdc-filled-button-container-color: var(--fwk-primary) !important;
+    --mdc-filled-button-label-text-color: #ffffff !important;
+    --mdc-protected-button-container-color: var(--fwk-primary) !important;
+    --mdc-protected-button-label-text-color: #ffffff !important;
+    --mdc-outlined-button-outline-color: var(--fwk-primary) !important;
+    --mdc-outlined-button-label-text-color: var(--fwk-primary) !important;
+    --mdc-text-button-label-text-color: var(--fwk-primary) !important;
+    --mdc-checkbox-selected-focus-icon-color: var(--fwk-primary) !important;
+    --mdc-checkbox-selected-hover-icon-color: var(--fwk-primary) !important;
+    --mdc-checkbox-selected-icon-color: var(--fwk-primary) !important;
+    --mdc-checkbox-selected-pressed-icon-color: var(--fwk-primary) !important;
+    --mat-full-pseudo-checkbox-selected-icon-color: var(--fwk-primary) !important;
+    --mdc-radio-selected-focus-icon-color: var(--fwk-primary) !important;
+    --mdc-radio-selected-hover-icon-color: var(--fwk-primary) !important;
+    --mdc-radio-selected-icon-color: var(--fwk-primary) !important;
+    --mdc-radio-selected-pressed-icon-color: var(--fwk-primary) !important;
+    --mdc-circular-progress-active-indicator-color: var(--fwk-primary) !important;
+    --mat-tab-header-active-label-text-color: var(--fwk-primary) !important;
+    --mdc-tab-indicator-active-indicator-color: var(--fwk-primary) !important;
+  }
+
+  /* Form Fields al enfocar (etiqueta, borde y cursor) */
+  .mat-mdc-form-field.mat-focused {
+    --mat-form-field-focus-label-color: var(--fwk-primary) !important;
+    --mdc-text-field-focus-label-text-color: var(--fwk-primary) !important;
+    --mdc-text-field-focus-outline-color: var(--fwk-primary) !important;
+    --mdc-text-field-caret-color: var(--fwk-primary) !important;
+
+    .mdc-floating-label,
+    .mat-mdc-floating-label {
+      color: var(--fwk-primary) !important;
+    }
+  }
+
+  /* Asegura iconos blancos en botones con fondo relleno */
+  .mat-mdc-unelevated-button.mat-primary,
+  .mat-mdc-unelevated-button.mat-accent,
+  .mat-mdc-raised-button.mat-primary,
+  .mat-mdc-raised-button.mat-accent {
+    .mat-icon {
+      color: #ffffff !important;
+      fill: #ffffff !important;
+    }
+  }
+
+  /* Borde y color de botones stroked */
+  .mat-mdc-outlined-button.mat-primary,
+  .mat-mdc-outlined-button.mat-accent {
+    border-color: var(--fwk-primary) !important;
+    color: var(--fwk-primary) !important;
+  }
+}
+
+/* ------------------------------------------------------------------
+ * Sidebar y Navegación Vertical
+ * ------------------------------------------------------------------ */
+fwk-vertical-navigation,
+fwk-vertical-navigation.dark,
+fwk-vertical-navigation.bg-gray-900,
+fwk-vertical-navigation .fwk-vertical-navigation-wrapper,
+fwk-vertical-navigation .fwk-vertical-navigation-aside-wrapper {
+  background-color: var(--fwk-sidebar-bg, #18181b) !important;
+}
+
+fwk-vertical-navigation {
+  .fwk-vertical-navigation-item-active,
+  .fwk-vertical-navigation-item-active-forced {
+    color: var(--fwk-primary) !important;
+    .mat-icon {
+      color: var(--fwk-primary) !important;
+    }
+  }
+}
+
+/* ------------------------------------------------------------------
+ * Elementos de Shell y Utilitarios
+ * ------------------------------------------------------------------ */
+user button .bg-blue-600,
+user .bg-blue-600,
+.bg-blue-600 {
+  background-color: var(--fwk-primary) !important;
+}
+
+.text-blue-600,
+.text-blue-700 {
+  color: var(--fwk-primary) !important;
+}

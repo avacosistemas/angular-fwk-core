@@ -1,6 +1,27 @@
-import { CrudModuleDefinition, CrudDef } from '@avacosistemas/core';
+import { CrudModuleDefinition, CrudDef } from '@fwk/core';
 
-export const CRUD_MODULES: CrudModuleDefinition[] = [];
+export const CRUD_MODULES: CrudModuleDefinition[] = [
+    {
+        path: 'permiso',
+        loader: () => import('app/resources/permiso/permiso.def')
+    },
+    {
+        path: 'seguridadgrupo',
+        loader: () => import('app/resources/seguridad_grupo/seguridad_grupo.def')
+    },
+    {
+        path: 'seguridadgrupopermiso',
+        loader: () => import('app/resources/seguridad_grupo_permiso/seguridad_grupo_permiso.def')
+    },
+    {
+        path: 'seguridadgrupousuario',
+        loader: () => import('app/resources/seguridad_grupo_usuario/seguridad_grupo_usuario.def')
+    },
+    {
+        path: 'users',
+        loader: () => import('app/resources/usuarios/usuarios.def')
+    },
+];
 
 export function loadAllCrudDefs(): Promise<any[]> {
   return Promise.all(CRUD_MODULES.map(m => m.loader().then((mod: any) => {

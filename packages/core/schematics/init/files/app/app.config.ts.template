@@ -7,7 +7,7 @@ import { provideAnimations } from '@angular/platform-browser/animations';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { MatDialogModule } from '@angular/material/dialog';
 import { appRoutes } from './app.routes';
-import { Scheme, provideFwkAuth, provideAppAuth, provideFwkCore, provideAppNavigation, provideFwkLayout, authInterceptor, fwkLoadingInterceptor } from '@avacosistemas/core';
+import { Scheme, provideFwkAuth, provideAppAuth, provideFwkCore, provideAppNavigation, provideFwkLayout, authInterceptor, fwkLoadingInterceptor } from '@fwk/core';
 import { CRUD_MODULES, loadCrudDefByPath } from './core/registries/crud.registry';
 import { NAVIGATION_GROUPS_MAP } from './core/navigation/navigation.groups';
 import { environment } from '../environments/environment';
@@ -32,6 +32,18 @@ const fwkConfig = {
     ...environment,
     customRoutes: APP_CONFIG.customRoutes,
     autocompleteWaitingTime: APP_CONFIG.autocompleteWaitingTime,
+    customTopbarComponent: APP_CONFIG.customTopbarComponent,
+    customUserMenuComponent: APP_CONFIG.customUserMenuComponent,
+    customMainFooterComponent: APP_CONFIG.customMainFooterComponent,
+    customAuthFormFooterComponent: APP_CONFIG.customAuthFormFooterComponent,
+    customNavigationItems: APP_CONFIG.customNavigationItems,
+    navigationItems: APP_CONFIG.navigationItems,
+    auth: {
+        ...environment.auth,
+        ...APP_CONFIG.auth,
+        sideBackground: APP_CONFIG.auth?.sideBackground,
+        links: APP_CONFIG.auth?.links,
+    },
 };
 
 export const appConfig: ApplicationConfig = {

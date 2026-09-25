@@ -1,0 +1,47 @@
+import { PERMISO_CREATE_FORM_FIELDS_DEF } from './form/permiso.create.fields';
+import { PERMISO_UPDATE_FORM_FIELDS_DEF } from './form/permiso.update.fields';
+import { PERMISO_READ_FORM_FIELDS_DEF } from './form/permiso.read.fields';
+import { PERMISO_FILTER_FORM_FIELDS_DEF } from './form/permiso.filter.fields';
+import { PERMISO_SECURITY_DEF } from './security/permiso.security';
+import { PERMISO_GRID_DEF } from './grid/permiso.grid';
+import { PERMISO_I18N_DEF } from './i18n/permiso.i18n';
+import { PERMISO_NAV_DEF } from './navigation/permiso.nav';
+import { CrudDef } from '@fwk/core';
+
+export const PERMISO_DEF: CrudDef = { 
+    name: 'PERMISO',
+    i18n: PERMISO_I18N_DEF,
+    grid: PERMISO_GRID_DEF,
+    formsDef: {
+        update: {
+            fields: PERMISO_UPDATE_FORM_FIELDS_DEF,
+            showSubmitContinue: true
+        },
+        create: {
+            fields: PERMISO_CREATE_FORM_FIELDS_DEF,
+            showSubmitContinue: true
+        }
+    },
+    forms: {
+        filter: PERMISO_FILTER_FORM_FIELDS_DEF,
+        create: PERMISO_CREATE_FORM_FIELDS_DEF,
+        update: PERMISO_UPDATE_FORM_FIELDS_DEF,
+        read: PERMISO_READ_FORM_FIELDS_DEF
+    },
+    navigation: PERMISO_NAV_DEF,
+    security: PERMISO_SECURITY_DEF,
+    ws: {
+        key: 'PERMISO_CRUD_URL',
+        url: 'assets/mocks/permisos.json'
+    },
+    dialogConfig: {
+        width: '600px'
+    },
+    filterInMemory: true,
+    serverPagination: false,
+    pagination: {
+        page: 0,
+        pageSize: 10
+    },
+    cancelInitSearch: false
+};

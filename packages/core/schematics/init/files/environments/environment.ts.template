@@ -14,14 +14,20 @@ export const environment = {
     siteInstitucionalUrl: PREFIX_DOMAIN_WEB,
     autocompleteWaitingTime: 700,
 
+    // Configuración para API real:
+    // auth: {
+    //     signIn: PREFIX_DOMAIN_API + 'User/login',
+    //     signOut: PREFIX_DOMAIN_API + 'user/logout',
+    //     refreshToken: PREFIX_DOMAIN_API + 'Auth/refresh',
+    //     forgotPassword: PREFIX_DOMAIN_API + 'auth/forgot-password',
+    //     resetPassword: PREFIX_DOMAIN_API + 'auth/reset-password',
+    //     changePassword: null,
+    //     signUp: PREFIX_DOMAIN_API + 'auth/sign-up'
+    // },
+
+    // MOCK API DE INICIO (ejemplo inicial antes de conectar a la API real):
     auth: {
-        signIn: PREFIX_DOMAIN_API + 'User/login',
-        signOut: PREFIX_DOMAIN_API + 'user/logout',
-        refreshToken: PREFIX_DOMAIN_API + 'Auth/refresh',
-        forgotPassword: PREFIX_DOMAIN_API + 'auth/forgot-password',
-        resetPassword: PREFIX_DOMAIN_API + 'auth/reset-password',
-        changePassword: null,
-        signUp: PREFIX_DOMAIN_API + 'auth/sign-up'
+        signIn: 'assets/mocks/auth.json',
+        refreshToken: 'assets/mocks/auth.json',
     },
 };
-

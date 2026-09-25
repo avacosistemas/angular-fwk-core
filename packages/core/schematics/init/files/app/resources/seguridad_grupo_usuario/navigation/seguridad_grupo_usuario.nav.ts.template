@@ -1,0 +1,11 @@
+import { NavigationDef } from "@fwk/core";
+
+export const SEGURIDAD_GRUPO_USUARIO_NAV_DEF: NavigationDef = {
+  id: 'seguridad.grupo.usuario',
+  translateKey: 'seguridad_grupo_usuario_nav_def',
+  url: '/seguridadgrupousuario',
+  icon: null,
+  group: null,
+  showInMenu: false,
+  activeItemId: 'seguridad.grupo'
+};

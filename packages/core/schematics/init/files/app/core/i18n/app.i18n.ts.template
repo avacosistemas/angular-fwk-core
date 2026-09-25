@@ -1,4 +1,4 @@
-import { I18n } from '@avacosistemas/core';
+import { I18n } from '@fwk/core';
 
 /**
  * Application-level i18n dictionary.
@@ -9,9 +9,50 @@ export const APP_I18N_DEF: I18n = {
   name: 'app',
   lang: 'es',
   words: {
-    app_name: '<%= appName %>',
+    app_name: '<%= appName || "Aplicación" %>',
     welcome_title: '¡Bienvenido!',
     welcome_subtitle: 'Panel de administración',
+
+    // Welcome Module - Greetings & Banner
+    welcome_greeting_morning: '¡Buenos días',
+    welcome_greeting_afternoon: '¡Buenas tardes',
+    welcome_greeting_night: '¡Buenas noches',
+    welcome_role_admin: 'Administrador',
+    welcome_role_user: 'Usuario',
+    welcome_banner_subtitle: 'Te damos la bienvenida al panel de administración. Desde aquí podrás gestionar usuarios, permisos y configurar el sistema.',
+
+    // Welcome Module - Shortcuts
+    welcome_shortcut_gestion_title: 'Gestión',
+    welcome_shortcut_gestion_subtitle: 'Usuarios',
+    welcome_shortcut_seguridad_title: 'Seguridad',
+    welcome_shortcut_seguridad_subtitle: 'Grupos',
+    welcome_shortcut_control_title: 'Control',
+    welcome_shortcut_control_subtitle: 'Permisos',
+    welcome_shortcut_cuenta_title: 'Mi Cuenta',
+    welcome_shortcut_cuenta_subtitle: 'Contraseña',
+
+    // Welcome Module - Section 1: Gestión de Usuarios y Seguridad
+    welcome_sec_gestion_title: 'Gestión de Usuarios y Seguridad',
+    welcome_sec_gestion_subtitle: 'Administración de usuarios, roles, grupos y permisos del sistema',
+    welcome_card_usuarios_title: 'Usuarios',
+    welcome_card_usuarios_desc: 'Administración de cuentas de usuario, altas, bajas y modificaciones.',
+    welcome_card_usuarios_badge: 'Gestión',
+    welcome_card_grupos_title: 'Grupos de Seguridad',
+    welcome_card_grupos_desc: 'Gestión de perfiles y roles de acceso para los usuarios.',
+    welcome_card_grupos_badge: 'Seguridad',
+    welcome_card_permisos_title: 'Permisos',
+    welcome_card_permisos_desc: 'Catálogo de permisos y privilegios del sistema.',
+    welcome_card_grupos_usuario_title: 'Grupos por Usuario',
+    welcome_card_grupos_usuario_desc: 'Asignación y vinculación de grupos de seguridad a usuarios.',
+    welcome_card_permisos_grupo_title: 'Permisos por Grupo',
+    welcome_card_permisos_grupo_desc: 'Configuración detallada de permisos asignados a cada grupo.',
+
+    // Welcome Module - Section 2: Mi Cuenta
+    welcome_sec_cuenta_title: 'Mi Cuenta',
+    welcome_sec_cuenta_subtitle: 'Opciones de acceso y gestión de sesión',
+    welcome_card_password_title: 'Cambiar Contraseña',
+    welcome_card_password_desc: 'Actualiza tu clave de acceso al sistema periódicamente.',
+    welcome_card_logout_title: 'Cerrar Sesión',
+    welcome_card_logout_desc: 'Finaliza tu sesión actual de forma segura.',
   },
 };
-
