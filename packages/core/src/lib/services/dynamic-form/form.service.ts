@@ -450,7 +450,7 @@ export class FormService {
     this.flattenFields(fields).forEach(element => {
       const control = form.controls[element.key];
       if (this.implementedField(element) && control) {
-        const value = control.value;
+        const value = control.value !== undefined && control.value !== null ? control.value : (form.getRawValue ? form.getRawValue()[element.key] : control.value);
 
         cleanedEntity[element.key] = value;
 

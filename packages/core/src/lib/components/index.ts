@@ -49,3 +49,4 @@ export * from './logo/logo.component';
 export * from './abstract-component.component';
 export * from './abstract-form.component';
 export * from './network-status-banner/network-status-banner.component';
+export * from './address-validator/address-validator.component';

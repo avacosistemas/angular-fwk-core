@@ -1,0 +1,130 @@
+<div class="address-validator-container w-full my-1.5">
+
+  <div class="status-card p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3.5"
+       [ngClass]="{
+         'state-pending': !isValidated && !isSearching,
+         'state-searching': isSearching,
+         'state-validated': isValidated
+       }">
+
+    <div class="flex items-center gap-3.5 min-w-0">
+      
+      <div class="icon-badge shadow-2xs"
+           [ngClass]="{
+             'badge-pending': !isValidated && !isSearching && !canValidate(),
+             'badge-ready': !isValidated && !isSearching && canValidate(),
+             'badge-searching': isSearching,
+             'badge-validated': isValidated
+           }">
+        <mat-icon *ngIf="!isValidated && !isSearching && !canValidate()" class="!w-6 !h-6 !text-[24px] text-gray-400">location_searching</mat-icon>
+        <mat-icon *ngIf="!isValidated && !isSearching && canValidate()" class="!w-6 !h-6 !text-[24px] text-blue-600 dark:text-blue-400">map</mat-icon>
+        <mat-icon *ngIf="isValidated" class="!w-6 !h-6 !text-[24px] text-emerald-600 dark:text-emerald-400">verified</mat-icon>
+        <mat-progress-spinner *ngIf="isSearching" [diameter]="22" mode="indeterminate" color="primary"></mat-progress-spinner>
+      </div>
+
+      <div class="flex flex-col min-w-0 flex-1">
+        
+        <div class="flex items-center gap-2">
+          <span class="text-sm font-bold tracking-tight text-gray-900 dark:text-gray-100">
+            {{ isValidated ? 'Domicilio Validado' : (isSearching ? 'Verificando dirección...' : (canValidate() ? 'Listo para validar' : 'Validación requerida')) }}
+          </span>
+        </div>
+
+        <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5 line-clamp-2 leading-relaxed">
+          <ng-container *ngIf="isValidated">
+            {{ selectedAddress?.displayName || 'La dirección fue confirmada correctamente.' }}
+          </ng-container>
+          <ng-container *ngIf="!isValidated && !isSearching">
+            {{ canValidate() ? 'Haga clic en el botón para buscar y confirmar su dirección.' : 'Complete Provincia, Localidad, Calle y Altura para verificar la ubicación.' }}
+          </ng-container>
+          <ng-container *ngIf="isSearching">
+            Consultando servicio de Google Maps...
+          </ng-container>
+        </p>
+
+      </div>
+    </div>
+
+    <div class="flex items-center shrink-0 sm:self-center self-end">
+
+      <button *ngIf="!isValidated"
+              mat-flat-button
+              type="button"
+              [disabled]="!canValidate() || isSearching"
+              (click)="onValidateClick()"
+              class="btn-pill-primary !h-10 !px-5 text-xs">
+        <mat-icon class="!w-4 !h-4 !text-[17px] mr-1.5"
+                  [ngClass]="{
+                    'text-white': canValidate() && !isSearching,
+                    'text-gray-400': !canValidate() || isSearching
+                  }">search</mat-icon>
+        <span>Validar Domicilio</span>
+      </button>
+
+      <button *ngIf="isValidated"
+              mat-button
+              type="button"
+              (click)="onResetClick()"
+              class="btn-pill-edit !h-10 !px-4 text-xs">
+        <mat-icon class="!w-4 !h-4 !text-[17px] mr-1.5 text-emerald-600 dark:text-emerald-400">edit_location_alt</mat-icon>
+        <span>Modificar domicilio</span>
+      </button>
+
+    </div>
+  </div>
+
+  <div *ngIf="errorMessage"
+       class="mt-2.5 p-3.5 rounded-xl bg-red-50/90 dark:bg-red-950/20 border border-red-200 dark:border-red-900/50 text-red-800 dark:text-red-300 text-xs flex items-start gap-2.5 shadow-2xs">
+    <mat-icon class="!w-4 !h-4 !text-[18px] text-red-500 shrink-0 mt-0.5">error_outline</mat-icon>
+    <div class="flex flex-col">
+      <span class="font-semibold">No se pudo verificar el domicilio</span>
+      <span class="text-red-700/90 dark:text-red-300/80 mt-0.5">{{ errorMessage }}</span>
+    </div>
+  </div>
+
+  <div *ngIf="showSuggestions && suggestions.length > 0"
+       class="suggestions-card mt-3">
+
+    <div class="px-4 py-2.5 bg-gray-50/80 dark:bg-gray-800/80 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <mat-icon class="!w-4 !h-4 !text-[18px] text-gray-500">pin_drop</mat-icon>
+        <span class="text-xs font-semibold text-gray-700 dark:text-gray-300">
+          Direcciones coincidentes encontradas ({{ suggestions.length }})
+        </span>
+      </div>
+
+      <button mat-icon-button (click)="closeSuggestions()" class="!w-7 !h-7 text-gray-400 hover:text-gray-600">
+        <mat-icon class="!w-4 !h-4 !text-[18px]">close</mat-icon>
+      </button>
+    </div>
+
+    <div class="results-list divide-y divide-gray-100 dark:divide-gray-800">
+      <div *ngFor="let item of suggestions"
+           (click)="selectAddress(item)"
+           class="suggestion-item p-3.5 cursor-pointer flex items-center justify-between gap-3 group">
+
+        <div class="flex items-start gap-3 min-w-0 flex-1">
+          <div class="pin-badge w-8 h-8 rounded-full flex items-center justify-center shrink-0 mt-0.5 transition-colors duration-150">
+            <mat-icon class="pin-icon !w-4 !h-4 !text-[18px]">place</mat-icon>
+          </div>
+
+          <div class="flex flex-col min-w-0 flex-1">
+            <span class="text-sm font-semibold text-gray-900 dark:text-gray-100 group-hover:text-blue-600 transition-colors">
+              {{ item.calle }} {{ item.altura }}
+            </span>
+            <span class="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 mt-0.5">
+              {{ item.displayName }}
+            </span>
+          </div>
+        </div>
+
+        <button mat-stroked-button
+                class="item-select-btn shrink-0 !h-8 !px-3.5 transition-all">
+          Seleccionar
+        </button>
+
+      </div>
+    </div>
+  </div>
+
+</div>

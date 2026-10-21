@@ -157,6 +157,7 @@ export interface FwkConfig {
     hmr?: boolean;
     autocompleteWaitingTime?: number;
     recaptchaSiteKey?: string;
+    googleMapsApiKey?: string;
     customRoutes?: Route[];
 
     auth?: AuthConfig;

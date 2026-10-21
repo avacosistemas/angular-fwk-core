@@ -27,3 +27,6 @@ export * from './icon-list/icon-list.service';
 export * from './dummy-service/dummy.service';
 export * from './dummy-service/setup-dummy-data.service';
 export { NavigationService as ComponentNavigationService } from './navigation/navigation.service';
+export * from './osm-address/osm-address.service';
+export * from './google-maps-address/google-maps-address.service';
+

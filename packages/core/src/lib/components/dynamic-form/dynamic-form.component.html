@@ -271,6 +271,11 @@
                 </fwk-image-cropper>
             </div>
 
+            <div *ngSwitchCase="'address_validator'" class="w-full">
+                <fwk-address-validator class="w-full" [formControlName]="field.key" [field]="field" [parentForm]="form">
+                </fwk-address-validator>
+            </div>
+
         </ng-container>
     </div>
 </ng-template>

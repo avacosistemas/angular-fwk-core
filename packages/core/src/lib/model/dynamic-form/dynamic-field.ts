@@ -35,6 +35,7 @@ export const DATE_READ = 'DATE_READ';
 export const DATE_TIME_READ = 'DATE_TIME_READ';
 export const ALERT = 'alert';
 export const IMAGE_CROPPER = 'image_cropper';
+export const ADDRESS_VALIDATOR = 'address_validator';
 
 export enum CONTROL_TYPE {
   DateRead = 'date_read',
@@ -71,6 +72,7 @@ export enum CONTROL_TYPE {
   Label = 'label',
   Alert = 'alert',
   ImageCropper = 'image_cropper',
+  AddressValidator = 'address_validator',
   Container = 'container',
   Group = 'group'
 }
@@ -107,7 +109,8 @@ export enum ControlTypeEnum {
   image_preview_src = 'image_preview_src',
   label = "label",
   alert = "ALERT",
-  image_cropper = "IMAGE_CROPPER"
+  image_cropper = "IMAGE_CROPPER",
+  address_validator = "ADDRESS_VALIDATOR"
 }
 
 export class DynamicField<T> {

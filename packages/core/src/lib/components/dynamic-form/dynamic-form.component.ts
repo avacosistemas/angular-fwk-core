@@ -45,6 +45,7 @@ import { IconPickerComponent } from '../icon-picker/icon-picker.component';
 import { CustomDatePickerComponent } from './custom-datepicker/custom-datepicker.component';
 import { HtmlEditorComponent } from '../html-editor/html-editor.component';
 import { ImageCropperComponent } from './image-cropper/image-cropper.component';
+import { AddressValidatorComponent } from '../address-validator/address-validator.component';
 
 @Component({
     selector: 'fwk-dynamic-form-component',
@@ -79,11 +80,10 @@ import { ImageCropperComponent } from './image-cropper/image-cropper.component';
         IconPickerComponent,
         HtmlEditorComponent,
         ImageCropperComponent,
+        AddressValidatorComponent,
         FwkAlertComponent,
         TranslatePipe
     ],
-
-
 
     providers: [
         { provide: MAT_DATE_LOCALE, useValue: es },

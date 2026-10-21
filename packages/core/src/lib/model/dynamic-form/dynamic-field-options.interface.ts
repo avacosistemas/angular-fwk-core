@@ -128,6 +128,16 @@ export interface AlertOptions extends BaseFieldOptions {
     translateArgs?: any;
 }
 
+export interface AddressValidatorOptions extends BaseFieldOptions {
+    provinciaKey?: string;
+    calleKey?: string;
+    alturaKey?: string;
+    localidadKey?: string;
+    codigoPostalKey?: string;
+    autoValidate?: boolean;
+    apiKey?: string;
+}
+
 export type DynamicFieldOptions =
     | BaseFieldOptions
     | TextboxOptions
@@ -145,4 +155,5 @@ export type DynamicFieldOptions =
     | FileOptions
     | ColorPickerOptions
     | IconPickerOptions
+    | AddressValidatorOptions
     | AlertOptions;
