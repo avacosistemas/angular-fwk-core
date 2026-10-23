@@ -48,4 +48,8 @@ export class ActionDef {
   redirectTo?: string;
   redirectToSuccess?: string;
   dialogComponent?: any;
+  showComment?: boolean;
+  commentLabelKey?: string;
+  commentPlaceholderKey?: string;
+  titleField?: string;
 }

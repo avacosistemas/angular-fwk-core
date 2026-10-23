@@ -217,6 +217,8 @@ export const FWK_I18N_DEF = {
     rating_excellent: 'Excelente',
     rating_dialog_title: 'Valorar',
     rating_dialog_message: 'Por favor, califique la calidad de la atención recibida.',
+    rating_dialog_comment_label: 'Tu opinión / comentarios',
+    rating_dialog_comment_placeholder: 'Escribe tu opinión opcional aquí...',
     rating_saved_mock: 'Valoración guardada (sin enviar, URL vacía)',
 
     // --- HTML Editor ---
